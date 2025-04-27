@@ -1,0 +1,63 @@
+<!DOCTYPE html>
+<html lang="es">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Registrar Pérdida/Merma</title>
+    <link rel="stylesheet" href="/registrarMerma.css" />
+  </head>
+  <body>
+    <div class="form-container">
+      <h1>Registrar Pérdida/Merma</h1>
+
+      <form action="/registrar-merma" method="POST">
+        <div class="form-group">
+          <label for="fecha">Fecha</label>
+          <input type="date" id="fecha" name="fecha" required />
+        </div>
+
+        <div class="form-group">
+          <label for="producto">Producto</label>
+          <select id="producto" name="producto" required>
+            <option value="">Seleccionar producto</option>
+            <option value="laptop-hp">Laptop HP (Stock: 15)</option>
+            <!-- Add more products as needed -->
+          </select>
+          <input
+            type="number"
+            id="cantidad"
+            name="cantidad"
+            placeholder="Cant"
+            min="1"
+            required
+          />
+        </div>
+
+        <div class="form-group">
+          <label for="motivo">Motivo</label>
+          <select id="motivo" name="motivo" required>
+            <option value="">Seleccionar motivo</option>
+            <option value="vencimiento">Vencimiento</option>
+            <option value="daño">Daño</option>
+            <option value="robo">Robo</option>
+            <option value="otros">Otros</option>
+          </select>
+        </div>
+
+        <div class="form-group">
+          <label for="descripcion">Descripción (opcional)</label>
+          <textarea
+            id="descripcion"
+            name="descripcion"
+            placeholder="Detalles adicionales..."
+          ></textarea>
+        </div>
+
+        <div class="button-group">
+          <button type="submit" class="btn-submit">Registrar Merma</button>
+          <button type="button" class="btn-cancel">Cancelar</button>
+        </div>
+      </form>
+    </div>
+  </body>
+</html>

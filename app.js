@@ -16,6 +16,7 @@ const rutaCategorias = require("./routes/rutaCategorias")
 const rutaProveedores = require("./routes/rutaProveedores")
 const rutaUsuarios = require("./routes/rutaUsuarios")
 const rutaVentas = require("./routes/rutaVentas")
+const rutaMermas = require("./routes/rutaMermas")
 
 // Middleware
 app.use(express.json())
@@ -47,6 +48,7 @@ app.use("/categorias", validarSesion, rutaCategorias)
 app.use("/proveedores", validarSesion, rutaProveedores)
 app.use("/usuarios", validarSesion, verificarAdmin, rutaUsuarios)
 app.use("/ventas", validarSesion, rutaVentas)
+app.use("/mermas", rutaMermas)
 // Login
 app.post(
   "/log-in",

@@ -4,90 +4,88 @@
     <meta charset="UTF-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
     <title>Gestión de Movimientos</title>
-    <style>
-      body {
-        font-family: Arial, sans-serif;
-        line-height: 1.6;
-        margin: 0;
-        padding: 20px;
-        color: #333;
-      }
-
-      h1 {
-        color: #2c3e50;
-        border-bottom: 2px solid #3498db;
-        padding-bottom: 10px;
-      }
-
-      h2 {
-        color: #2980b9;
-        margin-top: 30px;
-      }
-
-      .movimientos-list {
-        list-style-type: none;
-        padding: 0;
-      }
-
-      .movimiento-item {
-        background-color: #f9f9f9;
-        border-left: 4px solid #3498db;
-        margin-bottom: 15px;
-        padding: 15px;
-        border-radius: 0 4px 4px 0;
-      }
-
-      .movimiento-header {
-        font-weight: bold;
-        margin-bottom: 5px;
-        display: flex;
-        justify-content: space-between;
-      }
-
-      .movimiento-details {
-        display: flex;
-        justify-content: space-between;
-        margin-top: 8px;
-      }
-
-      .accion-entrada {
-        color: #27ae60;
-      }
-
-      .accion-salida {
-        color: #e74c3c;
-      }
-    </style>
+    <link rel="stylesheet" href="/listarMovimientos.css" />
+    <link
+      rel="stylesheet"
+      href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0-beta3/css/all.min.css"
+    />
   </head>
   <body>
-    <h1>Gestión de Movimientos</h1>
+    <div class="container">
+      <div class="header">
+        <h1>Gestión de Movimientos</h1>
+      </div>
 
-    <a href="/movimientos/registrar-venta">Nueva Venta</a>
-    <a href="/movimientos/registrar-entrada">Nueva Entrada</a>
-    <a href="/movimientos/registrar-sobrante">Nuevo Sobrante</a>
-    <a href="/movimientos/registrar-merma">Nueva Merma</a>
-    <h2>Movimientos Recientes</h2>
+      <div class="action-links">
+        <a href="/movimientos/registrar-venta" class="venta">
+          <i class="fas fa-shopping-cart"></i>
+          Nueva Venta
+        </a>
+        <a href="/movimientos/registrar-entrada" class="entrada">
+          <i class="fas fa-arrow-down"></i>
+          Nueva Entrada
+        </a>
+        <a href="/movimientos/registrar-sobrante" class="sobrante">
+          <i class="fas fa-plus-circle"></i>
+          Nuevo Sobrante
+        </a>
+        <a href="/movimientos/registrar-merma" class="merma">
+          <i class="fas fa-minus-circle"></i>
+          Nueva Merma
+        </a>
+      </div>
 
-    <ul class="movimientos-list">
-      <% movimientos.forEach((movimiento) => { %>
-      <li class="movimiento-item">
-        <div class="movimiento-header">
-          <span><%= new Date(movimiento.fecha).toLocaleString() %></span>
-          <span><%= movimiento.tipo %></span>
+      <div class="movimientos-list">
+        <div class="section-header">
+          <h2>Movimientos Recientes</h2>
         </div>
-        <div class="movimiento-details">
-          <span><%= movimiento.descripcion %></span>
-          <span>
-            <a
-              href="/movimientos/detalle/<%= movimiento.id_movimiento %>"
-              class="view-detail"
-              >Ver Detalle</a
-            >
-          </span>
+
+        <div class="table-container">
+          <div class="table-header">
+            <div class="table-row">
+              <div class="table-cell">Fecha</div>
+              <div class="table-cell">Hora</div>
+              <div class="table-cell">Tipo</div>
+              <div class="table-cell">Descripción</div>
+              <div class="table-cell">Usuario</div>
+              <div class="table-cell">Acciones</div>
+            </div>
+          </div>
+
+          <div class="table-body">
+            <% movimientos.forEach((movimiento) => { const fecha = new
+            Date(movimiento.fecha); const fechaStr = fecha.toLocaleDateString();
+            const horaStr = fecha.toLocaleTimeString([], { hour: '2-digit',
+            minute: '2-digit' }); %>
+            <div class="movimiento-item table-row">
+              <div class="table-cell"><%= fechaStr %></div>
+              <div class="table-cell"><%= horaStr %></div>
+              <div class="table-cell">
+                <% if (movimiento.tipo === 'Venta') { %>
+                <span class="badge badge-venta">Venta</span>
+                <% } else if (movimiento.tipo === 'Compra') { %>
+                <span class="badge badge-entrada">Entrada</span>
+                <% } else if (movimiento.tipo === 'Ajuste') { %>
+                <span class="badge badge-sobrante">Ajuste</span>
+                <% } else { %>
+                <span class="badge"><%= movimiento.tipo %></span>
+                <% } %>
+              </div>
+              <div class="table-cell"><%= movimiento.descripcion %></div>
+              <div class="table-cell"><%= usuario %></div>
+              <div class="table-cell">
+                <a
+                  href="/movimientos/detalle/<%= movimiento.id_movimiento %>"
+                  class="view-detail"
+                >
+                  Ver Detalle <i class="fas fa-chevron-right"></i>
+                </a>
+              </div>
+            </div>
+            <% }) %>
+          </div>
         </div>
-        <div><%= movimiento.usuario %></div>
-      </li>
-      <% }) %>
-    </ul>
+      </div>
+    </div>
   </body>
 </html>

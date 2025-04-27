@@ -1,0 +1,273 @@
+:root {
+  --primary: #2c3e50;
+  --secondary: #34495e;
+  --success: #27ae60;
+  --danger: #e74c3c;
+  --warning: #f39c12;
+  --info: #3498db;
+  --light: #ecf0f1;
+  --dark: #2c3e50;
+  --gray: #95a5a6;
+  --white: #ffffff;
+}
+
+* {
+  margin: 0;
+  padding: 0;
+  box-sizing: border-box;
+  font-family: "Segoe UI", Tahoma, Geneva, Verdana, sans-serif;
+}
+
+body {
+  background-color: #f8f9fa;
+  color: #333;
+  line-height: 1.6;
+}
+
+.container {
+  max-width: 1200px;
+  margin: 0 auto;
+  padding: 20px;
+}
+
+.header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-bottom: 30px;
+  padding-bottom: 15px;
+  border-bottom: 1px solid #e0e0e0;
+}
+
+.header h1 {
+  color: var(--primary);
+  font-size: 24px;
+  font-weight: 600;
+}
+
+/* Estilos para action-links (original) */
+.action-links {
+  display: grid;
+  grid-template-columns: repeat(4, 1fr);
+  gap: 15px;
+  margin-bottom: 30px;
+}
+
+.action-links a {
+  padding: 18px 15px;
+  border: none;
+  border-radius: 6px;
+  font-size: 16px;
+  font-weight: 500;
+  cursor: pointer;
+  transition: all 0.3s ease;
+  text-align: center;
+  background-color: var(--white);
+  box-shadow: 0 2px 4px rgba(0, 0, 0, 0.05);
+  border: 1px solid #e0e0e0;
+  color: var(--dark);
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  text-decoration: none;
+}
+
+.action-links a:hover {
+  transform: translateY(-2px);
+  box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
+}
+
+.action-links a i {
+  font-size: 24px;
+  margin-bottom: 8px;
+}
+
+.action-links a.venta {
+  border-left: 4px solid var(--danger);
+}
+
+.action-links a.entrada {
+  border-left: 4px solid var(--success);
+}
+
+.action-links a.sobrante {
+  border-left: 4px solid var(--warning);
+}
+
+.action-links a.merma {
+  border-left: 4px solid var(--info);
+}
+
+/* Estilos para movimientos-list (original) */
+.movimientos-list {
+  background-color: var(--white);
+  border-radius: 6px;
+  box-shadow: 0 2px 4px rgba(0, 0, 0, 0.05);
+  padding: 20px;
+  margin-bottom: 30px;
+  list-style: none;
+}
+
+.section-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-bottom: 20px;
+  padding-bottom: 10px;
+  border-bottom: 1px solid #e0e0e0;
+}
+
+.section-header h2 {
+  color: var(--primary);
+  font-size: 18px;
+  font-weight: 500;
+}
+
+.view-all {
+  color: var(--info);
+  font-size: 14px;
+  text-decoration: none;
+}
+
+/* Estilos para la tabla */
+.table-container {
+  display: table;
+  width: 100%;
+}
+
+.table-header {
+  display: table-header-group;
+  font-weight: 500;
+  color: var(--gray);
+  font-size: 14px;
+  text-transform: uppercase;
+}
+
+.table-body {
+  display: table-row-group;
+}
+
+.table-row {
+  display: table-row;
+}
+
+.table-cell {
+  display: table-cell;
+  padding: 12px 15px;
+  text-align: left;
+  border-bottom: 1px solid #e0e0e0;
+  vertical-align: middle;
+}
+
+.movimiento-item {
+  /* Mantenemos la clase pero los estilos se aplican a través de table-row y table-cell */
+}
+
+/* Estilos para view-detail (original) */
+.view-detail {
+  color: var(--info);
+  text-decoration: none;
+  font-weight: 500;
+  display: inline-flex;
+  align-items: center;
+  gap: 5px;
+}
+
+.view-detail:hover {
+  text-decoration: underline;
+}
+
+.view-detail i {
+  font-size: 14px;
+}
+
+/* Estilos para badges */
+.badge {
+  display: inline-block;
+  padding: 4px 8px;
+  border-radius: 12px;
+  font-size: 12px;
+  font-weight: 500;
+  color: white;
+}
+
+.badge-venta {
+  background-color: var(--danger);
+}
+
+.badge-entrada {
+  background-color: var(--success);
+}
+
+.badge-sobrante {
+  background-color: var(--warning);
+}
+
+.badge-merma {
+  background-color: var(--info);
+}
+
+/* Paginación */
+.pagination {
+  display: flex;
+  justify-content: center;
+  margin-top: 20px;
+  gap: 5px;
+}
+
+.pagination button {
+  padding: 8px 12px;
+  border: 1px solid #e0e0e0;
+  background-color: var(--white);
+  border-radius: 4px;
+  cursor: pointer;
+}
+
+.pagination button.active {
+  background-color: var(--primary);
+  color: white;
+  border-color: var(--primary);
+}
+
+/* Responsive */
+@media (max-width: 768px) {
+  .action-links {
+    grid-template-columns: 1fr;
+  }
+
+  .table-container {
+    display: block;
+    overflow-x: auto;
+  }
+
+  .table-header {
+    display: none;
+  }
+
+  .table-row {
+    display: block;
+    margin-bottom: 20px;
+    border-bottom: 1px solid #e0e0e0;
+    padding-bottom: 15px;
+  }
+
+  .table-cell {
+    display: block;
+    padding: 5px 0;
+    border-bottom: none;
+  }
+
+  .table-cell::before {
+    content: attr(data-label);
+    font-weight: bold;
+    display: inline-block;
+    width: 120px;
+    color: var(--gray);
+  }
+
+  .movimiento-header {
+    display: flex;
+    justify-content: space-between;
+    margin-bottom: 10px;
+  }
+}

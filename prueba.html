@@ -1,0 +1,431 @@
+<!DOCTYPE html>
+<html lang="es">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Registrar Compra</title>
+    <style>
+      body {
+        font-family: Arial, sans-serif;
+        line-height: 1.6;
+        margin: 20px;
+        color: #333;
+      }
+
+      h1 {
+        color: #2c3e50;
+        border-bottom: 2px solid #3498db;
+        padding-bottom: 10px;
+      }
+
+      .form-group {
+        margin-bottom: 15px;
+      }
+
+      label {
+        display: block;
+        margin-bottom: 5px;
+        font-weight: bold;
+      }
+
+      input,
+      select,
+      textarea {
+        width: 100%;
+        padding: 8px;
+        border: 1px solid #ddd;
+        border-radius: 4px;
+        box-sizing: border-box;
+      }
+
+      table {
+        width: 100%;
+        border-collapse: collapse;
+        margin: 20px 0;
+      }
+
+      th,
+      td {
+        border: 1px solid #ddd;
+        padding: 8px;
+        text-align: left;
+      }
+
+      th {
+        background-color: #f2f2f2;
+      }
+
+      .supplier-info {
+        background-color: #f9f9f9;
+        padding: 10px;
+        border-radius: 4px;
+        margin-bottom: 15px;
+      }
+
+      .supplier-info table {
+        margin: 0;
+      }
+
+      .supplier-info td {
+        border: none;
+        padding: 5px 0;
+      }
+
+      .btn {
+        padding: 10px 15px;
+        background-color: #3498db;
+        color: white;
+        border: none;
+        border-radius: 4px;
+        cursor: pointer;
+        margin-right: 10px;
+      }
+
+      .btn-cancel {
+        background-color: #e74c3c;
+      }
+
+      .total {
+        font-size: 1.2em;
+        font-weight: bold;
+        margin: 20px 0;
+        text-align: right;
+      }
+
+      .product-search {
+        display: flex;
+        gap: 10px;
+        margin-bottom: 15px;
+      }
+
+      .product-search input {
+        flex: 1;
+      }
+
+      .btn-add {
+        background-color: #2ecc71;
+      }
+
+      .btn-remove {
+        background-color: #e74c3c;
+        padding: 5px 10px;
+        font-size: 0.8em;
+      }
+
+      .hidden {
+        display: none;
+      }
+    </style>
+  </head>
+  <body>
+    <h1>Registrar Compra</h1>
+
+    <div class="form-group">
+      <label for="fecha">Fecha</label>
+      <input type="text" id="fecha" value="26/04/2025" readonly />
+    </div>
+
+    <div class="form-group">
+      <label for="proveedor">Proveedor</label>
+      <select id="proveedor" class="form-control">
+        <option value="">Seleccionar proveedor...</option>
+        <option value="1">Proveedor A</option>
+        <option value="2" selected>Proveedor B</option>
+        <option value="3">Proveedor C</option>
+      </select>
+    </div>
+
+    <div id="supplier-info" class="supplier-info">
+      <table>
+        <tr>
+          <th>Razón Social</th>
+          <th>RUC</th>
+          <th>Teléfono</th>
+          <th>Correo</th>
+        </tr>
+        <tr>
+          <td>Proveedor B</td>
+          <td>20456789123</td>
+          <td>912345678</td>
+          <td>b@proveedor.com</td>
+        </tr>
+      </table>
+    </div>
+
+    <div class="form-group">
+      <label for="producto">Producto</label>
+      <div class="product-search">
+        <input
+          type="text"
+          id="producto"
+          placeholder="Buscar producto..."
+          disabled
+        />
+        <button id="btn-add-product" class="btn btn-add" disabled>
+          Agregar
+        </button>
+      </div>
+      <div id="product-suggestions" class="hidden"></div>
+    </div>
+
+    <table id="products-table">
+      <thead>
+        <tr>
+          <th>Producto</th>
+          <th>Precio Unitario</th>
+          <th>Categoría</th>
+          <th>Cantidad</th>
+          <th>Subtotal</th>
+          <th>Acciones</th>
+        </tr>
+      </thead>
+      <tbody>
+        <tr>
+          <td>Laptop HP</td>
+          <td>$1200</td>
+          <td>Tecnología</td>
+          <td>
+            <input
+              type="number"
+              value="1"
+              min="1"
+              class="quantity"
+              data-price="1200"
+            />
+          </td>
+          <td class="subtotal">$1200.00</td>
+          <td><button class="btn-remove">Eliminar</button></td>
+        </tr>
+        <tr>
+          <td>Monitor LG</td>
+          <td>$300</td>
+          <td>Tecnología</td>
+          <td>
+            <input
+              type="number"
+              value="1"
+              min="1"
+              class="quantity"
+              data-price="300"
+            />
+          </td>
+          <td class="subtotal">$300.00</td>
+          <td><button class="btn-remove">Eliminar</button></td>
+        </tr>
+      </tbody>
+    </table>
+
+    <div class="form-group">
+      <label for="incidencias">Incidencias (opcional)</label>
+      <textarea id="incidencias" rows="3">GAAAAAAAAAAAAA</textarea>
+    </div>
+
+    <div class="total">
+      Total de la Compra: <span id="total">$1500.00</span>
+    </div>
+
+    <div>
+      <button id="btn-register" class="btn">Registrar Compra</button>
+      <button id="btn-cancel" class="btn btn-cancel">Cancelar</button>
+    </div>
+
+    <script>
+      // Sample data
+      const suppliers = {
+        1: {
+          name: "Proveedor A",
+          ruc: "10456789123",
+          phone: "987654321",
+          email: "a@proveedor.com",
+        },
+        2: {
+          name: "Proveedor B",
+          ruc: "20456789123",
+          phone: "912345678",
+          email: "b@proveedor.com",
+        },
+        3: {
+          name: "Proveedor C",
+          ruc: "30456789123",
+          phone: "934567890",
+          email: "c@proveedor.com",
+        },
+      }
+
+      const productsBySupplier = {
+        2: [
+          { id: 1, name: "Laptop HP", price: 1200, category: "Tecnología" },
+          { id: 2, name: "Monitor LG", price: 300, category: "Tecnología" },
+          {
+            id: 3,
+            name: "Teclado mecánico",
+            price: 80,
+            category: "Tecnología",
+          },
+          {
+            id: 4,
+            name: "Mouse inalámbrico",
+            price: 25,
+            category: "Tecnología",
+          },
+        ],
+      }
+
+      // DOM elements
+      const proveedorSelect = document.getElementById("proveedor")
+      const supplierInfoDiv = document.getElementById("supplier-info")
+      const productoInput = document.getElementById("producto")
+      const btnAddProduct = document.getElementById("btn-add-product")
+      const productSuggestions = document.getElementById("product-suggestions")
+      const productsTable = document
+        .getElementById("products-table")
+        .getElementsByTagName("tbody")[0]
+      const totalSpan = document.getElementById("total")
+
+      // Event listeners
+      proveedorSelect.addEventListener("change", handleSupplierChange)
+      productoInput.addEventListener("input", handleProductSearch)
+      btnAddProduct.addEventListener("click", addProductToTable)
+      productsTable.addEventListener("click", handleTableActions)
+      productsTable.addEventListener("input", updateTotals)
+
+      // Initial setup
+      updateTotals()
+
+      // Functions
+      function handleSupplierChange() {
+        const supplierId = proveedorSelect.value
+
+        if (supplierId) {
+          const supplier = suppliers[supplierId]
+          const infoTable = supplierInfoDiv.querySelector("table tbody tr")
+
+          infoTable.innerHTML = `
+                    <td>${supplier.name}</td>
+                    <td>${supplier.ruc}</td>
+                    <td>${supplier.phone}</td>
+                    <td>${supplier.email}</td>
+                `
+
+          supplierInfoDiv.classList.remove("hidden")
+          productoInput.disabled = false
+          btnAddProduct.disabled = false
+        } else {
+          supplierInfoDiv.classList.add("hidden")
+          productoInput.disabled = true
+          btnAddProduct.disabled = true
+          productoInput.value = ""
+          productSuggestions.classList.add("hidden")
+        }
+      }
+
+      function handleProductSearch() {
+        const searchTerm = productoInput.value.toLowerCase()
+        const supplierId = proveedorSelect.value
+
+        if (!supplierId || !searchTerm) {
+          productSuggestions.classList.add("hidden")
+          return
+        }
+
+        const products = productsBySupplier[supplierId] || []
+        const filteredProducts = products.filter((product) =>
+          product.name.toLowerCase().includes(searchTerm)
+        )
+
+        if (filteredProducts.length > 0) {
+          productSuggestions.innerHTML = filteredProducts
+            .map(
+              (product) => `
+                    <div class="product-suggestion" 
+                         data-id="${product.id}"
+                         data-name="${product.name}"
+                         data-price="${product.price}"
+                         data-category="${product.category}">
+                        ${product.name} - $${product.price} (${product.category})
+                    </div>
+                `
+            )
+            .join("")
+
+          productSuggestions.classList.remove("hidden")
+
+          // Add click event to suggestions
+          document.querySelectorAll(".product-suggestion").forEach((item) => {
+            item.addEventListener("click", function () {
+              productoInput.value = this.dataset.name
+              productSuggestions.classList.add("hidden")
+            })
+          })
+        } else {
+          productSuggestions.classList.add("hidden")
+        }
+      }
+
+      function addProductToTable() {
+        const productName = productoInput.value
+        const supplierId = proveedorSelect.value
+
+        if (!productName || !supplierId) return
+
+        // Find the product in our data
+        const products = productsBySupplier[supplierId] || []
+        const product = products.find((p) => p.name === productName)
+
+        if (!product) return
+
+        // Check if product already exists in table
+        const existingRow = Array.from(productsTable.rows).find(
+          (row) => row.cells[0].textContent === product.name
+        )
+
+        if (existingRow) {
+          // Just increase quantity if product exists
+          const quantityInput = existingRow.querySelector(".quantity")
+          quantityInput.value = parseInt(quantityInput.value) + 1
+          updateTotals()
+        } else {
+          // Add new row if product doesn't exist
+          const newRow = productsTable.insertRow()
+          newRow.innerHTML = `
+                    <td>${product.name}</td>
+                    <td>$${product.price}</td>
+                    <td>${product.category}</td>
+                    <td><input type="number" value="1" min="1" class="quantity" data-price="${
+                      product.price
+                    }"></td>
+                    <td class="subtotal">$${product.price.toFixed(2)}</td>
+                    <td><button class="btn-remove">Eliminar</button></td>
+                `
+        }
+
+        // Clear search
+        productoInput.value = ""
+        productSuggestions.classList.add("hidden")
+        updateTotals()
+      }
+
+      function handleTableActions(e) {
+        if (e.target.classList.contains("btn-remove")) {
+          e.target.closest("tr").remove()
+          updateTotals()
+        }
+      }
+
+      function updateTotals() {
+        let total = 0
+
+        Array.from(productsTable.rows).forEach((row) => {
+          const quantity = parseInt(row.querySelector(".quantity").value)
+          const price = parseFloat(row.querySelector(".quantity").dataset.price)
+          const subtotal = quantity * price
+
+          row.querySelector(".subtotal").textContent = `$${subtotal.toFixed(2)}`
+          total += subtotal
+        })
+
+        totalSpan.textContent = `$${total.toFixed(2)}`
+      }
+    </script>
+  </body>
+</html>

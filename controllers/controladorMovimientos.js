@@ -1,10 +1,12 @@
 const dbMovimientos = require("../model/queriesMovimientos")
 const dbProductos = require("../model/queriesProductos")
+const dbProveedores = require("../model/queriesProveedores")
 
 async function obtenerMovimientos(req, res) {
   try {
     const movimientos = await dbMovimientos.obtenerMovimientos()
-    res.render("movimientos", { movimientos })
+    const usuario = req.user.username
+    res.render("movimientos", { movimientos, usuario })
   } catch (error) {
     console.error("Error al obtener movimientos:", error)
     res.status(500).send("Error al obtener los movimientos")
@@ -100,9 +102,21 @@ async function registrarVentaPost(req, res) {
   }
 }
 
+async function registrarEntradaGet(req, res) {
+  try {
+    const productos = await dbProductos.obtenerProductos()
+    const proveedores = await dbProveedores.obtenerProveedores()
+    res.render("nuevaEntrada", { productos, proveedores })
+  } catch (error) {
+    console.error("Error al obtener detalle de movimiento:", error)
+    res.status(500).send("Error al obtener detalle del movimiento")
+  }
+}
+
 module.exports = {
   obtenerMovimientos,
   registrarVentaGet,
   registrarVentaPost,
+  registrarEntradaGet,
   verDetalleMovimiento,
 }

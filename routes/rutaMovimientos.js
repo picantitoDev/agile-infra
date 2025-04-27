@@ -7,5 +7,6 @@ router.get("/", controladorMovimientos.obtenerMovimientos)
 router.get("/detalle/:id", controladorMovimientos.verDetalleMovimiento)
 router.get("/registrar-venta", controladorMovimientos.registrarVentaGet)
 router.post("/registrar-venta", controladorMovimientos.registrarVentaPost)
+router.get("/registrar-entrada", controladorMovimientos.registrarEntradaGet)
 
 module.exports = router

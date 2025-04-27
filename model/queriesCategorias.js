@@ -1,7 +1,9 @@
 const pool = require("./pool")
 
 async function obtenerCategorias() {
-  const { rows } = await pool.query(`SELECT * FROM categoria ORDER BY id ASC`)
+  const { rows } = await pool.query(
+    `SELECT * FROM categoria ORDER BY id_categoria ASC`
+  )
   return rows
 }
 

@@ -1,0 +1,93 @@
+<!DOCTYPE html>
+<html lang="es">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Gestión de Movimientos</title>
+    <style>
+      body {
+        font-family: Arial, sans-serif;
+        line-height: 1.6;
+        margin: 0;
+        padding: 20px;
+        color: #333;
+      }
+
+      h1 {
+        color: #2c3e50;
+        border-bottom: 2px solid #3498db;
+        padding-bottom: 10px;
+      }
+
+      h2 {
+        color: #2980b9;
+        margin-top: 30px;
+      }
+
+      .movimientos-list {
+        list-style-type: none;
+        padding: 0;
+      }
+
+      .movimiento-item {
+        background-color: #f9f9f9;
+        border-left: 4px solid #3498db;
+        margin-bottom: 15px;
+        padding: 15px;
+        border-radius: 0 4px 4px 0;
+      }
+
+      .movimiento-header {
+        font-weight: bold;
+        margin-bottom: 5px;
+        display: flex;
+        justify-content: space-between;
+      }
+
+      .movimiento-details {
+        display: flex;
+        justify-content: space-between;
+        margin-top: 8px;
+      }
+
+      .accion-entrada {
+        color: #27ae60;
+      }
+
+      .accion-salida {
+        color: #e74c3c;
+      }
+    </style>
+  </head>
+  <body>
+    <h1>Gestión de Movimientos</h1>
+
+    <a href="/movimientos/registrar-venta">Nueva Venta</a>
+    <a href="/movimientos/registrar-entrada">Nueva Entrada</a>
+    <a href="/movimientos/registrar-sobrante">Nuevo Sobrante</a>
+    <a href="/movimientos/registrar-merma">Nueva Merma</a>
+    <h2>Movimientos Recientes</h2>
+
+    <ul class="movimientos-list">
+      <% movimientos.forEach((movimiento) => { %>
+      <li class="movimiento-item">
+        <div class="movimiento-header">
+          <span><%= new Date(movimiento.fecha).toLocaleString() %></span>
+          <span><%= movimiento.tipo %></span>
+        </div>
+        <div class="movimiento-details">
+          <span><%= movimiento.descripcion %></span>
+          <span>
+            <a
+              href="/movimientos/detalle/<%= movimiento.id_movimiento %>"
+              class="view-detail"
+              >Ver Detalle</a
+            >
+          </span>
+        </div>
+        <div><%= movimiento.usuario %></div>
+      </li>
+      <% }) %>
+    </ul>
+  </body>
+</html>

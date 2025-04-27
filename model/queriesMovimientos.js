@@ -58,7 +58,92 @@ async function obtenerDetalleMovimiento(idMov) {
   return rows
 }
 
+async function registrarMovimiento({ id_usuario, tipo, fecha, descripcion }) {
+  const query = `
+      INSERT INTO movimiento (id_usuario, tipo, fecha, descripcion) 
+      VALUES ($1, $2, $3, $4) 
+      RETURNING id_movimiento
+    `
+
+  const values = [id_usuario, tipo, fecha, descripcion]
+
+  try {
+    const result = await pool.query(query, values)
+    return result.rows[0].id_movimiento // Regresa el id_movimiento generado
+  } catch (error) {
+    console.error("Error al insertar movimiento:", error)
+    throw error
+  }
+}
+
+async function registrarMovimientoVenta({
+  id_movimiento,
+  nombre_cliente,
+  razon_social,
+  dni_cliente,
+  ruc_cliente,
+  correo_cliente,
+  direccion_cliente,
+  tipo_comprobante,
+  total,
+}) {
+  const query = `
+      INSERT INTO movimiento_venta (id_movimiento, nombre_cliente, razon_social, dni_cliente, ruc_cliente, correo_cliente, direccion_cliente, tipo_comprobante, total)
+      VALUES ($1, $2, $3, $4, $5, $6, $7, $8, $9)
+    `
+
+  const values = [
+    id_movimiento,
+    nombre_cliente,
+    razon_social,
+    dni_cliente,
+    ruc_cliente,
+    correo_cliente,
+    direccion_cliente,
+    tipo_comprobante,
+    total,
+  ]
+
+  try {
+    await pool.query(query, values)
+  } catch (error) {
+    console.error("Error al insertar movimiento venta:", error)
+    throw error
+  }
+}
+
+async function registrarProductoMovimiento({
+  id_producto,
+  id_movimiento,
+  cantidad,
+  precio_unitario,
+  subtotal,
+}) {
+  const query = `
+      INSERT INTO producto_movimiento (id_producto, id_movimiento, cantidad, precio_unitario, subtotal) 
+      VALUES ($1, $2, $3, $4, $5)
+    `
+
+  const values = [
+    id_producto,
+    id_movimiento,
+    cantidad,
+    precio_unitario,
+    subtotal,
+  ]
+
+  try {
+    await pool.query(query, values)
+  } catch (error) {
+    console.error("Error al insertar producto movimiento:", error)
+    throw error
+  }
+}
+
 module.exports = {
   obtenerMovimientos,
   obtenerDetalleMovimiento,
+  registrarMovimiento,
+  registrarMovimientoVenta,
+  registrarProductoMovimiento,
 }

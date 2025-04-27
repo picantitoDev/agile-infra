@@ -9,7 +9,7 @@
     <div class="venta-container">
       <h1 class="title">Registrar Nueva Venta</h1>
 
-      <form action="/ventas/nueva-venta" method="POST" class="venta-form">
+      <form action="/movimientos/registrar-venta" method="POST" class="venta-form">
         <!-- Tipo de Comprobante -->
         <div class="seccion tipo-comprobante">
           <h3>
@@ -374,7 +374,7 @@
           row.innerHTML = `
             <td>${prod.nombre}
             <td>S/. ${prod.precio_unitario}</td>
-            <td><button type="button" onclick="agregarProducto(${prod.id})">Agregar</button></td>
+            <td><button type="button" onclick="agregarProducto(${prod.id_producto})">Agregar</button></td>
           `
           // Si se clickea el producto, se invoca la funcion agregar producto con el id del mismo
           tablaProductos.appendChild(row) // Agaregamos la fila a la tabla
@@ -423,8 +423,8 @@
 
       // Funcion para agregar producto
       function agregarProducto(id) {
-        const prod = productos.find((p) => p.id === id) // Extraemos le producto con el mismo id de la list ade productos
-        const existente = carrito.find((p) => p.id === id) // Se busca el producto en el carrito
+        const prod = productos.find((p) => p.id_producto === id) // Extraemos le producto con el mismo id de la list ade productos
+        const existente = carrito.find((p) => p.id_producto === id) // Se busca el producto en el carrito
         if (existente) {
           existente.cantidad += 1 // Si existe, se le añade uno a su cantidad
         } else {

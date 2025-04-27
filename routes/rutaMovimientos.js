@@ -5,5 +5,7 @@ const controladorMovimientos = require("../controllers/controladorMovimientos")
 // Ruta para obtener todos los movimientos
 router.get("/", controladorMovimientos.obtenerMovimientos)
 router.get("/detalle/:id", controladorMovimientos.verDetalleMovimiento)
+router.get("/registrar-venta", controladorMovimientos.registrarVentaGet)
+router.post("/registrar-venta", controladorMovimientos.registrarVentaPost)
 
 module.exports = router

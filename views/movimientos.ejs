@@ -72,7 +72,13 @@
                 <% } %>
               </div>
               <div class="table-cell"><%= movimiento.descripcion %></div>
-              <div class="table-cell"><%= usuario %></div>
+              <div class="table-cell">
+                <% const usuario = usuarios.find(user => user.id ===
+                movimiento.id_usuario); if (usuario) { %> <%= usuario.username
+                %>
+                <!-- O cualquier otra propiedad que quieras mostrar -->
+                <% } else { %> Usuario no encontrado <% } %>
+              </div>
               <div class="table-cell">
                 <a
                   href="/movimientos/detalle/<%= movimiento.id_movimiento %>"

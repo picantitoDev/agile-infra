@@ -1,12 +1,13 @@
 const dbMovimientos = require("../model/queriesMovimientos")
 const dbProductos = require("../model/queriesProductos")
 const dbProveedores = require("../model/queriesProveedores")
+const dbUsuarios = require("../model/queriesUsuarios")
 
 async function obtenerMovimientos(req, res) {
   try {
     const movimientos = await dbMovimientos.obtenerMovimientos()
-    const usuario = req.user.username
-    res.render("movimientos", { movimientos, usuario })
+    const usuarios = await dbUsuarios.obtenerUsuarios()
+    res.render("movimientos", { movimientos, usuarios })
   } catch (error) {
     console.error("Error al obtener movimientos:", error)
     res.status(500).send("Error al obtener los movimientos")

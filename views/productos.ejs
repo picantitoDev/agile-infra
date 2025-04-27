@@ -121,7 +121,9 @@
             const matchesSearch = name.includes(searchText)
             const matchesCategory =
               selectedCategory === "all" || category === selectedCategory
-            const matchesStatus = showActive ? status === "Activado" : true
+            const matchesStatus = showActive
+              ? status === "Activado"
+              : status === "Desactivado"
 
             if (matchesSearch && matchesCategory && matchesStatus) {
               row.style.display = ""
@@ -146,9 +148,7 @@
           }
 
           // Actualizar etiqueta de estado
-          statusLabel.textContent = statusToggle.checked
-            ? "Activos"
-            : "Inactivos"
+          statusLabel.textContent = showActive ? "Activos" : "Inactivos"
         }
 
         // Event listeners

@@ -21,9 +21,20 @@ async function obtenerProductos() {
 
 async function obtenerProductoPorId(id) {
   const { rows } = await pool.query(
-    `SELECT p.*, c.nombre AS categoria
+    `SELECT 
+       p.id_producto,
+       p.nombre,
+       p.stock,
+       p.precio_unitario,
+       p.cantidad_minima,
+       p.estado,
+       p.id_categoria,
+       c.nombre AS categoria_nombre,
+       p.id_proveedor,
+       pr.razon_social AS proveedor_nombre
      FROM producto p
-     JOIN categoria c ON p.categoria = c.id_categoria
+     JOIN categoria c ON p.id_categoria = c.id_categoria
+     JOIN proveedor pr ON p.id_proveedor = pr.id_proveedor
      WHERE p.id_producto = $1`,
     [id]
   )
@@ -57,22 +68,22 @@ async function actualizarProducto(id, producto) {
   const query = `
     UPDATE producto
     SET nombre = $1,
-        sku = $2,
-        stock = $3,
-        precio_unitario = $4,
-        categoria = $5,
-        unidad_medida = $6,
+        stock = $2,
+        precio_unitario = $3,
+        id_categoria = $4,
+        id_proveedor = $5,
+        cantidad_minima = $6,
         estado = $7
     WHERE id_producto = $8
   `
 
   const valores = [
     producto.nombre,
-    producto.sku,
     producto.stock,
     producto.precio_unitario,
-    producto.categoria_id,
-    producto.unidad_medida,
+    producto.id_categoria,
+    producto.id_proveedor,
+    producto.cantidad_minima,
     producto.estado,
     id,
   ]

@@ -16,18 +16,27 @@ async function obtenerProductos(req, res) {
     res.status(500).send("Error al obtener los productos")
   }
 }
-
 async function obtenerProductoPorId(req, res) {
   try {
-    const id = parseInt(req.params.id)
+    const id = parseInt(req.params.id, 10)
+    if (isNaN(id)) {
+      console.log(req.params)
+      return res.status(400).send("El ID del producto no es válido")
+    }
+
     const producto = await dbProductos.obtenerProductoPorId(id)
     const categorias = await dbCategorias.obtenerCategorias()
+    const proveedores = await dbProveedores.obtenerProveedores()
 
     if (!producto) {
       return res.status(404).send("Producto no encontrado")
     }
 
-    res.render("detalleProducto", { producto, categorias })
+    res.render("detalleProducto", {
+      producto,
+      categorias,
+      proveedores,
+    })
   } catch (error) {
     console.error("Error al obtener producto por ID:", error)
     res.status(500).send("Error al obtener el producto")
@@ -36,24 +45,28 @@ async function obtenerProductoPorId(req, res) {
 
 async function actualizarProducto(req, res) {
   try {
-    const id = parseInt(req.params.id)
+    const id = parseInt(req.params.id, 10)
+    if (isNaN(id)) {
+      return res.status(400).send("ID de producto no válido")
+    }
+
     const {
       nombre,
-      sku,
       stock,
       precio_unitario,
-      categoria_id,
-      unidad_medida,
+      id_categoria,
+      id_proveedor,
+      cantidad_minima,
       estado,
     } = req.body
 
     const datosActualizados = {
       nombre,
-      sku,
       stock: parseInt(stock),
       precio_unitario: parseFloat(precio_unitario),
-      categoria_id: parseInt(categoria_id),
-      unidad_medida,
+      id_categoria: parseInt(id_categoria),
+      id_proveedor: parseInt(id_proveedor),
+      cantidad_minima: parseInt(cantidad_minima),
       estado,
     }
 

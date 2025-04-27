@@ -18,12 +18,6 @@
           <input type="text" name="nombre" value="<%= producto.nombre %>" required />
         </div>
 
-        <!-- SKU -->
-        <div>
-          <label>SKU:</label>
-          <input type="text" name="sku" value="<%= producto.sku %>" required />
-        </div>
-
         <!-- Stock -->
         <div>
           <label>Stock:</label>
@@ -39,20 +33,31 @@
         <!-- Categoría (Dropdown with categorias) -->
         <div>
           <label>Categoría:</label>
-          <select name="categoria_id" required>
+          <select name="id_categoria" required>
             <% categorias.forEach((cat) => { %>
-              <option value="<%= cat.id %>" <% if (cat.nombre === producto.categoria) { %> selected <% } %>>
+              <option value="<%= cat.id_categoria %>" <% if (cat.id_categoria === producto.id_categoria) { %> selected <% } %>>
                 <%= cat.nombre %>
               </option>
             <% }) %>
           </select>
         </div>
 
-
-        <!-- Unidad de Medida -->
+        <!-- Proveedor (Dropdown with proveedores) -->
         <div>
-          <label>Unidad de Medida:</label>
-          <input type="text" name="unidad_medida" value="<%= producto.unidad_medida %>" required />
+          <label>Proveedor:</label>
+          <select name="id_proveedor" required>
+            <% proveedores.forEach((prov) => { %>
+              <option value="<%= prov.id_proveedor %>" <% if (prov.id_proveedor === producto.id_proveedor) { %> selected <% } %>>
+                <%= prov.razon_social %>
+              </option>
+            <% }) %>
+          </select>
+        </div>
+
+        <!-- Cantidad Mínima -->
+        <div>
+          <label>Cantidad Mínima:</label>
+          <input type="number" name="cantidad_minima" value="<%= producto.cantidad_minima %>" required />
         </div>
 
         <!-- Estado -->

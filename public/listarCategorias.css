@@ -1,0 +1,164 @@
+:root {
+  --gris-oscuro: #e0e0e0;
+  --gris-claro: #f8f9fa;
+  --gris-intermedio: #f0f0f0;
+  --gris-texto: #555;
+  --verde: #28a745;
+  --verde-oscuro: #218838;
+  --azul: #007bff;
+  --azul-oscuro: #0069d9;
+  --rojo: #dc3545;
+  --rojo-oscuro: #c82333;
+}
+
+* {
+  margin: 0;
+  padding: 0;
+  box-sizing: border-box;
+}
+
+body {
+  font-family: "Segoe UI", Tahoma, Geneva, Verdana, sans-serif;
+  background-color: #f9fafb;
+  color: #333;
+  display: flex;
+  justify-content: center;
+  padding: 40px 20px;
+}
+
+.container {
+  max-width: 800px;
+  width: 100%;
+  background-color: #fff;
+  padding: 30px;
+  border-radius: 12px;
+  box-shadow: 0 4px 20px rgba(0, 0, 0, 0.05);
+}
+
+h1 {
+  margin-bottom: 20px;
+  text-align: center;
+  color: #2c3e50;
+}
+
+.back-link {
+  display: inline-block;
+  margin-bottom: 15px;
+  text-decoration: none;
+  color: #3498db;
+  font-weight: bold;
+  transition: color 0.2s;
+}
+
+.back-link:hover {
+  color: #2c80b4;
+}
+
+.categoria-form {
+  display: flex;
+  gap: 10px;
+  margin-bottom: 25px;
+  flex-wrap: wrap;
+  justify-content: center;
+}
+
+.categoria-form label {
+  font-weight: 500;
+}
+
+.categoria-form input[type="text"] {
+  padding: 8px 12px;
+  border: 1px solid #ccc;
+  border-radius: 8px;
+  flex-grow: 1;
+  min-width: 200px;
+}
+
+.categoria-form button {
+  padding: 8px 16px;
+  background-color: #3498db;
+  color: white;
+  border: none;
+  border-radius: 8px;
+  cursor: pointer;
+  transition: background-color 0.2s;
+}
+
+.categoria-form button:hover {
+  background-color: #2c80b4;
+}
+
+.categoria-table {
+  width: 100%;
+  border-collapse: collapse;
+  margin-top: 10px;
+}
+
+.categoria-table th,
+.categoria-table td {
+  padding: 12px 15px;
+  border-bottom: 1px solid #e0e0e0;
+}
+
+/* Alineación general de columnas por defecto */
+.categoria-table th {
+  background-color: #f0f4f8;
+  font-weight: 600;
+  text-align: left;
+}
+
+/* Centrar solo la columna de acciones */
+.categoria-table td:nth-child(3),
+.categoria-table th:nth-child(3) {
+  text-align: center;
+  vertical-align: middle;
+}
+
+.categoria-table tr:hover {
+  background-color: #f9f9f9;
+}
+
+/* Botones de acción */
+.acciones {
+  display: flex;
+  justify-content: center;
+  gap: 8px;
+}
+
+.btn-editar,
+.btn-eliminar {
+  background: none;
+  border: none;
+  cursor: pointer;
+  font-size: 1rem;
+  padding: 6px 10px;
+  border-radius: 4px;
+  transition: all 0.2s;
+}
+
+.btn-editar {
+  color: var(--azul);
+}
+
+.btn-editar:hover {
+  color: var(--azul-oscuro);
+  background: rgba(0, 123, 255, 0.1);
+}
+
+.btn-eliminar {
+  color: var(--rojo);
+}
+
+.btn-eliminar:hover {
+  color: var(--rojo-oscuro);
+  background: rgba(220, 53, 69, 0.1);
+}
+
+th {
+  text-align: left;
+}
+
+a {
+  color: var(--azul);
+  text-decoration: none;
+}

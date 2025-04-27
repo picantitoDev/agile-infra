@@ -1,0 +1,72 @@
+<!DOCTYPE html>
+<html lang="es">
+  <head>
+    <meta charset="UTF-8" />
+    <title>Editar Producto</title>
+    <link rel="stylesheet" href="/detalleProducto.css" />
+  </head>
+  <body>
+    <div class="container">
+      <a href="/productos">← Atrás</a>
+
+      <h1>Editar Producto</h1>
+
+      <form action="/productos/detalle/<%= producto.id_producto %>?_method=PUT" method="POST">
+        <!-- Nombre -->
+        <div>
+          <label>Nombre:</label>
+          <input type="text" name="nombre" value="<%= producto.nombre %>" required />
+        </div>
+
+        <!-- SKU -->
+        <div>
+          <label>SKU:</label>
+          <input type="text" name="sku" value="<%= producto.sku %>" required />
+        </div>
+
+        <!-- Stock -->
+        <div>
+          <label>Stock:</label>
+          <input type="number" name="stock" value="<%= producto.stock %>" required />
+        </div>
+
+        <!-- Precio Unitario -->
+        <div>
+          <label>Precio Unitario (S/.):</label>
+          <input type="number" step="0.01" name="precio_unitario" value="<%= producto.precio_unitario %>" required />
+        </div>
+
+        <!-- Categoría (Dropdown with categorias) -->
+        <div>
+          <label>Categoría:</label>
+          <select name="categoria_id" required>
+            <% categorias.forEach((cat) => { %>
+              <option value="<%= cat.id %>" <% if (cat.nombre === producto.categoria) { %> selected <% } %>>
+                <%= cat.nombre %>
+              </option>
+            <% }) %>
+          </select>
+        </div>
+
+
+        <!-- Unidad de Medida -->
+        <div>
+          <label>Unidad de Medida:</label>
+          <input type="text" name="unidad_medida" value="<%= producto.unidad_medida %>" required />
+        </div>
+
+        <!-- Estado -->
+        <div>
+          <label>Estado:</label>
+          <select name="estado">
+            <option value="Activado" <%= producto.estado === 'Activado' ? 'selected' : '' %>>Activado</option>
+            <option value="Desactivado" <%= producto.estado === 'Desactivado' ? 'selected' : '' %>>Desactivado</option>
+          </select>
+        </div>
+
+        <!-- Submit Button -->
+        <button type="submit">Guardar</button>
+      </form>
+    </div>
+  </body>
+</html>

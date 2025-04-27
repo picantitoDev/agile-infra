@@ -1,0 +1,168 @@
+<!DOCTYPE html>
+<html lang="es">
+  <head>
+    <meta charset="UTF-8" />
+    <title>Lista de Productos</title>
+    <link rel="stylesheet" href="/listarProductos.css" />
+    <link
+      rel="stylesheet"
+      href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.0/css/all.min.css"
+    />
+  </head>
+  <body>
+    <div class="container">
+      <header class="top-bar">
+        <a href="/" class="back-btn">
+          <span class="back-arrow">←</span> Atrás
+        </a>
+      </header>
+
+      <section class="filtering">
+        <div class="search">
+          <i class="fas fa-search search-icon"></i>
+          <input
+            type="text"
+            id="searchBar"
+            class="search-input"
+            placeholder="Buscar producto..."
+          />
+        </div>
+        <div class="filter">
+          <div class="status-toggle">
+            <label class="switch">
+              <input type="checkbox" id="statusToggle" checked />
+              <span class="slider"></span>
+            </label>
+            <span id="statusLabel">Activos</span>
+          </div>
+
+          <!-- Dynamic Category Filter -->
+          <select id="categoryFilter" class="category-select">
+            <option value="all">Todas</option>
+            <% categorias.forEach((cat) => { %>
+            <option value="<%= cat.nombre %>"><%= cat.nombre %></option>
+            <% }) %>
+          </select>
+
+          <form
+            action="/productos/crear-producto"
+            method="GET"
+            class="add-form"
+          >
+            <button type="submit" class="add-btn">+</button>
+          </form>
+        </div>
+      </section>
+
+      <div class="table-container">
+        <table class="product-table">
+          <thead>
+            <tr>
+              <th>Nombre</th>
+              <th>SKU</th>
+              <th>Stock</th>
+              <th>Precio Unitario</th>
+              <th>Categoría</th>
+              <th>Unidad de Medida</th>
+              <th>Detalle</th>
+            </tr>
+          </thead>
+          <tbody id="productTableBody">
+            <% productos.forEach((producto) => { %>
+            <tr>
+              <td><%= producto.nombre %></td>
+              <td><%= producto.sku %></td>
+              <td><%= producto.stock %></td>
+              <td>S/. <%= producto.precio_unitario %></td>
+              <td><%= producto.categoria %></td>
+              <td><%= producto.unidad_medida %></td>
+              <td>
+                <a
+                  class="view-btn"
+                  href="/productos/detalle/<%= producto.id %>"
+                >
+                  Ver Detalle
+                </a>
+              </td>
+            </tr>
+            <% }) %>
+          </tbody>
+        </table>
+      </div>
+    </div>
+
+    <script id="productos-data" type="application/json">
+      <%- JSON.stringify(productos) %>
+    </script>
+
+    <script>
+      const searchBar = document.getElementById("searchBar")
+      const categoryFilter = document.getElementById("categoryFilter")
+      const statusToggle = document.getElementById("statusToggle")
+      const statusLabel = document.getElementById("statusLabel")
+      const productTableBody = document.getElementById("productTableBody")
+
+      const productos = JSON.parse(
+        document.getElementById("productos-data").textContent
+      )
+
+      // Renderiza los productos en la tabla
+      function renderTable(filteredProductos) {
+        productTableBody.innerHTML = ""
+
+        if (filteredProductos.length === 0) {
+          const row = document.createElement("tr")
+          row.innerHTML = `<td colspan="7" style="text-align: center;">No se encontraron productos</td>`
+          productTableBody.appendChild(row)
+          return
+        }
+
+        filteredProductos.forEach((producto) => {
+          const row = document.createElement("tr")
+          row.innerHTML = `
+            <td>${producto.nombre}</td>
+            <td>${producto.sku}</td>
+            <td>${producto.stock}</td>
+            <td>S/. ${producto.precio_unitario}</td>
+            <td>${producto.categoria}</td>
+            <td>${producto.unidad_medida}</td>
+            <td><a class="view-btn" href="/productos/detalle/${producto.id}">Ver Detalle</a></td>
+          `
+          productTableBody.appendChild(row)
+        })
+      }
+
+      // Aplica los filtros de búsqueda, categoría y estado
+      function filterProducts() {
+        const searchText = searchBar.value.toLowerCase().trim()
+        const selectedCategory = categoryFilter.value
+        const selectedStatus = statusToggle.checked ? "Activado" : "Desactivado"
+
+        statusLabel.textContent = statusToggle.checked ? "Activos" : "Inactivos"
+
+        const filteredProductos = productos.filter((producto) => {
+          const matchesSearch =
+            producto.nombre.toLowerCase().includes(searchText) ||
+            producto.sku.toLowerCase().includes(searchText)
+
+          const matchesCategory =
+            selectedCategory === "all" ||
+            producto.categoria === selectedCategory
+          const matchesStatus = producto.estado === selectedStatus
+
+          return matchesSearch && matchesCategory && matchesStatus
+        })
+
+        renderTable(filteredProductos)
+      }
+
+      // Eventos
+      searchBar.addEventListener("input", filterProducts)
+      categoryFilter.addEventListener("change", filterProducts)
+      statusToggle.addEventListener("change", filterProducts)
+
+      // Render inicial: solo productos activos
+      renderTable(productos.filter((p) => p.estado === "Activado"))
+    </script>
+  </body>
+</html>

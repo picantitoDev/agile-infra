@@ -1,0 +1,45 @@
+<!DOCTYPE html>
+<html lang="es">
+  <head>
+    <meta charset="UTF-8" />
+    <title>Nuevo Producto</title>
+    <link rel="stylesheet" href="/crearProducto.css" />
+  </head>
+  <body>
+    <div class="form-container">
+      <a href="/productos">← Volver a productos</a>
+      <h1>Crear Nuevo Producto</h1>
+      <form action="/productos/crear-producto" method="POST">
+        <label for="nombre">Nombre:</label>
+        <input type="text" name="nombre" id="nombre" required />
+
+        <label for="sku">SKU:</label>
+        <input type="text" name="sku" id="sku" required />
+
+        <label for="stock">Stock:</label>
+        <input type="number" name="stock" id="stock" required />
+
+        <label for="precio_unitario">Precio Unitario:</label>
+        <input
+          type="number"
+          name="precio_unitario"
+          id="precio_unitario"
+          step="0.01"
+          required
+        />
+
+        <label for="unidad_medida">Unidad de Medida:</label>
+        <input type="text" name="unidad_medida" id="unidad_medida" required />
+
+        <label for="categoria_id">Categoría:</label>
+        <select name="categoria_id" id="categoria_id" required>
+          <% categorias.forEach((cat) => { %>
+          <option value="<%= cat.id %>"><%= cat.nombre %></option>
+          <% }) %>
+        </select>
+
+        <button type="submit">Crear Producto</button>
+      </form>
+    </div>
+  </body>
+</html>

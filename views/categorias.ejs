@@ -1,0 +1,53 @@
+<!DOCTYPE html>
+<html lang="es">
+  <head>
+    <meta charset="UTF-8" />
+    <title>Categorías</title>
+    <link rel="stylesheet" href="/listarCategorias.css" />
+    <link
+      rel="stylesheet"
+      href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css"
+    />
+  </head>
+  <body>
+    <div class="container">
+      <a href="/">← Atrás</a>
+
+      <h1>Listado de Categorías</h1>
+
+      <!-- Formulario para crear nueva categoría -->
+      <form action="/categorias" method="POST" class="categoria-form">
+        <label for="nombre">Nueva Categoría:</label>
+        <input type="text" id="nombre" name="nombre" required />
+        <button type="submit" class="btn-agregar">Agregar</button>
+      </form>
+
+      <!-- Tabla de categorías existentes -->
+      <table class="categoria-table">
+        <thead>
+          <tr>
+            <th>ID</th>
+            <th>Nombre</th>
+            <th>Acciones</th>
+          </tr>
+        </thead>
+        <tbody>
+          <% categorias.forEach((cat) => { %>
+          <tr>
+            <td><%= cat.id %></td>
+            <td><%= cat.nombre %></td>
+            <td class="acciones">
+              <button class="btn-editar">
+                <i class="fas fa-pencil-alt"></i>
+              </button>
+              <button class="btn-eliminar">
+                <i class="fas fa-trash-alt"></i>
+              </button>
+            </td>
+          </tr>
+          <% }) %>
+        </tbody>
+      </table>
+    </div>
+  </body>
+</html>

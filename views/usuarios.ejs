@@ -1,0 +1,42 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Usuarios</title>
+    <link rel="stylesheet" href="/listarUsuarios.css" />
+  </head>
+  <body>
+    <div class="container">
+      <div class="header">
+        <a href="/" class="back-btn">
+          <span class="back-arrow">←</span> Atrás
+        </a>
+        <div class="top-bar">
+          <a href="/usuarios/nuevo" class="btn-crear"> + Crear Usuario </a>
+        </div>
+      </div>
+      <h1 class="title">Lista de Usuarios</h1>
+      <table class="usuarios-table">
+        <thead>
+          <tr>
+            <th>ID</th>
+            <th>Username</th>
+            <th>Email</th>
+            <th>Rol</th>
+          </tr>
+        </thead>
+        <tbody>
+          <% usuarios.forEach(usuario => { %>
+          <tr>
+            <td><%= usuario.id %></td>
+            <td><%= usuario.username %></td>
+            <td><%= usuario.email || '—' %></td>
+            <td><%= usuario.rol %></td>
+          </tr>
+          <% }) %>
+        </tbody>
+      </table>
+    </div>
+  </body>
+</html>

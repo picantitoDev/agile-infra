@@ -1,0 +1,104 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <title><%= title %></title>
+    <link rel="stylesheet" href="styles.css" />
+    <link
+      rel="stylesheet"
+      href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.0/css/all.min.css"
+    />
+    <link
+      href="https://fonts.googleapis.com/css2?family=Poppins:wght@300;400;500;600;700&display=swap"
+      rel="stylesheet"
+    />
+    <link
+      rel="stylesheet"
+      href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0-beta3/css/all.min.css"
+    />
+  </head>
+  <body>
+    <% if (locals.user) {%>
+    <div
+      class="menu-container <%= user.rol !== 'Admin' ? 'logged-in-usuario' : '' %>"
+    >
+      <a href="/categorias" class="menu-card">
+        <i class="fas fa-tags"></i>
+        <span>Categorías</span>
+        <p>Gestiona las categorías</p>
+      </a>
+      <a href="/productos" class="menu-card">
+        <i class="fas fa-box"></i>
+        <span>Productos</span>
+        <p>Administra tu inventario</p>
+      </a>
+      <a href="/proveedores" class="menu-card">
+        <i class="fas fa-truck"></i>
+        <span>Proveedores</span>
+        <p>Controla tus relaciones</p>
+      </a>
+      <a href="/ventas" class="menu-card">
+        <i class="fas fa-arrows-rotate"></i>
+        <span>Ventas</span>
+        <p>Monitorea tus transacciones</p>
+      </a>
+      <a href="/entradas" class="menu-card">
+        <i class="fas fa-arrow-down"></i>
+        <span>Entradas</span>
+        <p>Registra nuevas adquisiciones</p>
+      </a>
+      <% if (user.rol === 'Admin') { %>
+      <a href="/usuarios" class="menu-card">
+        <i class="fas fa-users"></i>
+        <span>Usuarios</span>
+        <p>Administra accesos</p>
+      </a>
+      <% } %>
+    </div>
+
+    <% } else { %>
+    <div class="login-background">
+      <div class="login-container">
+        <div class="login-header">
+          <i class="fas fa-user-shield login-icon"></i>
+          <h1 class="login-title">Iniciar Sesión</h1>
+          <p class="login-subtitle">Ingresa tus credenciales para acceder</p>
+        </div>
+
+        <form action="/log-in" method="POST" class="login-form">
+          <div class="input-group">
+            <label for="username"> <i class="fas fa-user"></i> Usuario </label>
+            <input
+              id="username"
+              name="username"
+              placeholder="Ingresa tu usuario"
+              type="text"
+              required
+            />
+          </div>
+
+          <div class="input-group">
+            <label for="password">
+              <i class="fas fa-lock"></i> Contraseña
+            </label>
+            <input
+              id="password"
+              name="password"
+              placeholder="Ingresa tu contraseña"
+              type="password"
+              required
+            />
+          </div>
+
+          <div class="forgot-password-container">
+            <a href="#" class="forgot-password">¿Olvidaste tu contraseña?</a>
+          </div>
+
+          <button type="submit" class="login-button">
+            <i class="fas fa-sign-in-alt"></i> Ingresar
+          </button>
+        </form>
+      </div>
+    </div>
+    <%}%>
+  </body>
+</html>

@@ -64,7 +64,6 @@ async function registrarMovimiento({ id_usuario, tipo, fecha, descripcion }) {
       VALUES ($1, $2, $3, $4) 
       RETURNING id_movimiento
     `
-
   const values = [id_usuario, tipo, fecha, descripcion]
 
   try {
@@ -112,6 +111,26 @@ async function registrarMovimientoVenta({
   }
 }
 
+async function registrarMovimientoCompra({
+  id_movimiento,
+  id_proveedor,
+  total,
+}) {
+  const query = `
+      INSERT INTO movimiento_entrada (id_movimiento, id_proveedor, total)
+      VALUES ($1, $2, $3)
+    `
+
+  const values = [id_movimiento, id_proveedor, total]
+
+  try {
+    await pool.query(query, values)
+  } catch (error) {
+    console.error("Error al insertar movimiento compra:", error)
+    throw error
+  }
+}
+
 async function registrarProductoMovimiento({
   id_producto,
   id_movimiento,
@@ -145,5 +164,6 @@ module.exports = {
   obtenerDetalleMovimiento,
   registrarMovimiento,
   registrarMovimientoVenta,
+  registrarMovimientoCompra,
   registrarProductoMovimiento,
 }

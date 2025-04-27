@@ -186,7 +186,7 @@
 
         <!-- Botón de Enviar -->
         <div class="seccion submit-btn">
-          <button type="submit" class="submit-button">Registrar Venta</button>
+          <button type="submit" class="submit-button">Registrar Entrada</button>
         </div>
       </form>
     </div>
@@ -220,7 +220,6 @@
       // Evento para cuando se selecciona un proveedor
       proveedorSelect.addEventListener("change", (e) => {
         const idProveedor = parseInt(e.target.value) // Asegúrate de que el valor seleccionado sea un entero
-        console.log("Proveedor seleccionado:", idProveedor) // Log el id del proveedor seleccionado
 
         if (idProveedor) {
           // Mostrar los datos del proveedor seleccionado
@@ -250,7 +249,6 @@
               return p.proveedor === proveedor.razon_social // Comparar con razon_social
             })
 
-            console.log("Productos filtrados:", productosFiltrados) // Log de productos filtrados
             renderTablaBusqueda(productosFiltrados)
           } else {
             console.log("Proveedor no encontrado")
@@ -287,7 +285,22 @@
         const producto = productos.find((p) => p.id_producto === idProducto)
         if (!producto) return
 
-        carrito.push(producto)
+        // Verificar si el producto ya está en el carrito
+        const existente = carrito.find(
+          (item) => item.producto.id_producto === idProducto
+        )
+
+        if (existente) {
+          // Si ya existe, incrementar la cantidad
+          existente.cantidad++
+        } else {
+          // Si no existe, agregarlo con cantidad 1
+          carrito.push({
+            producto: producto,
+            cantidad: 1,
+          })
+        }
+
         renderResumenEntrada()
       }
 
@@ -295,30 +308,52 @@
       function renderResumenEntrada() {
         resumenEntrada.innerHTML = ""
         let total = 0
-        carrito.forEach((producto) => {
-          const subtotal = producto.precio_unitario
+
+        carrito.forEach((item, index) => {
+          const subtotal = item.producto.precio_unitario * item.cantidad
           total += subtotal
 
           const row = document.createElement("tr")
           row.innerHTML = `
-            <td>${producto.nombre}</td>
-            <td>S/. ${producto.precio_unitario}</td>
-            <td><input type="number" value="1" min="1" max="100" class="cantidad-input" data-id="${producto.id_producto}" /></td>
-            <td>S/. ${subtotal}</td>
-            <td><button type="button" onclick="quitarProducto(${producto.id_producto})">Quitar</button></td>
-          `
+      <td>${item.producto.nombre}</td>
+      <td>S/. ${item.producto.precio_unitario}</td>
+      <td><input type="number" value="${
+        item.cantidad
+      }" min="1" max="100" class="cantidad-input" data-index="${index}" /></td>
+      <td>S/. ${subtotal.toFixed(2)}</td>
+      <td><button type="button" onclick="quitarProducto(${index})">Quitar</button></td>
+    `
           resumenEntrada.appendChild(row)
         })
 
         totalVenta.textContent = total.toFixed(2)
-        productosInput.value = JSON.stringify(carrito)
+
+        // Actualizar los campos ocultos para el formulario
+        const productosParaEnviar = carrito.map((item) => ({
+          ...item.producto,
+          cantidad: item.cantidad,
+        }))
+        productosInput.value = JSON.stringify(productosParaEnviar)
         hiddenTotal.value = total.toFixed(2)
+
+        // Agregar eventos a los inputs de cantidad
+        document.querySelectorAll(".cantidad-input").forEach((input) => {
+          input.addEventListener("change", actualizarCantidad)
+        })
+      }
+      function actualizarCantidad(e) {
+        const index = parseInt(e.target.dataset.index)
+        const nuevaCantidad = parseInt(e.target.value)
+
+        if (nuevaCantidad > 0) {
+          carrito[index].cantidad = nuevaCantidad
+          renderResumenEntrada()
+        }
       }
 
       // Función para quitar un producto del carrito
-      function quitarProducto(idProducto) {
-        const index = carrito.findIndex((p) => p.id_producto === idProducto)
-        if (index !== -1) {
+      function quitarProducto(index) {
+        if (index >= 0 && index < carrito.length) {
           carrito.splice(index, 1)
           renderResumenEntrada()
         }
@@ -338,8 +373,6 @@
             p.proveedor === proveedor.razon_social
           )
         })
-
-        console.log("Productos filtrados:", productosFiltrados) // Log para mostrar los productos filtrados
 
         // Renderizar la tabla con los productos filtrados
         renderTablaBusqueda(productosFiltrados)

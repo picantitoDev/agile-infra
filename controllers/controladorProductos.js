@@ -1,11 +1,16 @@
 const dbProductos = require("../model/queriesProductos")
 const dbCategorias = require("../model/queriesCategorias")
+const dbProveedores = require("../model/queriesProveedores")
 
 async function obtenerProductos(req, res) {
   try {
     const productos = await dbProductos.obtenerProductos()
     const categorias = await dbCategorias.obtenerCategorias()
-    res.render("productos", { productos, categorias })
+
+    res.render("productos", {
+      productos,
+      categorias,
+    })
   } catch (error) {
     console.error("Error al obtener productos:", error)
     res.status(500).send("Error al obtener los productos")
@@ -62,8 +67,9 @@ async function actualizarProducto(req, res) {
 
 async function crearProductoGet(req, res) {
   try {
-    const categorias = await dbCategorias.obtenerCategorias() // Fetch categories from the database
-    res.render("nuevoProducto", { categorias })
+    const categorias = await dbCategorias.obtenerCategorias()
+    const proveedores = await dbProveedores.obtenerProveedores()
+    res.render("nuevoProducto", { categorias, proveedores })
   } catch (error) {
     console.error("Error al cargar formulario:", error)
     res.status(500).send("Error al cargar formulario")
@@ -72,16 +78,22 @@ async function crearProductoGet(req, res) {
 
 async function crearProductoPost(req, res) {
   try {
-    const { nombre, sku, stock, precio_unitario, categoria_id, unidad_medida } =
-      req.body
+    const {
+      nombre,
+      stock,
+      precio_unitario,
+      id_categoria,
+      id_proveedor,
+      cantidad_minima,
+    } = req.body
 
     await dbProductos.crearProducto(
       nombre,
-      sku,
       parseInt(stock),
       parseFloat(precio_unitario),
-      parseInt(categoria_id),
-      unidad_medida
+      parseInt(id_categoria),
+      parseInt(id_proveedor),
+      parseInt(cantidad_minima)
     )
 
     res.redirect("/productos")

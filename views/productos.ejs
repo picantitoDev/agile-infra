@@ -53,33 +53,36 @@
           </form>
         </div>
       </section>
-
       <div class="table-container">
         <table class="product-table">
           <thead>
             <tr>
               <th>Nombre</th>
-              <th>SKU</th>
               <th>Stock</th>
               <th>Precio Unitario</th>
               <th>Categoría</th>
-              <th>Unidad de Medida</th>
+              <th>Cantidad Mínima</th>
+              <th>Proveedor</th>
               <th>Detalle</th>
             </tr>
           </thead>
           <tbody id="productTableBody">
             <% productos.forEach((producto) => { %>
-            <tr>
-              <td><%= producto.nombre %></td>
-              <td><%= producto.sku %></td>
+            <tr
+              class="product-row"
+              data-status="<%= producto.estado %>"
+              data-category="<%= producto.categoria %>"
+            >
+              <td class="product-name"><%= producto.nombre %></td>
               <td><%= producto.stock %></td>
               <td>S/. <%= producto.precio_unitario %></td>
-              <td><%= producto.categoria %></td>
-              <td><%= producto.unidad_medida %></td>
+              <td class="product-category"><%= producto.categoria %></td>
+              <td><%= producto.cantidad_minima %></td>
+              <td class="product-supplier"><%= producto.proveedor %></td>
               <td>
                 <a
                   class="view-btn"
-                  href="/productos/detalle/<%= producto.id %>"
+                  href="/productos/detalle/<%= producto.id_producto %>"
                 >
                   Ver Detalle
                 </a>
@@ -91,78 +94,71 @@
       </div>
     </div>
 
-    <script id="productos-data" type="application/json">
-      <%- JSON.stringify(productos) %>
-    </script>
-
     <script>
-      const searchBar = document.getElementById("searchBar")
-      const categoryFilter = document.getElementById("categoryFilter")
-      const statusToggle = document.getElementById("statusToggle")
-      const statusLabel = document.getElementById("statusLabel")
-      const productTableBody = document.getElementById("productTableBody")
+      document.addEventListener("DOMContentLoaded", function () {
+        const searchBar = document.getElementById("searchBar")
+        const categoryFilter = document.getElementById("categoryFilter")
+        const statusToggle = document.getElementById("statusToggle")
+        const statusLabel = document.getElementById("statusLabel")
+        const productRows = document.querySelectorAll(".product-row")
 
-      const productos = JSON.parse(
-        document.getElementById("productos-data").textContent
-      )
+        // Función para aplicar filtros
+        function applyFilters() {
+          const searchText = searchBar.value.toLowerCase().trim()
+          const selectedCategory = categoryFilter.value
+          const showActive = statusToggle.checked
 
-      // Renderiza los productos en la tabla
-      function renderTable(filteredProductos) {
-        productTableBody.innerHTML = ""
+          let visibleCount = 0
 
-        if (filteredProductos.length === 0) {
-          const row = document.createElement("tr")
-          row.innerHTML = `<td colspan="7" style="text-align: center;">No se encontraron productos</td>`
-          productTableBody.appendChild(row)
-          return
+          productRows.forEach((row) => {
+            const name = row
+              .querySelector(".product-name")
+              .textContent.toLowerCase()
+            const category = row.querySelector(".product-category").textContent
+            const status = row.dataset.status
+
+            // Verificar coincidencias
+            const matchesSearch = name.includes(searchText)
+            const matchesCategory =
+              selectedCategory === "all" || category === selectedCategory
+            const matchesStatus = showActive ? status === "Activado" : true
+
+            if (matchesSearch && matchesCategory && matchesStatus) {
+              row.style.display = ""
+              visibleCount++
+            } else {
+              row.style.display = "none"
+            }
+          })
+
+          // Mostrar mensaje si no hay resultados
+          const noResultsRow = document.getElementById("noResultsRow")
+          if (visibleCount === 0) {
+            if (!noResultsRow) {
+              const tbody = document.getElementById("productTableBody")
+              const newRow = document.createElement("tr")
+              newRow.id = "noResultsRow"
+              newRow.innerHTML = `<td colspan="7" style="text-align: center;">No se encontraron productos</td>`
+              tbody.appendChild(newRow)
+            }
+          } else if (noResultsRow) {
+            noResultsRow.remove()
+          }
+
+          // Actualizar etiqueta de estado
+          statusLabel.textContent = statusToggle.checked
+            ? "Activos"
+            : "Inactivos"
         }
 
-        filteredProductos.forEach((producto) => {
-          const row = document.createElement("tr")
-          row.innerHTML = `
-            <td>${producto.nombre}</td>
-            <td>${producto.sku}</td>
-            <td>${producto.stock}</td>
-            <td>S/. ${producto.precio_unitario}</td>
-            <td>${producto.categoria}</td>
-            <td>${producto.unidad_medida}</td>
-            <td><a class="view-btn" href="/productos/detalle/${producto.id}">Ver Detalle</a></td>
-          `
-          productTableBody.appendChild(row)
-        })
-      }
+        // Event listeners
+        searchBar.addEventListener("input", applyFilters)
+        categoryFilter.addEventListener("change", applyFilters)
+        statusToggle.addEventListener("change", applyFilters)
 
-      // Aplica los filtros de búsqueda, categoría y estado
-      function filterProducts() {
-        const searchText = searchBar.value.toLowerCase().trim()
-        const selectedCategory = categoryFilter.value
-        const selectedStatus = statusToggle.checked ? "Activado" : "Desactivado"
-
-        statusLabel.textContent = statusToggle.checked ? "Activos" : "Inactivos"
-
-        const filteredProductos = productos.filter((producto) => {
-          const matchesSearch =
-            producto.nombre.toLowerCase().includes(searchText) ||
-            producto.sku.toLowerCase().includes(searchText)
-
-          const matchesCategory =
-            selectedCategory === "all" ||
-            producto.categoria === selectedCategory
-          const matchesStatus = producto.estado === selectedStatus
-
-          return matchesSearch && matchesCategory && matchesStatus
-        })
-
-        renderTable(filteredProductos)
-      }
-
-      // Eventos
-      searchBar.addEventListener("input", filterProducts)
-      categoryFilter.addEventListener("change", filterProducts)
-      statusToggle.addEventListener("change", filterProducts)
-
-      // Render inicial: solo productos activos
-      renderTable(productos.filter((p) => p.estado === "Activado"))
+        // Filtro inicial
+        applyFilters()
+      })
     </script>
   </body>
 </html>

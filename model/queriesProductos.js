@@ -1,30 +1,29 @@
 const pool = require("./pool")
 
 async function obtenerProductos() {
-  // Fetch products along with their category name by joining the 'producto' table with the 'categoria' table
-  const { rows } = await pool.query(
-    `SELECT 
-       p.id_producto AS id,
-       p.nombre,
-       p.stock,
-       p.precio_unitario,
-       p.unidad_medida,
-       p.estado,
-       p.sku,
-       c.nombre AS categoria
-     FROM producto p
-     JOIN categoria c ON p.categoria = c.id
-     ORDER BY p.nombre ASC`
-  )
+  const { rows } = await pool.query(`
+    SELECT 
+      p.id_producto,
+      p.nombre,
+      p.stock,
+      p.precio_unitario,
+      p.cantidad_minima,
+      p.estado,
+      c.nombre AS categoria,
+      pr.razon_social AS proveedor
+    FROM producto p
+    JOIN categoria c ON p.id_categoria = c.id_categoria
+    JOIN proveedor pr ON p.id_proveedor = pr.id_proveedor
+    ORDER BY p.nombre ASC
+  `)
   return rows
 }
 
 async function obtenerProductoPorId(id) {
-  // Fetch a single product and its category name by joining the 'producto' table with the 'categoria' table
   const { rows } = await pool.query(
     `SELECT p.*, c.nombre AS categoria
      FROM producto p
-     JOIN categoria c ON p.categoria = c.id
+     JOIN categoria c ON p.categoria = c.id_categoria
      WHERE p.id_producto = $1`,
     [id]
   )
@@ -33,23 +32,28 @@ async function obtenerProductoPorId(id) {
 
 async function crearProducto(
   nombre,
-  sku,
   stock,
   precio_unitario,
-  categoria_id,
-  unidad_medida
+  id_categoria,
+  id_proveedor,
+  cantidad_minima
 ) {
-  // Insert a new product into the 'producto' table
   await pool.query(
     `INSERT INTO producto 
-     (nombre, sku, stock, estado, precio_unitario, categoria, unidad_medida) 
-     VALUES ($1, $2, $3, 'Activado', $4, $5, $6)`,
-    [nombre, sku, stock, precio_unitario, categoria_id, unidad_medida]
+     (nombre, id_proveedor, id_categoria, cantidad_minima, stock, estado, precio_unitario) 
+     VALUES ($1, $2, $3, $4, $5, 'Activado', $6)`,
+    [
+      nombre,
+      id_proveedor,
+      id_categoria,
+      cantidad_minima,
+      stock,
+      precio_unitario,
+    ]
   )
 }
 
 async function actualizarProducto(id, producto) {
-  // Update product details in the 'producto' table
   const query = `
     UPDATE producto
     SET nombre = $1,

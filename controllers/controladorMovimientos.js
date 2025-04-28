@@ -94,6 +94,8 @@ async function registrarVentaPost(req, res) {
         precio_unitario,
         subtotal,
       })
+
+      await dbProductos.disminuirStock(id_producto, cantidad)
     }
 
     res.redirect("/movimientos") // Redirige después de la venta
@@ -160,6 +162,7 @@ async function registrarEntradaPost(req, res) {
         precio_unitario,
         subtotal,
       })
+      await dbProductos.aumentarStock(id_producto, cantidad)
     }
 
     res.redirect("/movimientos") // Redirige después de registrar la entrada
@@ -215,6 +218,8 @@ async function registrarSobrantePost(req, res) {
       subtotal: objProducto.precio_unitario,
     })
 
+    await dbProductos.aumentarStock(idProducto, cantidadNumerica)
+
     res.redirect("/movimientos")
   } catch (error) {
     console.error("Error al obtener detalle de movimiento:", error)
@@ -267,6 +272,8 @@ async function registrarMermaPost(req, res) {
       precio_unitario: objProducto.precio_unitario,
       subtotal: objProducto.precio_unitario,
     })
+
+    await dbProductos.disminuirStock(idProducto, cantidadNumerica)
 
     res.redirect("/movimientos")
   } catch (error) {

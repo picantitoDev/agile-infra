@@ -99,10 +99,32 @@ async function actualizarProducto(id, producto) {
   await pool.query(query, valores)
 }
 
+// SUMAR al stock de un producto
+async function aumentarStock(id_producto, cantidad) {
+  const query = `
+    UPDATE producto
+    SET stock = stock + $1
+    WHERE id_producto = $2
+  `
+  await pool.query(query, [cantidad, id_producto])
+}
+
+// RESTAR al stock de un producto
+async function disminuirStock(id_producto, cantidad) {
+  const query = `
+    UPDATE producto
+    SET stock = stock - $1
+    WHERE id_producto = $2
+  `
+  await pool.query(query, [cantidad, id_producto])
+}
+
 module.exports = {
   obtenerProductos,
   crearProducto,
   obtenerProductoPorId,
   actualizarProducto,
   obtenerIdProductoPorNombre,
+  aumentarStock,
+  disminuirStock,
 }

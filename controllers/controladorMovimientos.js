@@ -196,7 +196,7 @@ async function registrarSobrantePost(req, res) {
 
     const id_movimiento = await dbMovimientos.registrarMovimiento({
       id_usuario: usuarioId,
-      tipo: "Ajuste", // Tipo de movimiento
+      tipo: "Sobrante", // Tipo de movimiento
       fecha: fecha,
       descripcion,
     })
@@ -249,7 +249,7 @@ async function registrarMermaPost(req, res) {
 
     const id_movimiento = await dbMovimientos.registrarMovimiento({
       id_usuario: usuarioId,
-      tipo: "Ajuste", // Tipo de movimiento
+      tipo: "Merma", // Tipo de movimiento
       fecha: fecha,
       descripcion,
     })

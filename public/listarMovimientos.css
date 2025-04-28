@@ -207,6 +207,26 @@ body {
   background-color: var(--info);
 }
 
+.badge-venta {
+  background-color: #4caf50; /* Verde */
+  color: white;
+}
+
+.badge-entrada {
+  background-color: #2196f3; /* Azul */
+  color: white;
+}
+
+.badge-sobrante {
+  background-color: #ff9800; /* Naranja */
+  color: white;
+}
+
+.badge-merma {
+  background-color: #f44336; /* Rojo */
+  color: white;
+}
+
 /* Paginación */
 .pagination {
   display: flex;

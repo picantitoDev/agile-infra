@@ -65,8 +65,10 @@
                 <span class="badge badge-venta">Venta</span>
                 <% } else if (movimiento.tipo === 'Compra') { %>
                 <span class="badge badge-entrada">Entrada</span>
+                <% } else if (movimiento.tipo === 'Merma') { %>
+                <span class="badge badge-merma">Merma</span>
                 <% } else if (movimiento.tipo === 'Ajuste') { %>
-                <span class="badge badge-sobrante">Ajuste</span>
+                <span class="badge badge-sobrante">Sobrante</span>
                 <% } else { %>
                 <span class="badge"><%= movimiento.tipo %></span>
                 <% } %>

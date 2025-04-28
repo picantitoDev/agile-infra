@@ -222,6 +222,59 @@ async function registrarSobrantePost(req, res) {
   }
 }
 
+async function registrarMermaGet(req, res) {
+  try {
+    const productosTotales = await dbProductos.obtenerProductos()
+    const productos = productosTotales.filter((p) => p.estado === "Activado")
+    res.render("nuevaMerma", { productos })
+  } catch (error) {
+    console.error("Error al obtener detalle de movimiento:", error)
+    res.status(500).send("Error al obtener detalle del movimiento")
+  }
+}
+
+async function registrarMermaPost(req, res) {
+  const { fecha, producto, cantidad, motivo, descripcion } = req.body
+  try {
+    const idProducto = await dbProductos.obtenerIdProductoPorNombre(producto)
+    const objProducto = await dbProductos.obtenerProductoPorId(idProducto)
+    const cantidadNumerica = parseInt(cantidad)
+    const usuarioId = req.user.id
+
+    console.log("Fecha de Ajuste: ", fecha)
+    console.log("Id de Producto: ", idProducto)
+    console.log("Cantidad de Productos: ", cantidadNumerica)
+    console.log("Motivo de Ajuste: ", motivo)
+    console.log("Descripcion: ", descripcion)
+
+    const id_movimiento = await dbMovimientos.registrarMovimiento({
+      id_usuario: usuarioId,
+      tipo: "Ajuste", // Tipo de movimiento
+      fecha: fecha,
+      descripcion,
+    })
+
+    await dbMovimientos.registrarMovimientoAjuste({
+      id_movimiento,
+      tipo_ajuste: "Merma",
+      motivo,
+    })
+
+    await dbMovimientos.registrarProductoMovimiento({
+      id_producto: idProducto,
+      id_movimiento,
+      cantidad,
+      precio_unitario: objProducto.precio_unitario,
+      subtotal: objProducto.precio_unitario,
+    })
+
+    res.redirect("/movimientos")
+  } catch (error) {
+    console.error("Error al obtener detalle de movimiento:", error)
+    res.status(500).send("Error al obtener detalle del movimiento")
+  }
+}
+
 module.exports = {
   obtenerMovimientos,
   registrarVentaGet,
@@ -230,5 +283,7 @@ module.exports = {
   registrarEntradaPost,
   registrarSobranteGet,
   registrarSobrantePost,
+  registrarMermaGet,
+  registrarMermaPost,
   verDetalleMovimiento,
 }

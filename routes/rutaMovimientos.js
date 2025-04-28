@@ -9,5 +9,7 @@ router.get("/registrar-venta", controladorMovimientos.registrarVentaGet)
 router.post("/registrar-venta", controladorMovimientos.registrarVentaPost)
 router.get("/registrar-entrada", controladorMovimientos.registrarEntradaGet)
 router.post("/registrar-entrada", controladorMovimientos.registrarEntradaPost)
+router.get("/registrar-sobrante", controladorMovimientos.registrarSobranteGet)
+router.post("/registrar-sobrante", controladorMovimientos.registrarSobrantePost)
 
 module.exports = router

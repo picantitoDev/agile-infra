@@ -1,0 +1,147 @@
+/* Global Styles */
+* {
+  box-sizing: border-box;
+  margin: 0;
+  padding: 0;
+  font-family: Arial, Helvetica, sans-serif;
+}
+
+body {
+  background-color: #f5f5f5;
+  color: #333;
+  line-height: 1.6;
+}
+
+.container {
+  max-width: 600px;
+  margin: 20px auto;
+  padding: 20px;
+  background-color: #fff;
+  border-radius: 5px;
+  box-shadow: 0 0 10px rgba(0, 0, 0, 0.1);
+}
+
+/* Title */
+.title {
+  color: #4caf50;
+  text-align: center;
+  margin-bottom: 20px;
+  font-size: 24px;
+  font-weight: bold;
+}
+
+/* Form Elements */
+.form-group {
+  margin-bottom: 15px;
+}
+
+label {
+  display: block;
+  margin-bottom: 5px;
+  font-weight: bold;
+}
+
+input[type="text"],
+input[type="date"],
+input[type="number"],
+select,
+textarea {
+  width: 100%;
+  padding: 10px;
+  border: 1px solid #ddd;
+  border-radius: 4px;
+  font-size: 14px;
+  outline: none;
+}
+
+input:focus,
+select:focus,
+textarea:focus {
+  border-color: #4caf50;
+}
+
+textarea {
+  resize: vertical;
+  min-height: 60px;
+}
+
+/* Product Table */
+.product-table {
+  width: 100%;
+  border-collapse: collapse;
+  margin: 15px 0;
+  background-color: #f9f9f9;
+}
+
+.product-table th,
+.product-table td {
+  padding: 10px;
+  text-align: left;
+  border-bottom: 1px solid #ddd;
+}
+
+.product-table th {
+  background-color: #f2f2f2;
+  font-weight: bold;
+}
+
+.product-table tr:hover {
+  background-color: #f5f5f5;
+}
+
+/* Buttons */
+.button-group {
+  display: flex;
+  gap: 10px;
+  justify-content: space-between;
+  margin-top: 20px;
+}
+
+.btn {
+  padding: 10px 20px;
+  border: none;
+  border-radius: 4px;
+  cursor: pointer;
+  font-size: 14px;
+  font-weight: bold;
+  text-transform: uppercase;
+}
+
+.btn-primary {
+  background-color: #4caf50;
+  color: white;
+  flex: 1;
+  max-width: 200px;
+}
+
+.btn-secondary {
+  background-color: #ccc;
+  color: #333;
+  flex: 1;
+  max-width: 200px;
+}
+
+.btn-primary:hover {
+  background-color: #45a049;
+}
+
+.btn-secondary:hover {
+  background-color: #bbb;
+}
+
+/* Responsive adjustments */
+@media (max-width: 600px) {
+  .container {
+    padding: 15px;
+    margin: 10px;
+  }
+
+  .button-group {
+    flex-direction: column;
+  }
+
+  .btn {
+    width: 100%;
+    max-width: none;
+  }
+}

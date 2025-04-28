@@ -169,11 +169,66 @@ async function registrarEntradaPost(req, res) {
   }
 }
 
+async function registrarSobranteGet(req, res) {
+  try {
+    const productosTotales = await dbProductos.obtenerProductos()
+    const productos = productosTotales.filter((p) => p.estado === "Activado")
+    res.render("nuevoSobrante", { productos })
+  } catch (error) {
+    console.error("Error al registrar sobrante:", error)
+    res.status(500).send("Error al registrar sobrante")
+  }
+}
+
+async function registrarSobrantePost(req, res) {
+  const { fecha, producto, cantidad, motivo, descripcion } = req.body
+  try {
+    const idProducto = await dbProductos.obtenerIdProductoPorNombre(producto)
+    const objProducto = await dbProductos.obtenerProductoPorId(idProducto)
+    const cantidadNumerica = parseInt(cantidad)
+    const usuarioId = req.user.id
+
+    console.log("Fecha de Ajuste: ", fecha)
+    console.log("Id de Producto: ", idProducto)
+    console.log("Cantidad de Productos: ", cantidadNumerica)
+    console.log("Motivo de Ajuste: ", motivo)
+    console.log("Descripcion: ", descripcion)
+
+    const id_movimiento = await dbMovimientos.registrarMovimiento({
+      id_usuario: usuarioId,
+      tipo: "Ajuste", // Tipo de movimiento
+      fecha: fecha,
+      descripcion,
+    })
+
+    await dbMovimientos.registrarMovimientoAjuste({
+      id_movimiento,
+      tipo_ajuste: "Sobrante",
+      motivo,
+    })
+
+    await dbMovimientos.registrarProductoMovimiento({
+      id_producto: idProducto,
+      id_movimiento,
+      cantidad,
+      precio_unitario: objProducto.precio_unitario,
+      subtotal: objProducto.precio_unitario,
+    })
+
+    res.redirect("/movimientos")
+  } catch (error) {
+    console.error("Error al obtener detalle de movimiento:", error)
+    res.status(500).send("Error al obtener detalle del movimiento")
+  }
+}
+
 module.exports = {
   obtenerMovimientos,
   registrarVentaGet,
   registrarVentaPost,
   registrarEntradaGet,
   registrarEntradaPost,
+  registrarSobranteGet,
+  registrarSobrantePost,
   verDetalleMovimiento,
 }

@@ -131,6 +131,26 @@ async function registrarMovimientoCompra({
   }
 }
 
+async function registrarMovimientoAjuste({
+  id_movimiento,
+  tipo_ajuste,
+  motivo,
+}) {
+  const query = `
+      INSERT INTO movimiento_ajuste (id_movimiento, tipo_ajuste, motivo)
+      VALUES ($1, $2, $3)
+    `
+
+  const values = [id_movimiento, tipo_ajuste, motivo]
+
+  try {
+    await pool.query(query, values)
+  } catch (error) {
+    console.error("Error al insertar movimiento compra:", error)
+    throw error
+  }
+}
+
 async function registrarProductoMovimiento({
   id_producto,
   id_movimiento,
@@ -165,5 +185,6 @@ module.exports = {
   registrarMovimiento,
   registrarMovimientoVenta,
   registrarMovimientoCompra,
+  registrarMovimientoAjuste,
   registrarProductoMovimiento,
 }

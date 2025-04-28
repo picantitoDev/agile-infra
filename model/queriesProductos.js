@@ -64,6 +64,14 @@ async function crearProducto(
   )
 }
 
+async function obtenerIdProductoPorNombre(nombre) {
+  const resultado = await pool.query(
+    `SELECT id_producto FROM producto WHERE nombre = $1 LIMIT 1`,
+    [nombre]
+  )
+  return resultado.rows[0] ? resultado.rows[0].id_producto : null
+}
+
 async function actualizarProducto(id, producto) {
   const query = `
     UPDATE producto
@@ -96,4 +104,5 @@ module.exports = {
   crearProducto,
   obtenerProductoPorId,
   actualizarProducto,
+  obtenerIdProductoPorNombre,
 }

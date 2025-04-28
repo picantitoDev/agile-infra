@@ -1,0 +1,156 @@
+<!DOCTYPE html>
+<html lang="es">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Registrar Ajuste/Ingreso</title>
+    <link rel="stylesheet" href="/registrarSobrante.css" />
+    <style>
+      /* Estilo básico */
+      #autocomplete-results {
+        max-height: 150px;
+        overflow-y: auto;
+        position: absolute;
+        width: 550px;
+        background-color: white;
+        border: none; /* No borde al inicio */
+        z-index: 1000;
+      }
+      .autocomplete-item {
+        padding: 10px;
+        cursor: pointer;
+      }
+      .autocomplete-item:hover {
+        background-color: #f0f0f0;
+      }
+    </style>
+  </head>
+  <body>
+    <div class="container">
+      <h1 class="title">Registrar Ajuste/Ingreso</h1>
+
+      <form
+        id="adjustmentForm"
+        action="/movimientos/registrar-sobrante"
+        method="POST"
+      >
+        <div class="form-group">
+          <label for="fecha">Fecha</label>
+          <input type="date" id="fecha" name="fecha" required />
+        </div>
+
+        <div class="form-group" style="position: relative">
+          <label for="producto">Producto</label>
+          <input
+            type="text"
+            id="producto"
+            name="producto"
+            placeholder="Buscar producto..."
+            autocomplete="off"
+            required
+          />
+          <div id="autocomplete-results"></div>
+        </div>
+
+        <div class="form-group">
+          <label for="cantidad">Cantidad</label>
+          <input
+            type="number"
+            id="cantidad"
+            name="cantidad"
+            placeholder="Cantidad"
+            required
+          />
+        </div>
+
+        <div class="form-group">
+          <label for="motivo">Motivo</label>
+          <select id="motivo" name="motivo" required>
+            <option value="Ajuste de Inventario">Ajuste de Inventario</option>
+            <option value="Ingreso de Producto">Ingreso de Producto</option>
+            <option value="Salida de Producto">Salida de Producto</option>
+            <option value="Devolución">Devolución</option>
+          </select>
+        </div>
+
+        <div class="form-group">
+          <label for="descripcion">Descripción (opcional)</label>
+          <textarea
+            id="descripcion"
+            name="descripcion"
+            placeholder="Detalles adicionales..."
+          ></textarea>
+        </div>
+
+        <div class="button-group">
+          <button type="submit" class="btn btn-primary">
+            Registrar Ajuste
+          </button>
+          <button
+            type="button"
+            class="btn btn-secondary"
+            onclick="window.location.href='/movimientos'"
+          >
+            Cancelar
+          </button>
+        </div>
+      </form>
+    </div>
+
+    <!-- Productos disponibles en JSON -->
+    <script id="productos-data" type="application/json">
+      <%- JSON.stringify(productos) %>
+    </script>
+
+    <script>
+      document.addEventListener("DOMContentLoaded", function () {
+        const productos = JSON.parse(
+          document.getElementById("productos-data").textContent
+        )
+        const productoInput = document.getElementById("producto")
+        const resultsContainer = document.getElementById("autocomplete-results")
+
+        productoInput.addEventListener("input", function () {
+          const query = productoInput.value.trim().toLowerCase()
+
+          // Limpiar resultados
+          resultsContainer.innerHTML = ""
+          resultsContainer.style.border = "none" // Reset border
+
+          if (query.length < 2) {
+            return
+          }
+
+          // Filtrar productos
+          const productosFiltrados = productos.filter((producto) =>
+            producto.nombre.toLowerCase().includes(query)
+          )
+
+          if (productosFiltrados.length > 0) {
+            productosFiltrados.forEach((producto) => {
+              const resultItem = document.createElement("div")
+              resultItem.classList.add("autocomplete-item")
+              resultItem.textContent = `${producto.nombre} - Stock: ${producto.stock} - $${producto.precio_unitario}`
+
+              resultItem.addEventListener("click", function () {
+                productoInput.value = producto.nombre
+                resultsContainer.innerHTML = ""
+                resultsContainer.style.border = "none"
+              })
+
+              resultsContainer.appendChild(resultItem)
+            })
+
+            resultsContainer.style.border = "1px solid gray" // Mostrar borde
+          } else {
+            const noResult = document.createElement("div")
+            noResult.textContent = "No se encontraron productos"
+            noResult.classList.add("autocomplete-item")
+            resultsContainer.appendChild(noResult)
+            resultsContainer.style.border = "1px solid gray" // Mostrar borde
+          }
+        })
+      })
+    </script>
+  </body>
+</html>

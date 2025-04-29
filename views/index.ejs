@@ -11,13 +11,39 @@
       href="https://fonts.googleapis.com/css2?family=Poppins:wght@300;400;500;600;700&display=swap"
       rel="stylesheet"
     />
+
     <link
       rel="stylesheet"
       href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0-beta3/css/all.min.css"
     />
   </head>
   <body>
-    <% if (locals.user) {%>
+    <% if (locals.user) { %>
+    <a
+      href="/log-out"
+      style="
+        position: fixed;
+        top: 1rem;
+        right: 1rem;
+        background-color: #4c6ef5; /* Indigo */
+        color: white;
+        padding: 0.6rem;
+        border-radius: 50%;
+        text-decoration: none;
+        font-size: 1.5rem;
+        z-index: 1000;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        transition: background-color 0.3s ease;
+      "
+      title="Cerrar Sesión"
+      onmouseover="this.style.backgroundColor='#4051a1'"
+      onmouseout="this.style.backgroundColor='#4c6ef5'"
+    >
+      <i class="fas fa-right-from-bracket"></i>
+    </a>
+    <% } %> <% if (locals.user) {%>
     <div
       class="menu-container <%= user.rol !== 'Admin' ? 'logged-in-usuario' : '' %>"
     >
@@ -83,11 +109,6 @@
               required
             />
           </div>
-
-          <div class="forgot-password-container">
-            <a href="#" class="forgot-password">¿Olvidaste tu contraseña?</a>
-          </div>
-
           <button type="submit" class="login-button">
             <i class="fas fa-sign-in-alt"></i> Ingresar
           </button>

@@ -8,6 +8,10 @@
       rel="stylesheet"
       href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.0/css/all.min.css"
     />
+    <link
+      rel="stylesheet"
+      href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.0/css/all.min.css"
+    />
   </head>
   <body>
     <div class="container">
@@ -61,9 +65,9 @@
               <th>Stock</th>
               <th>Precio Unitario</th>
               <th>Categoría</th>
-              <th>Cantidad Mínima</th>
               <th>Proveedor</th>
               <th>Detalle</th>
+              <th>Orden</th>
             </tr>
           </thead>
           <tbody id="productTableBody">
@@ -74,10 +78,19 @@
               data-category="<%= producto.categoria %>"
             >
               <td class="product-name"><%= producto.nombre %></td>
-              <td><%= producto.stock %></td>
+              <td
+                class="<%= producto.stock < producto.cantidad_minima ? 'low-stock' : '' %>"
+              >
+                <%= producto.stock %> <% if (producto.stock <
+                producto.cantidad_minima) { %>
+                <i
+                  class="fa-solid fa-triangle-exclamation warning-icon"
+                  title="Stock bajo"
+                ></i>
+                <% } %>
+              </td>
               <td>S/. <%= producto.precio_unitario %></td>
               <td class="product-category"><%= producto.categoria %></td>
-              <td><%= producto.cantidad_minima %></td>
               <td class="product-supplier"><%= producto.proveedor %></td>
               <td>
                 <a
@@ -86,6 +99,21 @@
                 >
                   Ver Detalle
                 </a>
+              </td>
+              <td>
+                <% if (producto.stock > producto.cantidad_minima) { %>
+                <span class="icon-btn disabled" title="Stock suficiente">
+                  <i class="fa-solid fa-file"></i>
+                </span>
+                <% } else { %>
+                <a
+                  class="icon-btn"
+                  href="/productos/<%= producto.id_producto %>/generar-orden"
+                  title="Generar Orden"
+                >
+                  <i class="fa-solid fa-file"></i>
+                </a>
+                <% } %>
               </td>
             </tr>
             <% }) %>

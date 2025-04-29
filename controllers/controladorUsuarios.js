@@ -28,13 +28,13 @@ const crearUsuarioPost = async (req, res, next) => {
       return res.status(409).send("El nombre de usuario ya está en uso.")
     }
 
-    // Encripta la contraseña POR MEJORAR
-    // const hashedPassword = await bcrypt.hash(password, 10)
+    // Encripta la contraseña
+    const hashedPassword = await bcrypt.hash(password, 10)
 
     // Crea el usuario en la base de datos
     await dbUsuarios.crearUsuario({
       username,
-      password,
+      hashedPassword,
       email,
       rol,
     })

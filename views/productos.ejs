@@ -79,10 +79,10 @@
             >
               <td class="product-name"><%= producto.nombre %></td>
               <td
-                class="<%= producto.stock < producto.cantidad_minima ? 'low-stock' : '' %>"
+              class="<%= producto.estado === "Activado" && producto.stock < producto.cantidad_minima ? 'low-stock' : '' %>"
               >
                 <%= producto.stock %> <% if (producto.stock <
-                producto.cantidad_minima) { %>
+                producto.cantidad_minima && producto.estado === "Activado") { %>
                 <i
                   class="fa-solid fa-triangle-exclamation warning-icon"
                   title="Stock bajo"
@@ -96,12 +96,14 @@
                 <a
                   class="view-btn"
                   href="/productos/detalle/<%= producto.id_producto %>"
+                  title="Ver Detalle"
                 >
-                  Ver Detalle
+                  <i class="fa-solid fa-eye"></i>
                 </a>
               </td>
               <td>
-                <% if (producto.stock > producto.cantidad_minima) { %>
+                <% if (producto.stock > producto.cantidad_minima ||
+                producto.estado === "Desactivado") { %>
                 <span class="icon-btn disabled" title="Stock suficiente">
                   <i class="fa-solid fa-file"></i>
                 </span>

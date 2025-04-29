@@ -8,6 +8,13 @@ const buscarUsuarioPorNombre = async (nombre) => {
   return rows[0]
 }
 
+async function buscarUsuarioPorEmail(email) {
+  const { rows } = await pool.query(`SELECT * FROM usuarios WHERE email = $1`, [
+    email,
+  ])
+  return rows[0]
+}
+
 async function obtenerUsuarios() {
   const { rows } = await pool.query(`SELECT * FROM usuarios ORDER BY id ASC`)
   return rows
@@ -32,4 +39,5 @@ module.exports = {
   buscarUsuarioPorId,
   crearUsuario,
   obtenerUsuarios,
+  buscarUsuarioPorEmail,
 }

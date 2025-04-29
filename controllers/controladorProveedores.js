@@ -10,6 +10,35 @@ async function obtenerProveedores(req, res) {
   }
 }
 
+async function nuevoProveedorGet(req, res) {
+  try {
+    res.render("nuevoProveedor")
+  } catch (error) {
+    console.error("Error al cargar registro de proveedores:", error)
+    res.status(500).send("Error al cargar registro de proveedores")
+  }
+}
+
+async function nuevoProveedorPost(req, res) {
+  const { razon_social, ruc, numero_telefono, correo, direccion } = req.body
+
+  try {
+    await dbProveedores.insertarProveedor({
+      razon_social,
+      ruc,
+      numero_telefono,
+      correo,
+      direccion,
+    })
+    res.redirect("/proveedores")
+  } catch (error) {
+    console.error("Error al cargar registro de proveedores:", error)
+    res.status(500).send("Error al cargar registro de proveedores")
+  }
+}
+
 module.exports = {
   obtenerProveedores,
+  nuevoProveedorGet,
+  nuevoProveedorPost,
 }

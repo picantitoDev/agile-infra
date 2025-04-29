@@ -1,4 +1,4 @@
-//const bcrypt = require("bcrypt")
+const bcrypt = require("bcryptjs")
 const dbUsuarios = require("../model/queriesUsuarios")
 
 async function crearUsuarioGet(req, res) {
@@ -28,13 +28,18 @@ const crearUsuarioPost = async (req, res, next) => {
       return res.status(409).send("El nombre de usuario ya está en uso.")
     }
 
+    const emailExistente = await dbUsuarios.buscarUsuarioPorEmail(email)
+    if (emailExistente) {
+      return res.status(409).send("El correo electrónico ya está en uso.")
+    }
+
     // Encripta la contraseña
     const hashedPassword = await bcrypt.hash(password, 10)
 
     // Crea el usuario en la base de datos
     await dbUsuarios.crearUsuario({
       username,
-      hashedPassword,
+      password: hashedPassword,
       email,
       rol,
     })

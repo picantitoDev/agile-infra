@@ -2,6 +2,7 @@ const dbMovimientos = require("../model/queriesMovimientos")
 const dbProductos = require("../model/queriesProductos")
 const dbProveedores = require("../model/queriesProveedores")
 const dbUsuarios = require("../model/queriesUsuarios")
+const dbClientes = require("../model/queriesClientes")
 
 async function obtenerMovimientos(req, res) {
   try {
@@ -64,25 +65,33 @@ async function registrarVentaPost(req, res) {
   const productosArray = JSON.parse(productos)
 
   try {
-    const id_movimiento = await dbMovimientos.registrarMovimiento({
-      id_usuario: usuarioId, // Asegúrate de que el usuario esté autenticado
-      tipo: "Venta", // O el tipo que corresponda
-      fecha: fecha,
-      descripcion,
-    })
-
-    await dbMovimientos.registrarMovimientoVenta({
-      id_movimiento,
+    // 1. Se registra al cliente y se obtiene su id
+    const id_cliente = await dbClientes.registrarCliente({
       nombre_cliente: cliente_nombre,
       razon_social,
       dni_cliente: cliente_dni,
       ruc_cliente: cliente_ruc,
-      correo_cliente,
       direccion_cliente,
+      correo_cliente,
+    })
+
+    // 2. Se registra el nuevo movimiento
+    const id_movimiento = await dbMovimientos.registrarMovimiento({
+      id_usuario: usuarioId,
+      tipo: "Venta",
+      fecha: fecha,
+      descripcion,
+    })
+
+    // 3. Se registra la venta vinculada al cliente
+    await dbMovimientos.registrarMovimientoVenta({
+      id_movimiento,
+      id_cliente,
       tipo_comprobante,
       total,
     })
 
+    // 4. Se registran los productos en el detalle
     for (let producto of productosArray) {
       const { id_producto, cantidad, precio_unitario } = producto
       const subtotal = cantidad * parseFloat(precio_unitario)
@@ -98,7 +107,8 @@ async function registrarVentaPost(req, res) {
       await dbProductos.disminuirStock(id_producto, cantidad)
     }
 
-    res.redirect("/movimientos") // Redirige después de la venta
+    // 5. Redireccionar al listado de movimientos
+    res.redirect("/movimientos")
   } catch (error) {
     console.error("Error al obtener detalle de movimiento:", error)
     res.status(500).send("Error al obtener detalle del movimiento")

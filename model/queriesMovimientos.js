@@ -15,13 +15,14 @@ async function obtenerDetalleMovimiento(idMov) {
         m.tipo,
         m.descripcion,
         u.username AS usuario,
-        -- Datos de movimiento venta
-        mv.nombre_cliente,
-        mv.razon_social,
-        mv.dni_cliente,
-        mv.ruc_cliente,
-        mv.correo_cliente,
-        mv.direccion_cliente,
+        -- Datos de cliente (obtenidos a través de movimiento_venta)
+        mv.id_cliente,
+        c.nombre_cliente,
+        c.razon_social,
+        c.dni_cliente,
+        c.ruc_cliente,
+        c.correo_cliente,
+        c.direccion_cliente,
         mv.tipo_comprobante,
         mv.total AS total_venta,
         -- Datos de movimiento compra
@@ -41,6 +42,8 @@ async function obtenerDetalleMovimiento(idMov) {
         usuarios u ON m.id_usuario = u.id
       LEFT JOIN 
         movimiento_venta mv ON m.id_movimiento = mv.id_movimiento
+      LEFT JOIN 
+        cliente c ON mv.id_cliente = c.id_cliente -- Relacionamos con la tabla cliente
       LEFT JOIN 
         movimiento_entrada me ON m.id_movimiento = me.id_movimiento
       LEFT JOIN 
@@ -77,31 +80,16 @@ async function registrarMovimiento({ id_usuario, tipo, fecha, descripcion }) {
 
 async function registrarMovimientoVenta({
   id_movimiento,
-  nombre_cliente,
-  razon_social,
-  dni_cliente,
-  ruc_cliente,
-  correo_cliente,
-  direccion_cliente,
+  id_cliente,
   tipo_comprobante,
   total,
 }) {
   const query = `
-      INSERT INTO movimiento_venta (id_movimiento, nombre_cliente, razon_social, dni_cliente, ruc_cliente, correo_cliente, direccion_cliente, tipo_comprobante, total)
-      VALUES ($1, $2, $3, $4, $5, $6, $7, $8, $9)
-    `
+    INSERT INTO movimiento_venta (id_movimiento, id_cliente, tipo_comprobante, total)
+    VALUES ($1, $2, $3, $4)
+  `
 
-  const values = [
-    id_movimiento,
-    nombre_cliente,
-    razon_social,
-    dni_cliente,
-    ruc_cliente,
-    correo_cliente,
-    direccion_cliente,
-    tipo_comprobante,
-    total,
-  ]
+  const values = [id_movimiento, id_cliente, tipo_comprobante, total]
 
   try {
     await pool.query(query, values)

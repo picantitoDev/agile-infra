@@ -3,6 +3,7 @@ const dbProductos = require("../model/queriesProductos")
 const dbProveedores = require("../model/queriesProveedores")
 const dbUsuarios = require("../model/queriesUsuarios")
 const dbClientes = require("../model/queriesClientes")
+const pdfUtils = require("../utils/pdfGenerator")
 
 async function obtenerMovimientos(req, res) {
   try {
@@ -293,6 +294,15 @@ async function registrarMermaPost(req, res) {
   }
 }
 
+async function generarComprobantePDF(req, res) {
+  const pdfBytes = await pdfUtils.generarComprobantePDF()
+
+  res.setHeader("Content-Type", "application/pdf")
+  res.setHeader("Content-Disposition", 'attachment; filename="invoice.pdf"')
+  // Send PDF
+  res.send(Buffer.from(pdfBytes))
+}
+
 module.exports = {
   obtenerMovimientos,
   registrarVentaGet,
@@ -304,4 +314,5 @@ module.exports = {
   registrarMermaGet,
   registrarMermaPost,
   verDetalleMovimiento,
+  generarComprobantePDF,
 }

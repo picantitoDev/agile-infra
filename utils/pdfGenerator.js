@@ -63,7 +63,7 @@ async function generarComprobantePDF(data) {
   const centerX = rectX + rectWidth / 2
 
   // Adjust the vertical spacing (reduce the line height)
-  const lineHeight = rectHeight / 3.5 // Decreased the spacing to bring the text closer
+  const lh = rectHeight / 3.5 // Decreased the spacing to bring the text closer
 
   // Padding at the top of the rectangle
   const paddingTop = 5 // Adjust this value for more or less padding
@@ -92,12 +92,7 @@ async function generarComprobantePDF(data) {
   texts.forEach((text, index) => {
     const textWidth = fontBold.widthOfTextAtSize(text, 10) // Calculate text width for centering
     const xPos = centerX - textWidth / 2 // Center the text horizontally
-    const yPos =
-      rectY +
-      rectHeight -
-      (index + 1) * lineHeight +
-      lineHeight / 2 +
-      paddingTop // Evenly space the text vertically with top padding
+    const yPos = rectY + rectHeight - (index + 1) * lh + lh / 2 + paddingTop // Evenly space the text vertically with top padding
 
     page.drawText(text, {
       x: xPos,
@@ -207,7 +202,7 @@ async function generarComprobantePDF(data) {
 
   // Table Rows
   const products = data.map((item, index) => [
-    `PROD${String(index + 1).padStart(3, "0")}`, // Código ficticio
+    `PROD${String(item.id_producto).padStart(3, "0")}`,
     item.producto,
     item.cantidad.toString(),
     `S/ ${parseFloat(item.precio_unitario).toFixed(2)}`,
@@ -253,52 +248,91 @@ async function generarComprobantePDF(data) {
         }
       }
     } else {
-      // Default white background for other rows
+      // Fila de producto
+      const descriptionIndex = 1 // Assuming description is in column index 1
+      const maxWidth = 160 // Max width for description column
+      const lineHeight = 12 // Height per text line
+      const baseRowHeight = 20 // Base row height
+      const padding = 5 // Padding for borders
+
+      // Calculate needed height for this row
+      let rowHeight = baseRowHeight
+      const lines = wrapText(row[descriptionIndex], maxWidth, font, 10)
+      if (row[descriptionIndex]) {
+        if (lines.length > 1) {
+          rowHeight = baseRowHeight + (lines.length - 1) * lineHeight
+        }
+      }
+
+      let bonus = 0
+      if (lines.length > 1) {
+        bonus = lines.length * 5 + 1.5
+      }
+
+      // Draw rectangle with dynamic height
       page.drawRectangle({
-        x: colX[0] - 5, // Adding padding to the left
-        y: rowY - 5, // Adding padding to the top
-        width: colX[colX.length - 1] + 35, // Adding padding to the right
-        height: 20, // Height of the row
-        color: rgb(1, 1, 1), // White background for other rows
-        borderColor: rgb(0, 0, 0), // Black border
-        borderWidth: 0.5, // Thin border (0.5 points)
+        x: colX[0] - padding,
+        y: rowY - padding - bonus,
+        width: colX[colX.length - 1] + 35,
+        height: rowHeight,
+        color: rgb(1, 1, 1),
+        borderColor: rgb(0, 0, 0),
+        borderWidth: 0.5,
       })
+
+      // Escritura de campos
       row.forEach((cell, i) => {
         let xPosition = colX[i]
+        if (i === 2) xPosition = colX[i] + 35
+        if (i > 2) xPosition = colX[i] + 15
 
-        if (i === 2) {
-          xPosition = colX[i] + 35 // Add 15 points to move right
+        if (i === descriptionIndex) {
+          // Handle multi-line description
+          const lines = wrapText(cell, maxWidth, font, 10)
+          lines.forEach((line, lineIndex) => {
+            page.drawText(line, {
+              x: xPosition,
+              y: rowY - lineIndex * lineHeight,
+              size: 10,
+              font: font,
+              color: rgb(0, 0, 0),
+            })
+          })
+        } else {
+          // Regular single-line cells
+          page.drawText(cell, {
+            x: xPosition,
+            y: rowY,
+            size: 10,
+            font: font,
+            color: rgb(0, 0, 0),
+          })
         }
-
-        if (i > 2) {
-          xPosition = colX[i] + 15
-        }
-
-        page.drawText(cell, {
-          x: xPosition,
-          y: rowY,
-          size: 10,
-          font: font,
-          color: rgb(0, 0, 0), // Black text for other rows
-        })
       })
 
-      // Draw vertical lines for regular rows
+      let linePlus = 0
+      if (lines.length > 1) {
+        linePlus = lines.length * 20
+      }
+
+      // Lineas verticales with dynamic height
       for (let i = 0; i < colX.length; i++) {
         if (i > 0) {
           page.drawLine({
-            start: { x: colX[i] - 5, y: rowY - 5 },
-            end: { x: colX[i] - 5, y: rowY + 15 }, // 20px height
+            start: {
+              x: colX[i] - padding,
+              y: rowY + rowHeight - padding,
+            }, // Top of line
+            end: { x: colX[i] - padding, y: rowY - padding - 2 * bonus }, // Bottom of line
             thickness: 0.2,
-            color: rgb(0, 0, 0), // Black line
+            color: rgb(0, 0, 0),
           })
         }
       }
-    }
-    rowY -= 20
-  })
 
-  // Total
+      rowY -= rowHeight
+    }
+  })
 
   // Amount in Words
   page.drawText("Son : DOS MIL OCHOCIENTOS SETENTA Y SIETE CON 80/100 SOLES", {
@@ -338,6 +372,25 @@ async function generarComprobantePDF(data) {
   // Serialize PDF
   const pdfBytes = await pdfDoc.save()
   return pdfBytes
+}
+
+function wrapText(text, maxWidth, font, fontSize) {
+  const words = text.split(" ")
+  const lines = []
+  let currentLine = words[0]
+
+  for (let i = 1; i < words.length; i++) {
+    const word = words[i]
+    const width = font.widthOfTextAtSize(currentLine + " " + word, fontSize)
+    if (width < maxWidth) {
+      currentLine += " " + word
+    } else {
+      lines.push(currentLine)
+      currentLine = word
+    }
+  }
+  lines.push(currentLine)
+  return lines
 }
 
 module.exports = {

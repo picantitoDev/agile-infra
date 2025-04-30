@@ -32,6 +32,7 @@ async function obtenerDetalleMovimiento(idMov) {
         ma.tipo_ajuste,
         ma.motivo,
         -- Productos involucrados
+        p.id_producto,
         p.nombre AS producto,
         pm.cantidad,
         pm.precio_unitario,

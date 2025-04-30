@@ -318,7 +318,7 @@ router.get("/detalle/:id/comprobante", async (req, res) => {
 
   // Set headers
   res.setHeader("Content-Type", "application/pdf")
-  res.setHeader("Content-Disposition", 'inline; filename="invoice.pdf"')
+  res.setHeader("Content-Disposition", 'attachment; filename="invoice.pdf"')
 
   // Send PDF
   res.send(Buffer.from(pdfBytes))

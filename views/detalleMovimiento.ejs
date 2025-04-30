@@ -55,6 +55,12 @@
             <strong>Total Venta:</strong> <%= movimientoDetalle[0].total_venta
             %>
           </p>
+          <a
+            href="/movimientos/detalle/<%= movimientoDetalle[0].id_movimiento %>/comprobante"
+            class="btn"
+          >
+            Descargar Comprobante
+          </a>
         </div>
       </section>
       <% } else if (movimientoDetalle[0].tipo === 'Compra') { %>

@@ -1,7 +1,7 @@
 const PDFLib = require("pdf-lib")
 const fs = require("fs")
 
-async function generarComprobantePDF() {
+async function generarComprobantePDF(data) {
   const { PDFDocument, rgb, StandardFonts } = PDFLib
 
   // Create a new PDF document
@@ -78,10 +78,14 @@ async function generarComprobantePDF() {
     borderWidth: 1,
   })
 
+  const prefijo = data[0].tipo_comprobante === "boleta" ? "B" : "F"
+  const tipoComprobante =
+    data[0].tipo_comprobante === "boleta" ? "BOLETA" : "FACTURA"
+
   const texts = [
     "R.U.C. No. 132345423345",
-    "BOLETA DE VENTA ELECTRONICA",
-    "B012-04883929",
+    `${tipoComprobante} DE VENTA ELECTRONICA`,
+    `${prefijo}012-04883929`,
   ]
 
   // Draw each line of text, centered horizontally and evenly spaced vertically
@@ -103,12 +107,40 @@ async function generarComprobantePDF() {
     })
   })
 
+  // Data formateada
+
+  const clientePlaceholder =
+    data[0].tipo_comprobante === "boleta" ? "SEÑOR(ES):" : "RAZÓN SOCIAL:"
+
+  const documentoPlaceholder =
+    data[0].tipo_comprobante === "boleta" ? "DNI:" : "RUC:"
+
+  const cliente =
+    data[0].tipo_comprobante === "boleta"
+      ? data[0].nombre_cliente
+      : data[0].razon_social
+
+  const documento =
+    data[0].tipo_comprobante === "boleta"
+      ? data[0].dni_cliente
+      : data[0].ruc_cliente
+
+  const isoDate = data[0].fecha
+  const date = new Date(isoDate)
+
+  const day = String(date.getDate()).padStart(2, "0")
+  const month = String(date.getMonth() + 1).padStart(2, "0") // los meses van de 0 a 11
+  const year = date.getFullYear()
+
+  const fechaFormateada = `${day}/${month}/${year}`
+
+  const direccion = data[0].direccion_cliente
   // Customer Data
   const customerInfo = [
-    { label: "SEÑOR(ES):", value: "Juan Pérez López" },
-    { label: "DNI:", value: "87654321" },
-    { label: "FECHA EMISIÓN:", value: "25/04/2023" },
-    { label: "DIRECCIÓN:", value: "Av. Los Jardines 123, Trujillo" },
+    { label: `${clientePlaceholder}`, value: `${cliente}` },
+    { label: `${documentoPlaceholder}`, value: `${documento}` },
+    { label: "FECHA EMISIÓN:", value: `${fechaFormateada}` },
+    { label: "DIRECCIÓN:", value: `${direccion}` },
     { label: "TIPO MONEDA:", value: "PEN" },
   ]
 

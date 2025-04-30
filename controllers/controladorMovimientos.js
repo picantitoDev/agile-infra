@@ -22,8 +22,6 @@ async function verDetalleMovimiento(req, res) {
     const movimientoDetalle = await dbMovimientos.obtenerDetalleMovimiento(
       idMov
     )
-
-    console.log(movimientoDetalle)
     if (movimientoDetalle.length === 0) {
       return res.status(404).send("Movimiento no encontrado")
     }
@@ -295,7 +293,10 @@ async function registrarMermaPost(req, res) {
 }
 
 async function generarComprobantePDF(req, res) {
-  const pdfBytes = await pdfUtils.generarComprobantePDF()
+  const idVenta = req.params.id
+  const dataVenta = await dbMovimientos.obtenerDetalleMovimiento(idVenta)
+  console.log(dataVenta)
+  const pdfBytes = await pdfUtils.generarComprobantePDF(dataVenta)
 
   res.setHeader("Content-Type", "application/pdf")
   res.setHeader("Content-Disposition", 'attachment; filename="invoice.pdf"')

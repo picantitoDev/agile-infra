@@ -22,6 +22,7 @@ async function verDetalleMovimiento(req, res) {
       idMov
     )
 
+    console.log(movimientoDetalle)
     if (movimientoDetalle.length === 0) {
       return res.status(404).send("Movimiento no encontrado")
     }
@@ -280,7 +281,7 @@ async function registrarMermaPost(req, res) {
       id_movimiento,
       cantidad,
       precio_unitario: objProducto.precio_unitario,
-      subtotal: objProducto.precio_unitario,
+      subtotal: parseFloat(objProducto.precio_unitario * parseInt(cantidad)),
     })
 
     await dbProductos.disminuirStock(idProducto, cantidadNumerica)

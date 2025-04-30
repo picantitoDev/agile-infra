@@ -55,13 +55,36 @@
             <strong>Total Venta:</strong> <%= movimientoDetalle[0].total_venta
             %>
           </p>
-          <a
-            href="/movimientos/detalle/<%= movimientoDetalle[0].id_movimiento %>/comprobante"
-            class="btn"
-          >
-            Descargar Comprobante
-          </a>
         </div>
+        <section class="section">
+          <h2 class="section-title">Productos Afectados</h2>
+          <table class="table">
+            <thead>
+              <tr>
+                <th>Producto</th>
+                <th>Cantidad</th>
+                <th>Precio Unitario</th>
+                <th>Subtotal</th>
+              </tr>
+            </thead>
+            <tbody>
+              <% movimientoDetalle.forEach((item) => { %>
+              <tr>
+                <td><%= item.producto %></td>
+                <td><%= item.cantidad %></td>
+                <td><%= item.precio_unitario %></td>
+                <td><%= item.subtotal %></td>
+              </tr>
+              <% }) %>
+            </tbody>
+          </table>
+        </section>
+        <a
+          href="/movimientos/detalle/<%= movimientoDetalle[0].id_movimiento %>/comprobante"
+          class="btn"
+        >
+          Descargar Comprobante
+        </a>
       </section>
       <% } else if (movimientoDetalle[0].tipo === 'Compra') { %>
       <section class="section">
@@ -76,36 +99,6 @@
           </p>
         </div>
       </section>
-      <% } else if (movimientoDetalle[0].tipo === 'Merma') { %>
-      <section class="section">
-        <h2 class="section-title">Datos de Merma</h2>
-        <div class="info-container">
-          <p>
-            <strong>Motivo de Merma:</strong> <%=
-            movimientoDetalle[0].motivo_merma %>
-          </p>
-          <p>
-            <strong>Cantidad Merma:</strong> <%=
-            movimientoDetalle[0].cantidad_merma %>
-          </p>
-        </div>
-      </section>
-      <% } else if (movimientoDetalle[0].tipo === 'Sobrante') { %>
-      <section class="section">
-        <h2 class="section-title">Datos de Sobrante</h2>
-        <div class="info-container">
-          <p>
-            <strong>Motivo de Sobrante:</strong> <%=
-            movimientoDetalle[0].motivo_sobrante %>
-          </p>
-          <p>
-            <strong>Cantidad Sobrante:</strong> <%=
-            movimientoDetalle[0].cantidad_sobrante %>
-          </p>
-        </div>
-      </section>
-      <% } %>
-
       <section class="section">
         <h2 class="section-title">Productos Afectados</h2>
         <table class="table">
@@ -129,6 +122,81 @@
           </tbody>
         </table>
       </section>
+      <% } else if (movimientoDetalle[0].tipo === 'Merma') { %>
+      <section class="section">
+        <h2 class="section-title">Datos de Merma</h2>
+        <div class="info-container">
+          <p>
+            <strong>Motivo de Merma:</strong> <%=
+            movimientoDetalle[0].descripcion %>
+          </p>
+          <p>
+            <strong>Cantidad Merma:</strong> <%= movimientoDetalle[0].cantidad
+            %>
+          </p>
+        </div>
+      </section>
+      <section class="section">
+        <h2 class="section-title">Productos Afectados</h2>
+        <table class="table">
+          <thead>
+            <tr>
+              <th>Producto</th>
+              <th>Cantidad</th>
+              <th>Precio Unitario</th>
+              <th>Subtotal</th>
+            </tr>
+          </thead>
+          <tbody>
+            <% movimientoDetalle.forEach((item) => { %>
+            <tr>
+              <td><%= item.producto %></td>
+              <td><%= item.cantidad %></td>
+              <td><%= item.precio_unitario %></td>
+              <td><%= item.subtotal %></td>
+            </tr>
+            <% }) %>
+          </tbody>
+        </table>
+      </section>
+      <% } else if (movimientoDetalle[0].tipo === 'Sobrante') { %>
+      <section class="section">
+        <h2 class="section-title">Datos de Sobrante</h2>
+        <div class="info-container">
+          <p>
+            <strong>Motivo de Sobrante:</strong> <%=
+            movimientoDetalle[0].motivo_sobrante %>
+          </p>
+          <p>
+            <strong>Cantidad Sobrante:</strong> <%=
+            movimientoDetalle[0].cantidad_sobrante %>
+          </p>
+        </div>
+      </section>
+      <section class="section">
+        <h2 class="section-title">Productos Afectados</h2>
+        <table class="table">
+          <thead>
+            <tr>
+              <th>Producto</th>
+              <th>Cantidad</th>
+              <th>Precio Unitario</th>
+              <th>Subtotal</th>
+            </tr>
+          </thead>
+          <tbody>
+            <% movimientoDetalle.forEach((item) => { %>
+            <tr>
+              <td><%= item.producto %></td>
+              <td><%= item.cantidad %></td>
+              <td><%= item.precio_unitario %></td>
+              <td><%= item.subtotal %></td>
+            </tr>
+            <% }) %>
+          </tbody>
+        </table>
+      </section>
+      <% } %>
     </div>
   </body>
 </html>

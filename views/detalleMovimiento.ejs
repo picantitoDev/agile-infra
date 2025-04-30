@@ -30,16 +30,20 @@
       <section class="section">
         <h2 class="section-title">Datos de Venta</h2>
         <div class="info-container">
-          <p>
-            <strong>Nombre Cliente:</strong> <%=
-            movimientoDetalle[0].nombre_cliente %>
-          </p>
+          <% if (movimientoDetalle[0].tipo_comprobante === "factura") { %>
           <p>
             <strong>Razón Social:</strong> <%= movimientoDetalle[0].razon_social
             %>
           </p>
-          <p><strong>DNI:</strong> <%= movimientoDetalle[0].dni_cliente %></p>
           <p><strong>RUC:</strong> <%= movimientoDetalle[0].ruc_cliente %></p>
+          <% } else if (movimientoDetalle[0].tipo_comprobante === "boleta") { %>
+          <p>
+            <strong>Nombre Cliente:</strong> <%=
+            movimientoDetalle[0].nombre_cliente %>
+          </p>
+          <p><strong>DNI:</strong> <%= movimientoDetalle[0].dni_cliente %></p>
+          <% } %>
+
           <p>
             <strong>Correo:</strong> <%= movimientoDetalle[0].correo_cliente %>
           </p>

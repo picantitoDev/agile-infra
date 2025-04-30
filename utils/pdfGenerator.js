@@ -206,12 +206,16 @@ async function generarComprobantePDF(data) {
   })
 
   // Table Rows
-  const products = [
-    ["PROD001", "Laptop HP 15-dw1024la", "1", "S/ 2499.00", "S/ 2499.00"],
-    ["PROD002", "Mouse Inalámbrico Logitech", "2", "S/ 89.90", "S/ 179.80"],
-    ["PROD003", "Teclado Mecánico RGB", "1", "S/ 199.00", "S/ 199.00"],
-    [, , , "TOTAL", "S/ 2877.80"],
-  ]
+  const products = data.map((item, index) => [
+    `PROD${String(index + 1).padStart(3, "0")}`, // Código ficticio
+    item.producto,
+    item.cantidad.toString(),
+    `S/ ${parseFloat(item.precio_unitario).toFixed(2)}`,
+    `S/ ${parseFloat(item.subtotal).toFixed(2)}`,
+  ])
+
+  const total = data.reduce((sum, item) => sum + parseFloat(item.subtotal), 0)
+  products.push(["", "", "", "TOTAL", `S/ ${total.toFixed(2)}`])
 
   // Loop through each product and add to the table
   let rowY = tableStartY - 20

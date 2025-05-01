@@ -230,7 +230,7 @@ async function registrarSobrantePost(req, res) {
       id_movimiento,
       cantidad,
       precio_unitario: objProducto.precio_unitario,
-      subtotal: objProducto.precio_unitario,
+      subtotal: parseFloat(objProducto.precio_unitario * cantidad),
     })
 
     await dbProductos.aumentarStock(idProducto, cantidadNumerica)

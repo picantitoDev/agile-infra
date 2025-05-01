@@ -131,7 +131,6 @@ async function generarOrdenReposicion(req, res) {
 
   const nombreArchivo = `Solicitud_Compra_${nombreProducto}_${fechaActual}.pdf`
 
-  //const fileName = `${tipoComprobante}_${nombre}_${fecha}.pdf`
   res.setHeader("Content-Type", "application/pdf")
   res.setHeader(
     "Content-Disposition",

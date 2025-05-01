@@ -1,95 +1,113 @@
-/* Reset básico */
+/* nuevoProducto.css */
+
+:root {
+  --primary: #2c3e50;
+  --accent: #3498db;
+  --background: #f4f7fa;
+  --form-bg: #ffffff;
+  --text: #2c3e50;
+  --border: #ddd;
+  --shadow: 0 2px 8px rgba(0, 0, 0, 0.05);
+  --radius: 8px;
+}
+
 * {
-  margin: 0;
-  padding: 0;
   box-sizing: border-box;
   font-family: "Segoe UI", Tahoma, Geneva, Verdana, sans-serif;
+  margin: 0;
+  padding: 0;
 }
 
-/* Fondo general */
 body {
-  background-color: #f4f7fc;
-  display: flex;
-  justify-content: center;
+  background-color: var(--background);
+  color: var(--text);
   padding: 2rem;
-  color: #333;
 }
 
-/* Contenedor del formulario */
-.form-container {
-  background-color: #ffffff;
-  padding: 2rem;
-  border-radius: 16px;
+.container {
   max-width: 600px;
-  width: 100%;
-  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.1);
+  margin: 0 auto;
 }
 
-/* Título */
-h1 {
-  font-size: 1.8rem;
-  margin-bottom: 1.5rem;
-  color: #2c3e50;
-  text-align: center;
+.top-bar {
+  display: flex;
+  justify-content: flex-start;
+  margin-bottom: 2rem;
 }
 
-/* Enlace de regreso */
-a {
-  display: inline-block;
-  margin-bottom: 1.5rem;
-  color: #059669;
+.back-btn {
   text-decoration: none;
+  color: var(--accent);
   font-weight: 500;
-}
-a:hover {
-  text-decoration: underline;
+  display: flex;
+  align-items: center;
+  font-size: 0.95rem;
+  transition: color 0.2s;
 }
 
-/* Etiquetas y campos */
-form label {
+.back-btn:hover {
+  color: #1d6fa5;
+}
+
+.back-arrow {
+  font-size: 1.2rem;
+  margin-right: 0.5rem;
+}
+
+.form-section {
+  background-color: var(--form-bg);
+  padding: 2rem;
+  border-radius: var(--radius);
+  box-shadow: var(--shadow);
+  border: 1px solid var(--border);
+}
+
+.form-section h2 {
+  margin-bottom: 1.5rem;
+  color: var(--primary);
+  font-size: 1.4rem;
+}
+
+form > div {
+  margin-bottom: 1.25rem;
+}
+
+label {
   display: block;
-  margin-bottom: 0.5rem;
+  margin-bottom: 0.4rem;
   font-weight: 600;
-  color: #555;
-  margin-top: 1rem;
+  font-size: 0.95rem;
 }
 
-form input,
-form select {
+input,
+select {
   width: 100%;
   padding: 0.6rem;
-  border-radius: 8px;
-  border: 1px solid #ccc;
-  transition: border-color 0.3s ease;
-  font-size: 1rem;
+  border: 1px solid var(--border);
+  border-radius: var(--radius);
+  font-size: 0.95rem;
+  transition: border-color 0.2s;
 }
 
-form input:focus,
-form select:focus {
-  border-color: #3498db;
+input:focus,
+select:focus {
+  border-color: var(--accent);
   outline: none;
 }
 
-/* Botón de envío */
-button[type="submit"] {
-  background-color: #10b981;
+button {
+  width: 100%;
+  padding: 0.75rem;
+  background-color: var(--accent);
   color: white;
   border: none;
-  padding: 0.75rem 1.5rem;
-  margin-top: 1.5rem;
-  border-radius: 8px;
-  cursor: pointer;
-  width: 100%;
+  border-radius: var(--radius);
   font-size: 1rem;
-  transition: background-color 0.3s ease;
+  cursor: pointer;
+  transition: background-color 0.2s;
+  margin-top: 1rem;
 }
 
-button[type="submit"]:hover {
-  background-color: #059669;
-}
-
-/* Estado de envío */
-button[type="submit"]:disabled {
-  background-color: #95a5a6;
-  cursor: not-allowed;
+button:hover {
+  background-color: #217dbb;
 }

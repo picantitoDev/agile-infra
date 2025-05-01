@@ -4,7 +4,13 @@
     <meta charset="UTF-8" />
     <title>Nuevo Proveedor</title>
     <link rel="stylesheet" href="/registrarProveedor.css" />
-    <!-- Optional -->
+    <style>
+      .error-msg {
+        color: red;
+        font-size: 0.9em;
+        margin-top: 4px;
+      }
+    </style>
   </head>
   <body>
     <form action="/proveedores/nuevo" method="POST" class="form-container">
@@ -19,6 +25,7 @@
           required
           maxlength="255"
         />
+        <div id="razon-error" class="error-msg"></div>
       </div>
 
       <div class="form-group">
@@ -33,6 +40,7 @@
           max="99999999999"
           title="RUC debe ser un número de 11 dígitos."
         />
+        <div id="ruc-error" class="error-msg"></div>
       </div>
 
       <div class="form-group">
@@ -60,13 +68,61 @@
       <button type="submit" class="btn-submit">Registrar Proveedor</button>
     </form>
 
+    <script id="proveedores-data" type="application/json">
+      <%- JSON.stringify(proveedores) %>
+    </script>
+
     <script>
       document.addEventListener("DOMContentLoaded", () => {
-        const form = document.querySelector("form")
-        const submitBtn = form.querySelector('button[type="submit"]')
+        const proveedores = JSON.parse(
+          document.getElementById("proveedores-data").textContent
+        )
 
+        const form = document.querySelector("form")
+        const submitBtn = document.querySelector(".btn-submit") // Changed to class selector
+        const razonInput = document.getElementById("razon_social")
+        const rucInput = document.getElementById("ruc")
+        const razonError = document.getElementById("razon-error")
+        const rucError = document.getElementById("ruc-error")
+
+        function verificarDuplicados() {
+          const razon = razonInput.value.trim().toLowerCase()
+          const ruc = rucInput.value.trim()
+
+          const existeRazon = proveedores.some(
+            (p) => p.razon_social.toLowerCase() === razon
+          )
+
+          const existeRuc = proveedores.some((p) => p.ruc === ruc)
+
+          // Mostrar mensajes de error
+          razonError.textContent = existeRazon
+            ? "Esta razón social ya está registrada."
+            : ""
+
+          rucError.textContent = existeRuc ? "Este RUC ya está registrado." : ""
+
+          const hayError = existeRazon || existeRuc
+
+          // Desactivar y estilizar botón si hay error
+          submitBtn.disabled = hayError
+          submitBtn.style.opacity = hayError ? "0.5" : "1"
+          submitBtn.style.cursor = hayError ? "not-allowed" : "pointer"
+
+          return !hayError // Return true if no duplicates
+        }
+
+        // Check on input
+        razonInput.addEventListener("input", verificarDuplicados)
+        rucInput.addEventListener("input", verificarDuplicados)
+
+        // Also check on form submission
         form.addEventListener("submit", (e) => {
-          // Cambia el texto del botón y lo desactiva
+          if (!verificarDuplicados()) {
+            e.preventDefault() // Prevent form submission if duplicates exist
+            return
+          }
+
           submitBtn.textContent = "Registrando..."
           submitBtn.disabled = true
         })

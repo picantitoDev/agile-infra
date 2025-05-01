@@ -12,7 +12,8 @@ async function obtenerProveedores(req, res) {
 
 async function nuevoProveedorGet(req, res) {
   try {
-    res.render("nuevoProveedor")
+    const proveedores = await dbProveedores.obtenerProveedores()
+    res.render("nuevoProveedor", { proveedores })
   } catch (error) {
     console.error("Error al cargar registro de proveedores:", error)
     res.status(500).send("Error al cargar registro de proveedores")

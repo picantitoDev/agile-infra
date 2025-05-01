@@ -37,11 +37,12 @@ async function verDetalleMovimiento(req, res) {
 
 async function registrarVentaGet(req, res) {
   try {
-    const productos = await dbProductos.obtenerProductos()
+    const productosTotales = await dbProductos.obtenerProductos()
+    const productos = productosTotales.filter((p) => p.estado === "Activado")
     res.render("nuevaVenta", { productos })
   } catch (error) {
-    console.error("Error al obtener detalle de movimiento:", error)
-    res.status(500).send("Error al obtener detalle del movimiento")
+    console.error("Error al obtener productos para la venta:", error)
+    res.status(500).send("Error al obtener productos para la venta")
   }
 }
 

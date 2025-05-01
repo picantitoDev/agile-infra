@@ -52,17 +52,30 @@
           maxlength="20"
           pattern="(\+?\d{1,4}[\s-]?)?(\(?\d{1,4}\)?[\s-]?)?\d{7,15}"
           title="Número de teléfono con un formato válido."
+          required
         />
       </div>
 
       <div class="form-group">
         <label for="correo">Correo Electrónico</label>
-        <input type="email" id="correo" name="correo" maxlength="255" />
+        <input
+          type="email"
+          id="correo"
+          name="correo"
+          maxlength="255"
+          required
+        />
       </div>
 
       <div class="form-group">
         <label for="direccion">Dirección</label>
-        <input type="text" id="direccion" name="direccion" maxlength="255" />
+        <input
+          type="text"
+          id="direccion"
+          name="direccion"
+          maxlength="255"
+          required
+        />
       </div>
 
       <button type="submit" class="btn-submit">Registrar Proveedor</button>

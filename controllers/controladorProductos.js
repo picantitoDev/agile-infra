@@ -83,8 +83,9 @@ async function actualizarProducto(req, res) {
 async function crearProductoGet(req, res) {
   try {
     const categorias = await dbCategorias.obtenerCategorias()
+    const productos = await dbProductos.obtenerProductos()
     const proveedores = await dbProveedores.obtenerProveedores()
-    res.render("nuevoProducto", { categorias, proveedores })
+    res.render("nuevoProducto", { categorias, proveedores, productos })
   } catch (error) {
     console.error("Error al cargar formulario:", error)
     res.status(500).send("Error al cargar formulario")

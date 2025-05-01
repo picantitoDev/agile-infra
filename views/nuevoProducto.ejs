@@ -4,6 +4,13 @@
     <meta charset="UTF-8" />
     <title>Crear Producto</title>
     <link rel="stylesheet" href="/crearProducto.css" />
+    <style>
+      .error-msg {
+        color: red;
+        font-size: 0.9em;
+        margin-top: 5px;
+      }
+    </style>
   </head>
   <body>
     <div class="container">
@@ -12,10 +19,15 @@
           <span class="back-arrow">←</span> Atrás
         </a>
         <h2 style="text-align: center">Registrar Nuevo Producto</h2>
-        <form action="/productos/crear-producto" method="POST">
+        <form
+          id="producto-form"
+          action="/productos/crear-producto"
+          method="POST"
+        >
           <div>
             <label for="nombre">Nombre del Producto:</label>
             <input type="text" id="nombre" name="nombre" required />
+            <div id="nombre-error" class="error-msg"></div>
           </div>
           <div>
             <label for="cantidad_minima">Cantidad Mínima:</label>
@@ -62,9 +74,49 @@
               <% }) %>
             </select>
           </div>
-          <button type="submit">Registrar Producto</button>
+          <button type="submit" id="submit-btn">Registrar Producto</button>
         </form>
       </section>
     </div>
+
+    <!-- Productos en JSON -->
+    <script id="productos-data" type="application/json">
+      <%- JSON.stringify(productos) %>
+    </script>
+
+    <!-- Validación en vivo -->
+    <script>
+      const productos = JSON.parse(
+        document.getElementById("productos-data").textContent
+      )
+      const form = document.getElementById("producto-form")
+      const nombreInput = document.getElementById("nombre")
+      const nombreError = document.getElementById("nombre-error")
+      const submitBtn = document.getElementById("submit-btn")
+
+      function verificarNombre(nombre) {
+        const nombreNormalizado = nombre.trim().toLowerCase()
+        return productos.some(
+          (p) => p.nombre.toLowerCase() === nombreNormalizado
+        )
+      }
+
+      function validarNombre() {
+        if (verificarNombre(nombreInput.value)) {
+          nombreError.textContent = "Este nombre de producto ya existe."
+          submitBtn.disabled = true
+          submitBtn.style.opacity = 0.5
+        } else {
+          nombreError.textContent = ""
+          submitBtn.disabled = false
+          submitBtn.style.opacity = 1
+        }
+      }
+
+      nombreInput.addEventListener("input", validarNombre)
+
+      // Inicializar estado del botón si hay un valor ya precargado
+      window.addEventListener("DOMContentLoaded", validarNombre)
+    </script>
   </body>
 </html>

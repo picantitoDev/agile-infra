@@ -23,16 +23,27 @@
 
       <div class="form-group">
         <label for="ruc">RUC *</label>
-        <input type="text" id="ruc" name="ruc" required maxlength="20" />
+        <input
+          type="number"
+          id="ruc"
+          name="ruc"
+          required
+          maxlength="11"
+          min="10000000000"
+          max="99999999999"
+          title="RUC debe ser un número de 11 dígitos."
+        />
       </div>
 
       <div class="form-group">
         <label for="numero_telefono">Número de Teléfono</label>
         <input
-          type="text"
+          type="tel"
           id="numero_telefono"
           name="numero_telefono"
           maxlength="20"
+          pattern="(\+?\d{1,4}[\s-]?)?(\(?\d{1,4}\)?[\s-]?)?\d{7,15}"
+          title="Número de teléfono con un formato válido."
         />
       </div>
 

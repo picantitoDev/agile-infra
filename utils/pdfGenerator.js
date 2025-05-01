@@ -563,7 +563,7 @@ async function crearOrdenReposicionPDF(dataProducto) {
 
   // Título
   page.drawText("SOLICITUD DE REPOSICIÓN", {
-    x: 50,
+    x: 595 / 2 - 120.5,
     y,
     size: 20,
     font: boldFont,
@@ -573,7 +573,7 @@ async function crearOrdenReposicionPDF(dataProducto) {
   // Subtítulo
   y -= 25
   page.drawText("Stock por debajo del nivel mínimo", {
-    x: 50,
+    x: 595 / 2 - 77.5,
     y,
     size: 12,
     font,
@@ -582,7 +582,8 @@ async function crearOrdenReposicionPDF(dataProducto) {
 
   // Fecha
   y -= 30
-  page.drawText("Generado: martes, 29 de abril de 2025", {
+  const fecha = formatoFechaGeneracion()
+  page.drawText(`${fecha}`, {
     x: 350,
     y,
     size: 10,
@@ -593,13 +594,13 @@ async function crearOrdenReposicionPDF(dataProducto) {
   // Datos
   y -= 40
   const data = [
-    ["Código:", "PROD-2024-056"],
-    ["Producto:", "Baterías Litio CR2032"],
-    ["Ubicación:", "Almacén Norte - Estante B3"],
-    ["Stock Actual:", "8"],
-    ["Stock Mínimo:", "25"],
-    ["Cantidad a Reponer:", "29.5"],
-    ["Unidad:", "unidades"],
+    ["Código:", `PROD-${String(dataProducto.id_producto).padStart(3, "0")}`],
+    ["Producto:", `${dataProducto.nombre}`],
+    ["Proveedor:", `${dataProducto.proveedor_nombre}`],
+    ["Stock Mínimo:", `${dataProducto.cantidad_minima}`],
+    ["Stock Actual:", `${dataProducto.stock}`],
+    ["Cantidad a Reponer:", `${dataProducto.cantidad_minima * 3}`],
+    ["Usuario Encargado:", `${dataProducto.usuarioResponsable.username}`],
   ]
 
   for (const [label, value] of data) {
@@ -638,6 +639,39 @@ async function crearOrdenReposicionPDF(dataProducto) {
 
   const pdfBytes = await pdfDoc.save()
   return pdfBytes
+}
+
+function formatoFechaGeneracion(fecha = new Date()) {
+  const dias = [
+    "domingo",
+    "lunes",
+    "martes",
+    "miércoles",
+    "jueves",
+    "viernes",
+    "sábado",
+  ]
+  const meses = [
+    "enero",
+    "febrero",
+    "marzo",
+    "abril",
+    "mayo",
+    "junio",
+    "julio",
+    "agosto",
+    "septiembre",
+    "octubre",
+    "noviembre",
+    "diciembre",
+  ]
+
+  const diaSemana = dias[fecha.getDay()]
+  const diaMes = fecha.getDate()
+  const mes = meses[fecha.getMonth()]
+  const anio = fecha.getFullYear()
+
+  return `Generado: ${diaSemana}, ${diaMes} de ${mes} de ${anio}`
 }
 
 module.exports = {

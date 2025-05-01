@@ -1,6 +1,7 @@
 const dbProductos = require("../model/queriesProductos")
 const dbCategorias = require("../model/queriesCategorias")
 const dbProveedores = require("../model/queriesProveedores")
+const dbUsuarios = require("../model/queriesUsuarios")
 const pdfUtils = require("../utils/pdfGenerator")
 
 async function obtenerProductos(req, res) {
@@ -119,7 +120,11 @@ async function crearProductoPost(req, res) {
 
 async function generarOrdenReposicion(req, res) {
   const idProducto = req.params.id
+  const usuarioResponsable = await dbUsuarios.buscarUsuarioPorId(req.user.id)
   const dataProducto = await dbProductos.obtenerProductoPorId(idProducto)
+  dataProducto.usuarioResponsable = usuarioResponsable
+
+  console.log(dataProducto)
   const pdfBytes = await pdfUtils.crearOrdenReposicionPDF(dataProducto)
 
   //const fileName = `${tipoComprobante}_${nombre}_${fecha}.pdf`

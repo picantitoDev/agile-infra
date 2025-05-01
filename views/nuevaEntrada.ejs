@@ -390,6 +390,25 @@
         // Renderizar la tabla con los productos filtrados
         renderTablaBusqueda(productosFiltrados)
       })
+
+      // Validar formulario antes de enviar
+      const form = document.querySelector(".entrada-form")
+      const submitButton = document.querySelector(".submit-button")
+
+      form.addEventListener("submit", function (e) {
+        const proveedorSeleccionado = proveedorSelect.value
+        if (!proveedorSeleccionado) {
+          alert("Por favor, seleccione un proveedor.")
+          e.preventDefault()
+          return
+        }
+
+        if (carrito.length === 0) {
+          alert("Debe agregar al menos un producto al resumen de entrada.")
+          e.preventDefault()
+          return
+        }
+      })
     </script>
   </body>
 </html>

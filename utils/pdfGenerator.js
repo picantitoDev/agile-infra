@@ -250,7 +250,7 @@ async function generarComprobantePDF(data) {
     } else {
       // Fila de producto
       const descriptionIndex = 1 // Assuming description is in column index 1
-      const maxWidth = 160 // Max width for description column
+      const maxWidth = 155 // Max width for description column
       const lineHeight = 12 // Height per text line
       const baseRowHeight = 20 // Base row height
       const padding = 5 // Padding for borders
@@ -335,7 +335,9 @@ async function generarComprobantePDF(data) {
   })
 
   // Amount in Words
-  page.drawText("Son : DOS MIL OCHOCIENTOS SETENTA Y SIETE CON 80/100 SOLES", {
+  const textoNatural = numberToText(total)
+  const str = "Son : " + textoNatural.toUpperCase() + " SOLES"
+  page.drawText(str, {
     x: 50,
     y: rowY - 40,
     size: 10,
@@ -345,9 +347,9 @@ async function generarComprobantePDF(data) {
   // Footer Values
   const footerInfo = [
     "Total Valor de Venta - Operaciones Gravadas: S/ 0.00",
-    "Total Valor de Venta - Operaciones Inafecta: S/ 2877.80",
+    `Total Valor de Venta - Operaciones Inafecta: S/ ${total.toFixed(2)}`,
     "IGV: S/ 0.00",
-    "Importe Total: S/ 2877.80",
+    `Importe Total: S/ ${total.toFixed(2)}`,
   ]
 
   let footerY = rowY - 80
@@ -391,6 +393,128 @@ function wrapText(text, maxWidth, font, fontSize) {
   }
   lines.push(currentLine)
   return lines
+}
+
+function numberToText(number) {
+  const units = [
+    "",
+    "uno",
+    "dos",
+    "tres",
+    "cuatro",
+    "cinco",
+    "seis",
+    "siete",
+    "ocho",
+    "nueve",
+  ]
+
+  const teens = [
+    "",
+    "once",
+    "doce",
+    "trece",
+    "catorce",
+    "quince",
+    "dieciséis",
+    "diecisiete",
+    "dieciocho",
+    "diecinueve",
+  ]
+
+  const tens = [
+    "",
+    "diez",
+    "veinte",
+    "treinta",
+    "cuarenta",
+    "cincuenta",
+    "sesenta",
+    "setenta",
+    "ochenta",
+    "noventa",
+  ]
+
+  const hundreds = [
+    "",
+    "ciento",
+    "doscientos",
+    "trescientos",
+    "cuatrocientos",
+    "quinientos",
+    "seiscientos",
+    "setecientos",
+    "ochocientos",
+    "novecientos",
+  ]
+
+  const numToString = (num) => {
+    if (num === 0) return "cero"
+    if (num < 10) return units[num]
+    if (num < 20) return teens[num - 10]
+
+    // Casos especiales para números entre 21-29
+    if (num < 30 && num > 20) {
+      return "veinti" + units[num % 10]
+    }
+
+    if (num < 100) {
+      const decena = tens[Math.floor(num / 10)]
+      const unidad = num % 10
+      return decena + (unidad !== 0 ? " y " + units[unidad] : "")
+    }
+
+    if (num < 1000) {
+      if (num === 100) return "cien"
+      const centena = hundreds[Math.floor(num / 100)]
+      const resto = num % 100
+      return centena + (resto !== 0 ? " " + numToString(resto) : "")
+    }
+
+    if (num < 1000000) {
+      const miles = Math.floor(num / 1000)
+      const resto = num % 1000
+      let milesText = ""
+
+      if (miles === 1) {
+        milesText = "mil"
+      } else {
+        milesText = numToString(miles) + " mil"
+      }
+
+      return milesText + (resto !== 0 ? " " + numToString(resto) : "")
+    }
+
+    return "Número demasiado grande"
+  }
+
+  // Manejo de decimales
+  const formatDecimalPart = (decimalPart) => {
+    // Convertimos a string y tomamos los primeros 2 dígitos
+    const decimalStr = decimalPart.toString().padEnd(2, "0").substring(0, 2)
+    const decimalNum = parseInt(decimalStr)
+
+    if (decimalNum === 0) return ""
+
+    // Si el número decimal es menor que 10, lo tratamos como un solo dígito
+    if (decimalNum < 10) {
+      return ` con ${decimalStr}/100`
+    }
+
+    return ` con ${decimalNum}/100`
+  }
+
+  // Separamos parte entera y decimal
+  const integerPart = Math.floor(number)
+  const decimalPart = Math.round((number - integerPart) * 100) // Obtenemos centavos
+
+  const integerText = numToString(integerPart)
+  const decimalText = decimalPart > 0 ? formatDecimalPart(decimalPart) : ""
+
+  // Convertimos "uno" a "un" cuando es parte de miles (para casos como 1,000)
+  const finalText = integerText.replace(/^uno mil/, "un mil") + decimalText
+
+  return finalText.charAt(0).toUpperCase() + finalText.slice(1) // Capitalizamos la primera letra
 }
 
 module.exports = {

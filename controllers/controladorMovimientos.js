@@ -22,6 +22,8 @@ async function verDetalleMovimiento(req, res) {
     const movimientoDetalle = await dbMovimientos.obtenerDetalleMovimiento(
       idMov
     )
+
+    console.log(movimientoDetalle)
     if (movimientoDetalle.length === 0) {
       return res.status(404).send("Movimiento no encontrado")
     }
@@ -57,7 +59,6 @@ async function registrarVentaPost(req, res) {
     descripcion,
   } = req.body
 
-  console.log(req.body)
   const usuarioId = req.user.id
   const fecha = new Date() // Fecha actual
 
@@ -92,20 +93,23 @@ async function registrarVentaPost(req, res) {
     })
 
     // 4. Se registran los productos en el detalle
-    for (let producto of productosArray) {
-      const { id_producto, cantidad, precio_unitario } = producto
-      const subtotal = cantidad * parseFloat(precio_unitario)
+    await Promise.all(
+      productosArray.map(async (producto) => {
+        const { id_producto, cantidad, precio_unitario } = producto
+        const subtotal = cantidad * parseFloat(precio_unitario)
 
-      await dbMovimientos.registrarProductoMovimiento({
-        id_producto,
-        id_movimiento,
-        cantidad,
-        precio_unitario,
-        subtotal,
+        // Ejecuta ambas operaciones en paralelo
+        await dbMovimientos.registrarProductoMovimiento({
+          id_producto,
+          id_movimiento,
+          cantidad,
+          precio_unitario,
+          subtotal,
+        })
+
+        await dbProductos.disminuirStock(id_producto, cantidad)
       })
-
-      await dbProductos.disminuirStock(id_producto, cantidad)
-    }
+    )
 
     // 5. Redireccionar al listado de movimientos
     res.redirect("/movimientos")
@@ -298,8 +302,25 @@ async function generarComprobantePDF(req, res) {
   console.log(dataVenta)
   const pdfBytes = await pdfUtils.generarComprobantePDF(dataVenta)
 
+  // FACTURA_JuanPerez_20250430.pdf
+  const tipoComprobante =
+    dataVenta[0].tipo_comprobante === "boleta" ? "BOLETA" : "FACTURA"
+
+  const nombre =
+    dataVenta[0].tipo_comprobante === "boleta"
+      ? dataVenta[0].nombre_cliente
+      : dataVenta[0].razon_social
+
+  const fecha = dataVenta[0].fecha
+    .toISOString()
+    .slice(0, 10)
+    .split("-")
+    .join("")
+  console.log(fecha)
+  const fileName = `${tipoComprobante}_${nombre}_${fecha}.pdf`
   res.setHeader("Content-Type", "application/pdf")
-  res.setHeader("Content-Disposition", 'attachment; filename="invoice.pdf"')
+  res.setHeader("Content-Disposition", `attachment; filename="${fileName}"`)
+
   // Send PDF
   res.send(Buffer.from(pdfBytes))
 }

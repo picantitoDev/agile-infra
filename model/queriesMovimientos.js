@@ -24,6 +24,8 @@ async function obtenerDetalleMovimiento(idMov) {
         c.correo_cliente,
         c.direccion_cliente,
         mv.tipo_comprobante,
+        mv.serie,
+        mv.correlativo,
         mv.total AS total_venta,
         -- Datos de movimiento compra
         me.id_proveedor,
@@ -44,7 +46,7 @@ async function obtenerDetalleMovimiento(idMov) {
       LEFT JOIN 
         movimiento_venta mv ON m.id_movimiento = mv.id_movimiento
       LEFT JOIN 
-        cliente c ON mv.id_cliente = c.id_cliente -- Relacionamos con la tabla cliente
+        cliente c ON mv.id_cliente = c.id_cliente
       LEFT JOIN 
         movimiento_entrada me ON m.id_movimiento = me.id_movimiento
       LEFT JOIN 
@@ -85,15 +87,38 @@ async function registrarMovimientoVenta({
   tipo_comprobante,
   total,
 }) {
-  const query = `
-    INSERT INTO movimiento_venta (id_movimiento, id_cliente, tipo_comprobante, total)
-    VALUES ($1, $2, $3, $4)
-  `
-
-  const values = [id_movimiento, id_cliente, tipo_comprobante, total]
-
   try {
-    await pool.query(query, values)
+    // Definir la serie según el tipo de comprobante
+    const serie = tipo_comprobante === "boleta" ? "B001" : "F001"
+
+    // Obtener el correlativo actual
+    const correlativoQuery = `
+    SELECT COALESCE(MAX(correlativo), 0) + 1 AS nuevo_correlativo
+    FROM movimiento_venta
+    WHERE tipo_comprobante = $1
+  `
+    const correlativoResult = await pool.query(correlativoQuery, [
+      tipo_comprobante,
+    ])
+    const correlativo = correlativoResult.rows[0].nuevo_correlativo
+
+    // Insertar el movimiento de venta con serie y correlativo
+    const insertQuery = `
+      INSERT INTO movimiento_venta (
+        id_movimiento, id_cliente, tipo_comprobante, serie, correlativo, total
+      )
+      VALUES ($1, $2, $3, $4, $5, $6)
+    `
+    const values = [
+      id_movimiento,
+      id_cliente,
+      tipo_comprobante,
+      serie,
+      correlativo,
+      total,
+    ]
+
+    await pool.query(insertQuery, values)
   } catch (error) {
     console.error("Error al insertar movimiento venta:", error)
     throw error

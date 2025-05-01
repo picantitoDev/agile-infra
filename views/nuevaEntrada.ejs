@@ -256,8 +256,20 @@
           }
         } else {
           // Limpiar la información del proveedor y deshabilitar la búsqueda
-          proveedorInfo.innerHTML = ""
+          document.getElementById("proveedor-razon-social").textContent = ""
+          document.getElementById("proveedor-ruc").textContent = ""
+          document.getElementById("proveedor-telefono").textContent = ""
+          document.getElementById("proveedor-correo").textContent = ""
+          document.getElementById("proveedor-direccion").textContent = ""
           buscarInput.disabled = true
+          buscarInput.value = ""
+
+          // Limpiar la tabla de productos
+          tablaProductos.innerHTML = `<tr><td colspan="3">Seleccione un proveedor para ver los productos</td></tr>`
+
+          // Limpiar carrito
+          carrito.length = 0
+          renderResumenEntrada()
         }
       })
 

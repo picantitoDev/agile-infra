@@ -125,7 +125,8 @@ async function registrarEntradaGet(req, res) {
     const productosTotales = await dbProductos.obtenerProductos()
     const proveedores = await dbProveedores.obtenerProveedores()
     const productos = productosTotales.filter((p) => p.estado === "Activado")
-
+    console.log(productos)
+    console.log(proveedores)
     res.render("nuevaEntrada", { productos, proveedores })
   } catch (error) {
     console.error("Error al obtener detalle de movimiento:", error)

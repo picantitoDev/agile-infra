@@ -1,6 +1,7 @@
 const dbProductos = require("../model/queriesProductos")
 const dbCategorias = require("../model/queriesCategorias")
 const dbProveedores = require("../model/queriesProveedores")
+const pdfUtils = require("../utils/pdfGenerator")
 
 async function obtenerProductos(req, res) {
   try {
@@ -116,10 +117,24 @@ async function crearProductoPost(req, res) {
   }
 }
 
+async function generarOrdenReposicion(req, res) {
+  const idProducto = req.params.id
+  const dataProducto = await dbProductos.obtenerProductoPorId(idProducto)
+  const pdfBytes = await pdfUtils.crearOrdenReposicionPDF(dataProducto)
+
+  //const fileName = `${tipoComprobante}_${nombre}_${fecha}.pdf`
+  res.setHeader("Content-Type", "application/pdf")
+  res.setHeader("Content-Disposition", `attachment; filename="pingaa.pdf"`)
+
+  // Send PDF
+  res.send(Buffer.from(pdfBytes))
+}
+
 module.exports = {
   obtenerProductos,
   crearProductoGet,
   crearProductoPost,
   obtenerProductoPorId,
   actualizarProducto,
+  generarOrdenReposicion,
 }

@@ -78,14 +78,19 @@ async function generarComprobantePDF(data) {
     borderWidth: 1,
   })
 
-  const prefijo = data[0].tipo_comprobante === "boleta" ? "B" : "F"
   const tipoComprobante =
     data[0].tipo_comprobante === "boleta" ? "BOLETA" : "FACTURA"
+
+  // Asegúrate de que el correlativo tenga 8 dígitos (relleno con ceros a la izquierda)
+  const correlativoFormateado = String(data[0].correlativo).padStart(8, "0")
+
+  // Ejemplo: B001-00002345
+  const numeroComprobante = `${data[0].serie}-${correlativoFormateado}`
 
   const texts = [
     "R.U.C. No. 132345423345",
     `${tipoComprobante} DE VENTA ELECTRONICA`,
-    `${prefijo}012-04883929`,
+    numeroComprobante,
   ]
 
   // Draw each line of text, centered horizontally and evenly spaced vertically
@@ -517,6 +522,98 @@ function numberToText(number) {
   return finalText.charAt(0).toUpperCase() + finalText.slice(1) // Capitalizamos la primera letra
 }
 
+async function crearOrdenReposicionPDF(dataProducto) {
+  const { PDFDocument, rgb, StandardFonts } = PDFLib
+
+  const pdfDoc = await PDFDocument.create()
+  const page = pdfDoc.addPage([595, 842]) // Tamaño A4
+  const { width, height } = page.getSize()
+
+  const font = await pdfDoc.embedFont(StandardFonts.Helvetica)
+  const boldFont = await pdfDoc.embedFont(StandardFonts.HelveticaBold)
+
+  let y = height - 50
+
+  // Título
+  page.drawText("SOLICITUD DE REPOSICIÓN", {
+    x: 50,
+    y,
+    size: 20,
+    font: boldFont,
+    color: rgb(0, 0, 0.6),
+  })
+
+  // Subtítulo
+  y -= 25
+  page.drawText("Stock por debajo del nivel mínimo", {
+    x: 50,
+    y,
+    size: 12,
+    font,
+    color: rgb(0.4, 0.4, 0.4),
+  })
+
+  // Fecha
+  y -= 30
+  page.drawText("Generado: martes, 29 de abril de 2025", {
+    x: 350,
+    y,
+    size: 10,
+    font,
+    color: rgb(0.3, 0.3, 0.3),
+  })
+
+  // Datos
+  y -= 40
+  const data = [
+    ["Código:", "PROD-2024-056"],
+    ["Producto:", "Baterías Litio CR2032"],
+    ["Ubicación:", "Almacén Norte - Estante B3"],
+    ["Stock Actual:", "8"],
+    ["Stock Mínimo:", "25"],
+    ["Cantidad a Reponer:", "29.5"],
+    ["Unidad:", "unidades"],
+  ]
+
+  for (const [label, value] of data) {
+    page.drawText(label, {
+      x: 50,
+      y,
+      size: 12,
+      font: boldFont,
+    })
+    page.drawText(value, {
+      x: 180,
+      y,
+      size: 12,
+      font,
+      color: label === "Stock Actual:" ? rgb(1, 0, 0) : rgb(0, 0, 0),
+    })
+    y -= 25
+  }
+
+  // Alerta
+  y -= 20
+  page.drawRectangle({
+    x: 50,
+    y,
+    width: 500,
+    height: 30,
+    color: rgb(1, 0.8, 0.8),
+  })
+  page.drawText("¡ATENCIÓN: Stock crítico!", {
+    x: 60,
+    y: y + 8,
+    size: 12,
+    font: boldFont,
+    color: rgb(1, 0, 0),
+  })
+
+  const pdfBytes = await pdfDoc.save()
+  return pdfBytes
+}
+
 module.exports = {
   generarComprobantePDF,
+  crearOrdenReposicionPDF,
 }

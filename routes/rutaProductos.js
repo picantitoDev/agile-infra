@@ -17,4 +17,7 @@ router.get("/detalle/:id", controladorProductos.obtenerProductoPorId)
 // Actualizar producto
 router.put("/detalle/:id", controladorProductos.actualizarProducto)
 
+// Generar orden de reposicion
+router.get("/:id/generar-orden", controladorProductos.generarOrdenReposicion)
+
 module.exports = router

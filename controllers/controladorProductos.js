@@ -126,10 +126,17 @@ async function generarOrdenReposicion(req, res) {
 
   console.log(dataProducto)
   const pdfBytes = await pdfUtils.crearOrdenReposicionPDF(dataProducto)
+  const fechaActual = new Date().toISOString().slice(0, 10)
+  const nombreProducto = dataProducto.nombre.replace(/\s+/g, "_")
+
+  const nombreArchivo = `Solicitud_Compra_${nombreProducto}_${fechaActual}.pdf`
 
   //const fileName = `${tipoComprobante}_${nombre}_${fecha}.pdf`
   res.setHeader("Content-Type", "application/pdf")
-  res.setHeader("Content-Disposition", `attachment; filename="pingaa.pdf"`)
+  res.setHeader(
+    "Content-Disposition",
+    `attachment; filename="${nombreArchivo}"`
+  )
 
   // Send PDF
   res.send(Buffer.from(pdfBytes))

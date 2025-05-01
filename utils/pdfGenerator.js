@@ -220,6 +220,54 @@ async function generarComprobantePDF(data) {
   // Loop through each product and add to the table
   let rowY = tableStartY - 20
   products.forEach((row, rowIndex) => {
+    if (
+      rowIndex === products.length - 1 &&
+      data[0].tipo_comprobante === "factura"
+    ) {
+      const totalVenta = parseFloat(total)
+      const subtotal = (totalVenta / 1.18).toFixed(2)
+      const igv = (totalVenta - subtotal).toFixed(2)
+
+      const resumen = [
+        ["", "", "", "SUBTOTAL", subtotal],
+        ["", "", "", "IGV (18%)", igv],
+      ]
+
+      resumen.forEach((resumenRow) => {
+        page.drawRectangle({
+          x: colX[0] - 5,
+          y: rowY - 5,
+          width: colX[colX.length - 1] + 35,
+          height: 20,
+          color: rgb(0.99607843137, 0.94509803921, 0.81960784313),
+          borderColor: rgb(0, 0, 0),
+          borderWidth: 0.5,
+        })
+
+        resumenRow.forEach((cell, i) => {
+          page.drawText(String(cell), {
+            x: colX[i],
+            y: rowY,
+            size: 10,
+            font: font,
+            color: rgb(0, 0, 0),
+          })
+        })
+
+        for (let i = 0; i < colX.length; i++) {
+          if (i === colX.length - 1) {
+            page.drawLine({
+              start: { x: colX[i] - 5, y: rowY - 5 },
+              end: { x: colX[i] - 5, y: rowY + 15 },
+              thickness: 0.5,
+              color: rgb(0, 0, 0),
+            })
+          }
+        }
+
+        rowY -= 20 // Ajustar posición para la siguiente fila
+      })
+    }
     // If it's the last row, add a yellow background with black text
     if (rowIndex === products.length - 1) {
       page.drawRectangle({
@@ -315,7 +363,6 @@ async function generarComprobantePDF(data) {
         }
       })
 
-      let linePlus = 0
       if (lines.length > 1) {
         linePlus = lines.length * 20
       }
@@ -350,10 +397,13 @@ async function generarComprobantePDF(data) {
   })
 
   // Footer Values
+  const igv = total / 1.18
+  const subtotal = total - igv
+
   const footerInfo = [
-    "Total Valor de Venta - Operaciones Gravadas: S/ 0.00",
-    `Total Valor de Venta - Operaciones Inafecta: S/ ${total.toFixed(2)}`,
-    "IGV: S/ 0.00",
+    `Total Valor de Venta - Operaciones Gravadas: S/ ${subtotal.toFixed(2)}`,
+    `Total Valor de Venta - Operaciones Inafecta: S/ 0.00`,
+    `IGV: S/ ${igv.toFixed(2)}`,
     `Importe Total: S/ ${total.toFixed(2)}`,
   ]
 
@@ -399,7 +449,6 @@ function wrapText(text, maxWidth, font, fontSize) {
   lines.push(currentLine)
   return lines
 }
-
 function numberToText(number) {
   const units = [
     "",
@@ -458,7 +507,6 @@ function numberToText(number) {
     if (num < 10) return units[num]
     if (num < 20) return teens[num - 10]
 
-    // Casos especiales para números entre 21-29
     if (num < 30 && num > 20) {
       return "veinti" + units[num % 10]
     }
@@ -479,47 +527,26 @@ function numberToText(number) {
     if (num < 1000000) {
       const miles = Math.floor(num / 1000)
       const resto = num % 1000
-      let milesText = ""
-
-      if (miles === 1) {
-        milesText = "mil"
-      } else {
-        milesText = numToString(miles) + " mil"
-      }
-
+      let milesText = miles === 1 ? "mil" : numToString(miles) + " mil"
       return milesText + (resto !== 0 ? " " + numToString(resto) : "")
     }
 
     return "Número demasiado grande"
   }
 
-  // Manejo de decimales
   const formatDecimalPart = (decimalPart) => {
-    // Convertimos a string y tomamos los primeros 2 dígitos
-    const decimalStr = decimalPart.toString().padEnd(2, "0").substring(0, 2)
+    const decimalStr = decimalPart.toString().padStart(2, "0").substring(0, 2)
     const decimalNum = parseInt(decimalStr)
-
-    if (decimalNum === 0) return ""
-
-    // Si el número decimal es menor que 10, lo tratamos como un solo dígito
-    if (decimalNum < 10) {
-      return ` con ${decimalStr}/100`
-    }
-
-    return ` con ${decimalNum}/100`
+    return ` con ${decimalStr}/100`
   }
 
-  // Separamos parte entera y decimal
   const integerPart = Math.floor(number)
-  const decimalPart = Math.round((number - integerPart) * 100) // Obtenemos centavos
-
+  const decimalPart = Math.round((number - integerPart) * 100)
   const integerText = numToString(integerPart)
-  const decimalText = decimalPart > 0 ? formatDecimalPart(decimalPart) : ""
+  const decimalText = formatDecimalPart(decimalPart)
 
-  // Convertimos "uno" a "un" cuando es parte de miles (para casos como 1,000)
   const finalText = integerText.replace(/^uno mil/, "un mil") + decimalText
-
-  return finalText.charAt(0).toUpperCase() + finalText.slice(1) // Capitalizamos la primera letra
+  return finalText.charAt(0).toUpperCase() + finalText.slice(1)
 }
 
 async function crearOrdenReposicionPDF(dataProducto) {
@@ -602,8 +629,8 @@ async function crearOrdenReposicionPDF(dataProducto) {
     color: rgb(1, 0.8, 0.8),
   })
   page.drawText("¡ATENCIÓN: Stock crítico!", {
-    x: 60,
-    y: y + 8,
+    x: 594 / 2 - 65,
+    y: y + 10.5,
     size: 12,
     font: boldFont,
     color: rgb(1, 0, 0),

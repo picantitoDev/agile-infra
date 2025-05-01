@@ -48,5 +48,18 @@
 
       <button type="submit" class="btn-submit">Registrar Proveedor</button>
     </form>
+
+    <script>
+      document.addEventListener("DOMContentLoaded", () => {
+        const form = document.querySelector("form")
+        const submitBtn = form.querySelector('button[type="submit"]')
+
+        form.addEventListener("submit", (e) => {
+          // Cambia el texto del botón y lo desactiva
+          submitBtn.textContent = "Registrando..."
+          submitBtn.disabled = true
+        })
+      })
+    </script>
   </body>
 </html>

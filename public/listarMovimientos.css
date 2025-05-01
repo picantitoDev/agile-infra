@@ -32,7 +32,7 @@ body {
 
 .header {
   display: flex;
-  justify-content: space-between;
+  gap: 0.5rem;
   align-items: center;
   margin-bottom: 30px;
   padding-bottom: 15px;
@@ -43,6 +43,12 @@ body {
   color: var(--primary);
   font-size: 24px;
   font-weight: 600;
+}
+
+.header a {
+  text-decoration: none;
+  color: black;
+  font: bolder;
 }
 
 /* Estilos para action-links (original) */

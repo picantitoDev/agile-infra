@@ -11,6 +11,10 @@ body {
   color: #333;
   line-height: 1.6;
 }
+.container a {
+  text-decoration: none;
+  color: black;
+}
 
 .container {
   max-width: 600px;

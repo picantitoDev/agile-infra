@@ -54,9 +54,11 @@
 
           <div class="table-body">
             <% movimientos.forEach((movimiento) => { const fecha = new
-            Date(movimiento.fecha); const fechaStr = fecha.toLocaleDateString();
-            const horaStr = fecha.toLocaleTimeString([], { hour: '2-digit',
-            minute: '2-digit' }); %>
+            Date(movimiento.fecha); const fechaStr =
+            fecha.toLocaleDateString('es-PE', { day: '2-digit', month:
+            '2-digit', year: 'numeric' }); const horaStr =
+            fecha.toLocaleTimeString('es-PE', { hour: '2-digit', minute:
+            '2-digit', hour12: false }); %>
             <div class="movimiento-item table-row">
               <div class="table-cell"><%= fechaStr %></div>
               <div class="table-cell"><%= horaStr %></div>

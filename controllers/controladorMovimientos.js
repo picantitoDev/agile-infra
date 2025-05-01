@@ -199,12 +199,13 @@ async function registrarSobranteGet(req, res) {
 }
 
 async function registrarSobrantePost(req, res) {
-  const { fecha, producto, cantidad, motivo, descripcion } = req.body
+  const { producto, cantidad, motivo, descripcion } = req.body
   try {
     const idProducto = await dbProductos.obtenerIdProductoPorNombre(producto)
     const objProducto = await dbProductos.obtenerProductoPorId(idProducto)
     const cantidadNumerica = parseInt(cantidad)
     const usuarioId = req.user.id
+    const fecha = new Date()
 
     console.log("Fecha de Ajuste: ", fecha)
     console.log("Id de Producto: ", idProducto)
@@ -254,12 +255,13 @@ async function registrarMermaGet(req, res) {
 }
 
 async function registrarMermaPost(req, res) {
-  const { fecha, producto, cantidad, motivo, descripcion } = req.body
+  const { producto, cantidad, motivo, descripcion } = req.body
   try {
     const idProducto = await dbProductos.obtenerIdProductoPorNombre(producto)
     const objProducto = await dbProductos.obtenerProductoPorId(idProducto)
     const cantidadNumerica = parseInt(cantidad)
     const usuarioId = req.user.id
+    const fecha = new Date()
 
     console.log("Fecha de Ajuste: ", fecha)
     console.log("Id de Producto: ", idProducto)

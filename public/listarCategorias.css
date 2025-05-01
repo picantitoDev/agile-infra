@@ -162,3 +162,26 @@ a {
   color: var(--azul);
   text-decoration: none;
 }
+
+.categoria-table {
+  width: 100%;
+  border-collapse: collapse;
+}
+
+.categoria-table th,
+.categoria-table td {
+  padding: 10px;
+  border: 1px solid #ddd;
+  text-align: left;
+}
+
+.categoria-table th {
+  background-color: #f4f4f4;
+}
+
+/* Fix the table body with scrollable content */
+.categoria-table-container {
+  max-height: 420px; /* Adjust height as needed */
+  overflow-y: auto;
+  display: block;
+}

@@ -8,6 +8,31 @@
       rel="stylesheet"
       href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css"
     />
+    <style>
+      .error-message {
+        color: red;
+        font-size: 12px;
+        padding: 0;
+        margin: 0 auto;
+      }
+
+      .input-error {
+        border: 2px solid red;
+      }
+
+      .input-container {
+        display: flex;
+        width: 100%;
+        justify-content: center;
+        gap: 1.5rem;
+        justify-content: space-around;
+      }
+
+      .categoria-table {
+        margin-top: 0;
+        padding-top: 0;
+      }
+    </style>
   </head>
   <body>
     <div class="container">
@@ -17,37 +42,79 @@
 
       <!-- Formulario para crear nueva categoría -->
       <form action="/categorias" method="POST" class="categoria-form">
-        <label for="nombre">Nueva Categoría:</label>
-        <input type="text" id="nombre" name="nombre" required />
-        <button type="submit" class="btn-agregar">Agregar</button>
+        <div class="input-container">
+          <label for="nombre">Nueva Categoría:</label>
+          <input type="text" id="nombre" name="nombre" required />
+          <button type="submit" class="btn-agregar">Agregar</button>
+        </div>
+        <div id="error-message" class="error-message"></div>
+        <!-- Error message container -->
       </form>
 
       <!-- Tabla de categorías existentes -->
-      <table class="categoria-table">
-        <thead>
-          <tr>
-            <th>ID</th>
-            <th>Nombre</th>
-            <!-- <th>Acciones</th> -->
-          </tr>
-        </thead>
-        <tbody>
-          <% categorias.forEach((cat) => { %>
-          <tr>
-            <td><%= cat.id_categoria %></td>
-            <td><%= cat.nombre %></td>
-            <!-- <td class="acciones">
-              <button class="btn-editar">
-                <i class="fas fa-pencil-alt"></i>
-              </button>
-              <button class="btn-eliminar">
-                <i class="fas fa-trash-alt"></i>
-              </button>
-            </td> -->
-          </tr>
-          <% }) %>
-        </tbody>
-      </table>
+      <div class="categoria-table-container">
+        <table class="categoria-table">
+          <thead>
+            <tr>
+              <th>ID</th>
+              <th>Nombre</th>
+            </tr>
+          </thead>
+          <tbody>
+            <% categorias.forEach((cat) => { %>
+            <tr>
+              <td><%= cat.id_categoria %></td>
+              <td><%= cat.nombre %></td>
+            </tr>
+            <% }) %>
+          </tbody>
+        </table>
+      </div>
     </div>
+    </div>
+    <script id="categorias-data" type="application/json">
+      <%- JSON.stringify(categorias.map(cat => cat.nombre.toLowerCase().trim())) %>
+    </script>
+
+    <script>
+      const existingCategories = JSON.parse(
+        document.getElementById("categorias-data").textContent
+      )
+
+      const input = document.getElementById("nombre")
+      const button = document.querySelector(".btn-agregar")
+      const errorMessage = document.getElementById("error-message")
+
+      input.addEventListener("input", () => {
+        const value = input.value.toLowerCase().trim()
+
+        if (existingCategories.includes(value)) {
+          input.setCustomValidity("La categoría ya existe.")
+          input.classList.add("input-error")
+          errorMessage.textContent = "La categoría ya existe."
+          button.disabled = true
+        } else {
+          input.setCustomValidity("")
+          input.classList.remove("input-error")
+          errorMessage.textContent = ""
+          button.disabled = false
+        }
+      })
+
+      // Also handle form submission to prevent default behavior
+      document
+        .querySelector(".categoria-form")
+        .addEventListener("submit", (e) => {
+          const value = input.value.toLowerCase().trim()
+
+          if (existingCategories.includes(value)) {
+            e.preventDefault()
+            input.setCustomValidity("La categoría ya existe.")
+            input.classList.add("input-error")
+            errorMessage.textContent = "La categoría ya existe."
+            button.disabled = true
+          }
+        })
+    </script>
   </body>
 </html>

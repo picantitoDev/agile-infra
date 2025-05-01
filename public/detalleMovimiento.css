@@ -66,6 +66,11 @@ body {
   display: inline-block;
 }
 
+.atras-btn {
+  text-decoration: none;
+  color: blue;
+}
+
 .section-title::after {
   content: "";
   position: absolute;

@@ -77,6 +77,7 @@
               id="cliente_nombre"
               class="input-field"
               placeholder="Ingrese nombre completo"
+              
             />
           </div>
           <div class="input-group">
@@ -89,6 +90,7 @@
               pattern="\d{8}"
               class="input-field"
               placeholder="Ingrese DNI (8 dígitos)"
+              
             />
           </div>
         </div>
@@ -124,6 +126,7 @@
               id="razon_social"
               class="input-field"
               placeholder="Ingrese razón social"
+              
             />
           </div>
           <div class="input-group">
@@ -136,6 +139,7 @@
               pattern="\d{11}"
               class="input-field"
               placeholder="Ingrese RUC (11 dígitos)"
+              
             />
           </div>
         </div>
@@ -360,6 +364,60 @@
       const datosFactura = document.getElementById("datosFactura")
       const carrito = []
 
+        // Modificamos el evento submit del formulario para agregar validación
+        document.querySelector('.venta-form').addEventListener('submit', function(e) {
+        e.preventDefault() // Prevenir envío por defecto
+        
+        // Validar carrito no vacío
+        if (carrito.length === 0) {
+          alert('Error: Debe agregar al menos un producto al carrito')
+          return
+        }
+        
+        // Obtener tipo de comprobante seleccionado
+        const tipoComprobante = document.querySelector('input[name="tipo_comprobante"]:checked').value
+        
+        if (tipoComprobante === 'boleta') {
+          // Validar campos de boleta
+          const nombre = document.getElementById('cliente_nombre').value.trim()
+          const dni = document.getElementById('cliente_dni').value.trim()
+          
+          if (!nombre) {
+            alert('Error: Debe ingresar el nombre del cliente para boleta')
+            return
+          }
+          
+          if (!dni || dni.length !== 8 || !/^\d+$/.test(dni)) {
+            alert('Error: DNI debe tener 8 dígitos numéricos')
+            return
+          }
+        } else if (tipoComprobante === 'factura') {
+          // Validar campos de factura
+          const razonSocial = document.getElementById('razon_social').value.trim()
+          const ruc = document.getElementById('cliente_ruc').value.trim()
+          
+          if (!razonSocial) {
+            alert('Error: Debe ingresar la razón social para factura')
+            return
+          }
+          
+          if (!ruc || ruc.length !== 11 || !/^\d+$/.test(ruc)) {
+            alert('Error: RUC debe tener 11 dígitos numéricos')
+            return
+          }
+        }
+        
+        // Validar correo electrónico
+        const correo = document.getElementById('correo_cliente').value.trim()
+        if (!correo || !/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(correo)) {
+          alert('Error: Ingrese un correo electrónico válido')
+          return
+        }
+        
+        // Si todo está validado, enviar el formulario
+        this.submit()
+      })
+
       // Tabla donde buscaremos los productos
       function renderTablaBusqueda(filtrados) {
         // Pasamos una lista de productos filtrados
@@ -494,15 +552,20 @@
           if (radio.value === "boleta") {
             datosBoleta.style.display = "block"
             datosFactura.style.display = "none"
+            document.getElementById('razon_social').value = ''
+            document.getElementById('cliente_ruc').value = ''
           } else {
             datosBoleta.style.display = "none"
             datosFactura.style.display = "block"
+            document.getElementById('cliente_nombre').value = ''
+            document.getElementById('cliente_dni').value = ''
           }
         })
       })
 
       // Mostrar todos al inicio
       renderTablaBusqueda(productos)
+
     </script>
   </body>
 </html>

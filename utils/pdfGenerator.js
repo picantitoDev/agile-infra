@@ -642,9 +642,7 @@ async function crearOrdenReposicionPDF(dataProducto) {
   return pdfBytes
 }
 
-function formatoFechaGeneracion(
-  fecha = DateTime.now().minus({ hours: 5 }).toISO()
-) {
+function formatoFechaGeneracion(fecha = DateTime.now().minus({ hours: 5 })) {
   const dias = [
     "domingo",
     "lunes",
@@ -669,10 +667,14 @@ function formatoFechaGeneracion(
     "diciembre",
   ]
 
-  const diaSemana = dias[fecha.getDay()]
-  const diaMes = fecha.getDate()
-  const mes = meses[fecha.getMonth()]
-  const anio = fecha.getFullYear()
+  if (typeof fecha === "string") {
+    fecha = DateTime.fromISO(fecha)
+  }
+
+  const diaSemana = dias[fecha.weekday % 7]
+  const diaMes = fecha.day
+  const mes = meses[fecha.month - 1]
+  const anio = fecha.year
 
   return `Generado: ${diaSemana}, ${diaMes} de ${mes} de ${anio}`
 }

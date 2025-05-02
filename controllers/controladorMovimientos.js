@@ -62,8 +62,8 @@ async function registrarVentaPost(req, res) {
   } = req.body
 
   const usuarioId = req.user.id
-  const fecha = DateTime.now().setZone("America/Lima").toJSDate() // Esto te da un Date ya ajustado
-
+  const fecha = DateTime.now().setZone("America/Lima").toJSDate()
+  console.log(fecha)
   // Parseamos el JSON de productos
   const productosArray = JSON.parse(productos)
 

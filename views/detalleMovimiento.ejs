@@ -43,8 +43,10 @@
             'Entrada' : movimientoDetalle[0].tipo %>
           </p>
           <p>
-            <strong>Descripción:</strong> <%= movimientoDetalle[0].descripcion
-            %>
+            <strong>Descripción:</strong>
+            <%= (movimientoDetalle[0].tipo === 'Venta' &&
+            !movimientoDetalle[0].descripcion) ? 'Venta realizada con éxito' :
+            movimientoDetalle[0].descripcion %>
           </p>
           <p><strong>Usuario:</strong> <%= movimientoDetalle[0].usuario %></p>
         </div>
@@ -157,8 +159,7 @@
         <h2 class="section-title">Datos de Merma</h2>
         <div class="info-container">
           <p>
-            <strong>Motivo de Merma:</strong> <%=
-            movimientoDetalle[0].descripcion %>
+            <strong>Motivo de Merma:</strong> <%= movimientoDetalle[0].motivo %>
           </p>
           <p>
             <strong>Cantidad Merma:</strong> <%= movimientoDetalle[0].cantidad

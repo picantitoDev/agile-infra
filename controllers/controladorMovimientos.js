@@ -145,7 +145,7 @@ async function registrarEntradaPost(req, res) {
 
   console.log(req.body)
   const usuarioId = req.user.id // Asegúrate de que el usuario esté autenticado
-  const fecha = new Date() // Fecha actual
+  const fecha = DateTime.now().minus({ hours: 5 }).toISO()
 
   // Parseamos el JSON de productos
   const productosArray = JSON.parse(productos)
@@ -207,7 +207,7 @@ async function registrarSobrantePost(req, res) {
     const objProducto = await dbProductos.obtenerProductoPorId(idProducto)
     const cantidadNumerica = parseInt(cantidad)
     const usuarioId = req.user.id
-    const fecha = new Date()
+    const fecha = DateTime.now().minus({ hours: 5 }).toISO()
 
     console.log("Fecha de Ajuste: ", fecha)
     console.log("Id de Producto: ", idProducto)
@@ -263,7 +263,7 @@ async function registrarMermaPost(req, res) {
     const objProducto = await dbProductos.obtenerProductoPorId(idProducto)
     const cantidadNumerica = parseInt(cantidad)
     const usuarioId = req.user.id
-    const fecha = new Date()
+    const fecha = DateTime.now().minus({ hours: 5 }).toISO()
 
     console.log("Fecha de Ajuste: ", fecha)
     console.log("Id de Producto: ", idProducto)

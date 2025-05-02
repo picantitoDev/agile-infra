@@ -82,19 +82,20 @@
         <div class="form-group">
           <label for="motivo">Motivo</label>
           <select id="motivo" name="motivo" required>
-            <option value="Ajuste de Inventario">Ajuste de Inventario</option>
-            <option value="Ingreso de Producto">Ingreso de Producto</option>
-            <option value="Salida de Producto">Salida de Producto</option>
-            <option value="Devolución">Devolución</option>
+            <option value="Ajuste de Inventario">Productos vencidos</option>
+            <option value="Ingreso de Producto">Daño en almacén</option>
+            <option value="Salida de Producto">Robo del producto</option>
+            <option value="Devolución">Otros (especificar)</option>
           </select>
         </div>
 
         <div class="form-group">
-          <label for="descripcion">Descripción (opcional)</label>
+          <label for="descripcion">Descripción</label>
           <textarea
             id="descripcion"
             name="descripcion"
             placeholder="Detalles adicionales..."
+            required
           ></textarea>
         </div>
 

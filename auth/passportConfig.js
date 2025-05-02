@@ -4,14 +4,17 @@ const bcrypt = require("bcryptjs")
 const dbUsuarios = require("../model/queriesUsuarios")
 
 passport.use(
-  new LocalStrategy(async (username, password, done) => {
+  new LocalStrategy(async (usernameOrEmail, password, done) => {
     try {
-      const user = await dbUsuarios.buscarUsuarioPorNombre(username)
-      if (!user) return done(null, false, { message: "Incorrect username" })
+      const user = await dbUsuarios.buscarUsuarioPorNombreOCorreo(
+        usernameOrEmail
+      )
+      if (!user)
+        return done(null, false, { message: "Usuario o correo incorrecto" })
 
-      //const match = await bcrypt.compare(password, user.password)
-      const match = password === user.password
-      if (!match) return done(null, false, { message: "Incorrect password" })
+      const match = await bcrypt.compare(password, user.password)
+      //const match = password === user.password
+      if (!match) return done(null, false, { message: "Contraseña incorrecta" })
 
       return done(null, user)
     } catch (err) {

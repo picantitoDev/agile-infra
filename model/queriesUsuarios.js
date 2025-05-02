@@ -20,6 +20,14 @@ async function obtenerUsuarios() {
   return rows
 }
 
+const buscarUsuarioPorNombreOCorreo = async (input) => {
+  const { rows } = await pool.query(
+    `SELECT * FROM usuarios WHERE username = $1 OR email = $1`,
+    [input]
+  )
+  return rows[0]
+}
+
 const buscarUsuarioPorId = async (id) => {
   const { rows } = await pool.query("SELECT * FROM usuarios WHERE id = $1", [
     id,
@@ -39,5 +47,6 @@ module.exports = {
   buscarUsuarioPorId,
   crearUsuario,
   obtenerUsuarios,
+  buscarUsuarioPorNombreOCorreo,
   buscarUsuarioPorEmail,
 }

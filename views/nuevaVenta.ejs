@@ -340,7 +340,7 @@
 
         <!-- Botón de Enviar -->
         <div class="seccion submit-btn">
-          <button type="submit" class="submit-button">Registrar Venta</button>
+          <button type="submit" class="submit-button btn-primary" id="submitBtn">Registrar Venta</button>
         </div>
       </form>
     </div>
@@ -366,56 +366,56 @@
 
         // Modificamos el evento submit del formulario para agregar validación
         document.querySelector('.venta-form').addEventListener('submit', function(e) {
-        e.preventDefault() // Prevenir envío por defecto
-        
-        // Validar carrito no vacío
-        if (carrito.length === 0) {
-          alert('Error: Debe agregar al menos un producto al carrito')
-          return
-        }
-        
-        // Obtener tipo de comprobante seleccionado
-        const tipoComprobante = document.querySelector('input[name="tipo_comprobante"]:checked').value
-        
-        if (tipoComprobante === 'boleta') {
-          // Validar campos de boleta
-          const nombre = document.getElementById('cliente_nombre').value.trim()
-          const dni = document.getElementById('cliente_dni').value.trim()
+          e.preventDefault() // Prevenir envío por defecto
           
-          if (!nombre) {
-            alert('Error: Debe ingresar el nombre del cliente para boleta')
+          // Validar carrito no vacío
+          if (carrito.length === 0) {
+            alert('Error: Debe agregar al menos un producto al carrito')
             return
           }
           
-          if (!dni || dni.length !== 8 || !/^\d+$/.test(dni)) {
-            alert('Error: DNI debe tener 8 dígitos numéricos')
-            return
-          }
-        } else if (tipoComprobante === 'factura') {
-          // Validar campos de factura
-          const razonSocial = document.getElementById('razon_social').value.trim()
-          const ruc = document.getElementById('cliente_ruc').value.trim()
+          // Obtener tipo de comprobante seleccionado
+          const tipoComprobante = document.querySelector('input[name="tipo_comprobante"]:checked').value
           
-          if (!razonSocial) {
-            alert('Error: Debe ingresar la razón social para factura')
+          if (tipoComprobante === 'boleta') {
+            // Validar campos de boleta
+            const nombre = document.getElementById('cliente_nombre').value.trim()
+            const dni = document.getElementById('cliente_dni').value.trim()
+            
+            if (!nombre) {
+              alert('Error: Debe ingresar el nombre del cliente para boleta')
+              return
+            }
+            
+            if (!dni || dni.length !== 8 || !/^\d+$/.test(dni)) {
+              alert('Error: DNI debe tener 8 dígitos numéricos')
+              return
+            }
+          } else if (tipoComprobante === 'factura') {
+            // Validar campos de factura
+            const razonSocial = document.getElementById('razon_social').value.trim()
+            const ruc = document.getElementById('cliente_ruc').value.trim()
+            
+            if (!razonSocial) {
+              alert('Error: Debe ingresar la razón social para factura')
+              return
+            }
+            
+            if (!ruc || ruc.length !== 11 || !/^\d+$/.test(ruc)) {
+              alert('Error: RUC debe tener 11 dígitos numéricos')
+              return
+            }
+          }
+          
+          // Validar correo electrónico
+          const correo = document.getElementById('correo_cliente').value.trim()
+          if (!correo || !/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(correo)) {
+            alert('Error: Ingrese un correo electrónico válido')
             return
           }
           
-          if (!ruc || ruc.length !== 11 || !/^\d+$/.test(ruc)) {
-            alert('Error: RUC debe tener 11 dígitos numéricos')
-            return
-          }
-        }
-        
-        // Validar correo electrónico
-        const correo = document.getElementById('correo_cliente').value.trim()
-        if (!correo || !/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(correo)) {
-          alert('Error: Ingrese un correo electrónico válido')
-          return
-        }
-        
-        // Si todo está validado, enviar el formulario
-        this.submit()
+          // Si todo está validado, enviar el formulario
+          this.submit()
       })
 
       // Tabla donde buscaremos los productos
@@ -563,6 +563,14 @@
         })
       })
 
+      
+      const form = document.querySelector(".venta-form")
+      const submitBtn = document.getElementById("submitBtn")
+
+      form.addEventListener("submit", function (e) {
+        submitBtn.disabled = true
+        submitBtn.innerHTML = '<span class="spinner"></span> Procesando...'
+      })
       // Mostrar todos al inicio
       renderTablaBusqueda(productos)
 

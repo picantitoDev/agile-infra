@@ -212,6 +212,21 @@ body {
   font: bold;
 }
 
+.btn-primary:disabled {
+  opacity: 0.7;
+  cursor: not-allowed;
+  background-color: #6c757d;
+}
+/* Spinner animation */
+@keyframes spin {
+  0% {
+    transform: rotate(0deg);
+  }
+  100% {
+    transform: rotate(360deg);
+  }
+}
+
 /* Buttons */
 .submit-button {
   display: inline-block;

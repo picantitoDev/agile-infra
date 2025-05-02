@@ -222,7 +222,11 @@
 
       // Evento para cuando se selecciona un proveedor
       proveedorSelect.addEventListener("change", (e) => {
-        const idProveedor = parseInt(e.target.value) // Asegúrate de que el valor seleccionado sea un entero
+        const idProveedor = parseInt(e.target.value)
+
+        // Clear the shopping cart when changing suppliers
+        carrito.length = 0
+        renderResumenEntrada()
 
         if (idProveedor) {
           // Mostrar los datos del proveedor seleccionado
@@ -246,10 +250,7 @@
 
             // Filtrar productos por nombre del proveedor (razón social)
             const productosFiltrados = productos.filter((p) => {
-              if (p.proveedor === undefined) {
-                console.log("Proveedor invalido para el producto:", p)
-              }
-              return p.proveedor === proveedor.razon_social // Comparar con razon_social
+              return p.proveedor === proveedor.razon_social
             })
 
             renderTablaBusqueda(productosFiltrados)
@@ -268,10 +269,6 @@
 
           // Limpiar la tabla de productos
           tablaProductos.innerHTML = `<tr><td colspan="3">Seleccione un proveedor para ver los productos</td></tr>`
-
-          // Limpiar carrito
-          carrito.length = 0
-          renderResumenEntrada()
         }
       })
 

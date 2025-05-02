@@ -182,6 +182,7 @@
               id="direccion_cliente"
               class="input-field"
               placeholder="Ingrese dirección completa"
+              required
             />
           </div>
         </div>
@@ -575,10 +576,46 @@
 
         const form = document.querySelector(".venta-form")
         const submitBtn = document.getElementById("submitBtn")
-        form.addEventListener("submit", function (e) {
-          submitBtn.disabled = true
-          submitBtn.innerHTML = '<span class="spinner"></span> Procesando...'
-        })
+        form.addEventListener("submit", function(e) {
+          if (carrito.length === 0) {
+            e.preventDefault();
+            
+            // 1. Mostrar mensaje de error
+            alert('Error: Debe agregar al menos un producto al carrito');
+            
+            // 2. Resaltar visualmente la sección de productos
+            const seccionProductos = document.querySelector('.seccion.productos');
+            seccionProductos.style.border = '2px solid #ff4444';
+            seccionProductos.style.borderRadius = '8px';
+            seccionProductos.style.transition = 'border 0.5s ease'; // Transición suave
+            
+            // 3. Hacer scroll a la sección de productos
+            seccionProductos.scrollIntoView({ behavior: 'smooth' });
+            
+            // 4. Agregar animación temporal
+            seccionProductos.animate([
+              { transform: 'translateX(0)' },
+              { transform: 'translateX(-10px)' },
+              { transform: 'translateX(10px)' },
+              { transform: 'translateX(0)' }
+            ], {
+              duration: 300,
+              iterations: 2
+            });
+            
+            // 5. Quitar el borde después de 3 segundos (3000 milisegundos)
+            setTimeout(() => {
+              seccionProductos.style.border = ''; // Elimina el borde
+              seccionProductos.style.borderRadius = ''; // Elimina el borde redondeado
+            }, 1000);
+            
+            return false;
+          }
+          
+          // Continuar con el envío si hay productos
+          submitBtn.disabled = true;
+          submitBtn.innerHTML = '<span class="spinner"></span> Procesando...';
+        });
     </script>
   </body>
 </html>

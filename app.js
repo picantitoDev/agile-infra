@@ -4,6 +4,7 @@ const path = require("path")
 const session = require("express-session")
 const methodOverride = require("method-override")
 const passport = require("passport")
+const flash = require("connect-flash")
 
 // Configurar passport
 require("./auth/passportConfig")
@@ -27,11 +28,21 @@ app.use(methodOverride("_method"))
 // Configurar sesión
 app.use(
   session({
-    secret: "clave_super_secreta", // Cambiá esto por algo más seguro
+    secret: "clave_super_secreta",
     resave: false,
     saveUninitialized: false,
   })
 )
+
+app.use(flash())
+
+// Hacer disponibles los mensajes flash en todas las vistas
+app.use((req, res, next) => {
+  res.locals.success_msg = req.flash("success_msg")
+  res.locals.error_msg = req.flash("error_msg")
+  res.locals.error = req.flash("error") // Passport usa 'error' por defecto
+  next()
+})
 
 // Inicializar passport y sesiones
 app.use(passport.initialize())
@@ -47,12 +58,14 @@ app.use("/categorias", validarSesion, rutaCategorias)
 app.use("/proveedores", validarSesion, rutaProveedores)
 app.use("/usuarios", validarSesion, verificarAdmin, rutaUsuarios)
 app.use("/movimientos", validarSesion, rutaMovimientos)
+
 // Login
 app.post(
   "/log-in",
   passport.authenticate("local", {
     successRedirect: "/",
     failureRedirect: "/",
+    failureFlash: true,
   })
 )
 

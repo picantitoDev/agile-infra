@@ -35,6 +35,18 @@
       rel="stylesheet"
       href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0-beta3/css/all.min.css"
     />
+    <style>
+      .flash-error {
+        color: #a70000;
+        border-radius: 5px;
+        padding-bottom: 4px;
+        font-weight: bold;
+        font-size: 14px; /* Tamaño de fuente más pequeño */
+        text-align: center;
+        width: auto;
+        display: inline-block; /* Para que no ocupe todo el ancho */
+      }
+    </style>
   </head>
   <body>
     <% if (locals.user) { %>
@@ -128,6 +140,9 @@
               required
             />
           </div>
+          <% if (error && error !== '') { %>
+          <div class="flash-error"><%= error %></div>
+          <% } %>
           <button type="submit" class="login-button">
             <i class="fas fa-sign-in-alt"></i> Ingresar
           </button>

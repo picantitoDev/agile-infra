@@ -66,6 +66,11 @@ app.get("/log-out", (req, res, next) => {
   })
 })
 
+// Middleware para manejar errores 404
+app.use((req, res, next) => {
+  res.status(404).render("404", { url: req.originalUrl })
+})
+
 // Servidor
 app.listen(8080, () => {
   console.log("Running on localhost...")

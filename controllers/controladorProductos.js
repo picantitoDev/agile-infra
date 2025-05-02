@@ -127,7 +127,9 @@ async function generarOrdenReposicion(req, res) {
 
   console.log(dataProducto)
   const pdfBytes = await pdfUtils.crearOrdenReposicionPDF(dataProducto)
-  const fechaActual = new Date().toISOString().slice(0, 10)
+  const fechaActual = new Date(Date.now() - 5 * 60 * 60 * 1000)
+    .toISOString()
+    .slice(0, 10)
 
   const sanitizeFilename = (name) =>
     name

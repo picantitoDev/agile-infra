@@ -29,7 +29,10 @@ async function verDetalleMovimiento(req, res) {
       return res.status(404).send("Movimiento no encontrado")
     }
 
-    res.render("detalleMovimiento", { movimientoDetalle })
+    const proveedores = await dbProveedores.obtenerProveedores()
+    console.log(proveedores)
+
+    res.render("detalleMovimiento", { movimientoDetalle, proveedores })
   } catch (error) {
     console.error("Error al obtener detalle de movimiento:", error)
     res.status(500).send("Error al obtener detalle del movimiento")

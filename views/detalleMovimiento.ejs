@@ -38,7 +38,10 @@
           month: "long", day: "numeric", hour: "2-digit", minute: "2-digit", });
           %>
           <p><strong>Fecha:</strong> <%= fechaFormateada %></p>
-          <p><strong>Tipo:</strong> <%= movimientoDetalle[0].tipo %></p>
+          <p>
+            <strong>Tipo:</strong> <%= movimientoDetalle[0].tipo === 'Compra' ?
+            'Entrada' : movimientoDetalle[0].tipo %>
+          </p>
           <p>
             <strong>Descripción:</strong> <%= movimientoDetalle[0].descripcion
             %>
@@ -113,10 +116,12 @@
       </section>
       <% } else if (movimientoDetalle[0].tipo === 'Compra') { %>
       <section class="section">
-        <h2 class="section-title">Datos de Compra</h2>
+        <h2 class="section-title">Datos de Entrada</h2>
         <div class="info-container">
           <p>
-            <strong>Proveedor:</strong> <%= movimientoDetalle[0].id_proveedor %>
+            <strong>Proveedor:</strong>
+            <%= proveedores.find(p => p.id_proveedor ===
+            movimientoDetalle[0].id_proveedor)?.razon_social || 'Desconocido' %>
           </p>
           <p>
             <strong>Total Compra:</strong> <%= movimientoDetalle[0].total_compra

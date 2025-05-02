@@ -168,7 +168,6 @@ body {
 .movimiento-item {
   /* Mantenemos la clase pero los estilos se aplican a través de table-row y table-cell */
 }
-
 /* Estilos para view-detail (original) */
 .view-detail {
   color: var(--info);
@@ -253,6 +252,31 @@ body {
   background-color: var(--primary);
   color: white;
   border-color: var(--primary);
+}
+
+.movimientos-list {
+  max-height: 640px;
+  overflow-y: auto;
+  border: 1px solid #ddd;
+  border-radius: 4px;
+  margin-bottom: 20px;
+}
+
+.movimientos-list::-webkit-scrollbar {
+  width: 8px;
+}
+
+.movimientos-list::-webkit-scrollbar-track {
+  background: #f1f1f1;
+}
+
+.movimientos-list::-webkit-scrollbar-thumb {
+  background: #888;
+  border-radius: 4px;
+}
+
+.movimientos-list::-webkit-scrollbar-thumb:hover {
+  background: #555;
 }
 
 /* Responsive */

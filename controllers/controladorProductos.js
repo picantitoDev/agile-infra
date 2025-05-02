@@ -128,8 +128,15 @@ async function generarOrdenReposicion(req, res) {
   console.log(dataProducto)
   const pdfBytes = await pdfUtils.crearOrdenReposicionPDF(dataProducto)
   const fechaActual = new Date().toISOString().slice(0, 10)
-  const nombreProducto = dataProducto.nombre.replace(/\s+/g, "_")
 
+  const sanitizeFilename = (name) =>
+    name
+      .normalize("NFD") // Elimina tildes (acentos)
+      .replace(/[\u0300-\u036f]/g, "") // Elimina los caracteres diacríticos
+      .replace(/[^a-zA-Z0-9_\-]/g, "") // Elimina caracteres no válidos
+      .substring(0, 50) // Limita longitud si es necesario
+
+  const nombreProducto = sanitizeFilename(dataProducto.nombre)
   const nombreArchivo = `Solicitud_Compra_${nombreProducto}_${fechaActual}.pdf`
 
   res.setHeader("Content-Type", "application/pdf")

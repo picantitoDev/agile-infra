@@ -125,8 +125,10 @@
           document.getElementById("productos-data").textContent
         )
         const productoInput = document.getElementById("producto")
+        const cantidadInput = document.getElementById("cantidad")
         const resultsContainer = document.getElementById("autocomplete-results")
 
+        let selectedProducto = null
         productoInput.addEventListener("input", function () {
           const query = productoInput.value.trim().toLowerCase()
 
@@ -151,8 +153,14 @@
 
               resultItem.addEventListener("click", function () {
                 productoInput.value = producto.nombre
+                selectedProducto = producto
                 resultsContainer.innerHTML = ""
                 resultsContainer.style.border = "none"
+                cantidadInput.max = producto.stock
+                cantidadInput.value = ""
+                cantidadInput.setCustomValidity(
+                  "Esta cantidad sobrepasa el stock disponible"
+                )
               })
 
               resultsContainer.appendChild(resultItem)
@@ -169,13 +177,35 @@
         })
       })
 
+      cantidadInput.addEventListener("input", function () {
+        if (selectedProducto) {
+          const cantidad = parseInt(cantidadInput.value)
+          const stock = selectedProducto.stock
+          console.log(cantidad)
+          console.log(stock)
+
+          // Check if the quantity exceeds the available stock
+          if (cantidad > stock) {
+            cantidadInput.setCustomValidity(
+              "Esta cantidad sobrepasa el stock disponible"
+            )
+          } else {
+            cantidadInput.setCustomValidity("") // Clear custom validity
+          }
+        }
+      })
+
       document
         .getElementById("adjustmentForm")
         .addEventListener("submit", function (e) {
           // Get the submit button
           const submitBtn = document.getElementById("submitBtn")
 
-          // Disable the button to prevent multiple clicks
+          if (!cantidadInput.checkValidity()) {
+            e.preventDefault()
+            cantidadInput.reportValidity()
+            return
+          }
           submitBtn.disabled = true
 
           // Change the button text to indicate processing

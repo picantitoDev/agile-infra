@@ -266,6 +266,17 @@ body {
   width: 8px;
 }
 
+.header {
+  display: flex;
+  justify-content: space-between;
+  height: 40px;
+  width: 100%;
+}
+
+.header-title {
+  justify-self: center;
+}
+
 .movimientos-list::-webkit-scrollbar-track {
   background: #f1f1f1;
 }

@@ -39,7 +39,7 @@ app.use(passport.session())
 
 // Rutas principales
 app.get("/", (req, res) => {
-  res.render("index", { title: "Gabriel Roscaza", user: req.user })
+  res.render("index", { user: req.user })
 })
 
 app.use("/productos", validarSesion, rutaProductos)

@@ -127,14 +127,17 @@
         const productoInput = document.getElementById("producto")
         const cantidadInput = document.getElementById("cantidad")
         const resultsContainer = document.getElementById("autocomplete-results")
+        const form = document.getElementById("adjustmentForm")
+        const submitBtn = document.getElementById("submitBtn")
 
         let selectedProducto = null
+
         productoInput.addEventListener("input", function () {
           const query = productoInput.value.trim().toLowerCase()
 
           // Limpiar resultados
           resultsContainer.innerHTML = ""
-          resultsContainer.style.border = "none" // Reset border
+          resultsContainer.style.border = "none"
 
           if (query.length < 2) {
             return
@@ -158,9 +161,6 @@
                 resultsContainer.style.border = "none"
                 cantidadInput.max = producto.stock
                 cantidadInput.value = ""
-                cantidadInput.setCustomValidity(
-                  "Esta cantidad sobrepasa el stock disponible"
-                )
               })
 
               resultsContainer.appendChild(resultItem)
@@ -175,44 +175,52 @@
             resultsContainer.style.border = "1px solid gray" // Mostrar borde
           }
         })
-      })
 
-      cantidadInput.addEventListener("input", function () {
-        if (selectedProducto) {
-          const cantidad = parseInt(cantidadInput.value)
-          const stock = selectedProducto.stock
-          console.log(cantidad)
-          console.log(stock)
+        cantidadInput.addEventListener("input", function () {
+          if (selectedProducto) {
+            const cantidad = parseInt(cantidadInput.value) || 0
+            const stock = selectedProducto.stock
 
-          // Check if the quantity exceeds the available stock
-          if (cantidad > stock) {
-            cantidadInput.setCustomValidity(
-              "Esta cantidad sobrepasa el stock disponible"
-            )
-          } else {
-            cantidadInput.setCustomValidity("") // Clear custom validity
+            // Custom validation
+            if (cantidad > stock) {
+              cantidadInput.setCustomValidity(
+                `No hay suficiente stock. Stock disponible: ${stock}`
+              )
+            } else if (cantidad < 1) {
+              cantidadInput.setCustomValidity(
+                "La cantidad mínima permitida es 1"
+              )
+            } else {
+              cantidadInput.setCustomValidity("") // Reset custom validity
+            }
+
+            // Manually trigger validation to show custom message
+            cantidadInput.reportValidity()
           }
-        }
-      })
+        })
 
-      document
-        .getElementById("adjustmentForm")
-        .addEventListener("submit", function (e) {
-          // Get the submit button
-          const submitBtn = document.getElementById("submitBtn")
+        form.addEventListener("submit", function (e) {
+          // Validar que se seleccionó un producto
+          if (!selectedProducto) {
+            e.preventDefault()
+            alert("Debe seleccionar un producto de la lista")
+            productoInput.focus()
+            return
+          }
 
+          // Validar cantidad
           if (!cantidadInput.checkValidity()) {
             e.preventDefault()
             cantidadInput.reportValidity()
             return
           }
-          submitBtn.disabled = true
 
-          // Change the button text to indicate processing
-          submitBtn.innerHTML = "Procesando..."
+          // Deshabilitar botón y mostrar spinner
+          submitBtn.disabled = true
           submitBtn.innerHTML =
             '<i class="fa fa-spinner fa-spin"></i> Procesando...'
         })
+      })
     </script>
   </body>
 </html>

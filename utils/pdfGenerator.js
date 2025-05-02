@@ -641,7 +641,9 @@ async function crearOrdenReposicionPDF(dataProducto) {
   return pdfBytes
 }
 
-function formatoFechaGeneracion(fecha = new Date()) {
+function formatoFechaGeneracion(
+  fecha = DateTime.now().minus({ hours: 5 }).toISO()
+) {
   const dias = [
     "domingo",
     "lunes",

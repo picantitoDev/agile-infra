@@ -230,8 +230,8 @@ async function generarComprobantePDF(data) {
       const igv = (totalVenta - subtotal).toFixed(2)
 
       const resumen = [
-        ["", "", "", "SUBTOTAL", subtotal],
-        ["", "", "", "IGV (18%)", igv],
+        ["", "", "", "SUBTOTAL", `S/ ${igv}`],
+        ["", "", "", "IGV (18%)", `S/ ${subtotal}`],
       ]
 
       resumen.forEach((resumenRow) => {
@@ -402,9 +402,9 @@ async function generarComprobantePDF(data) {
   const subtotal = total - igv
 
   const footerInfo = [
-    `Total Valor de Venta - Operaciones Gravadas: S/ ${subtotal.toFixed(2)}`,
+    `Total Valor de Venta - Operaciones Gravadas: S/ ${igv.toFixed(2)}`,
     `Total Valor de Venta - Operaciones Inafecta: S/ 0.00`,
-    `IGV: S/ ${igv.toFixed(2)}`,
+    `IGV: S/ ${subtotal.toFixed(2)}`,
     `Importe Total: S/ ${total.toFixed(2)}`,
   ]
 

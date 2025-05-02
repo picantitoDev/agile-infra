@@ -26,6 +26,24 @@ async function registrarCliente({
   return result.rows[0].id_cliente
 }
 
+async function buscarPorDNI(dni) {
+  const result = await pool.query(
+    "SELECT * FROM cliente WHERE dni_cliente = $1",
+    [dni]
+  )
+  return result.rows[0] // o undefined si no hay
+}
+
+async function buscarPorRUC(ruc) {
+  const result = await pool.query(
+    "SELECT * FROM cliente WHERE ruc_cliente = $1",
+    [ruc]
+  )
+  return result.rows[0] // o undefined si no hay
+}
+
 module.exports = {
   registrarCliente,
+  buscarPorDNI,
+  buscarPorRUC,
 }

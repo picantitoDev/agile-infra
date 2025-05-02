@@ -70,15 +70,30 @@ async function registrarVentaPost(req, res) {
   const productosArray = JSON.parse(productos)
 
   try {
-    // 1. Se registra al cliente y se obtiene su id
-    const id_cliente = await dbClientes.registrarCliente({
-      nombre_cliente: cliente_nombre,
-      razon_social,
-      dni_cliente: cliente_dni,
-      ruc_cliente: cliente_ruc,
-      direccion_cliente,
-      correo_cliente,
-    })
+    let clienteExistente
+    let id_cliente
+
+    // 1. Verificar si el cliente ya existe según el tipo de comprobante
+    if (tipo_comprobante === "boleta") {
+      clienteExistente = await dbClientes.buscarPorDNI(cliente_dni)
+    } else if (tipo_comprobante === "factura") {
+      clienteExistente = await dbClientes.buscarPorRUC(cliente_ruc)
+    }
+
+    if (clienteExistente) {
+      // Cliente ya existe
+      id_cliente = clienteExistente.id_cliente
+    } else {
+      // Cliente no existe, lo registramos
+      id_cliente = await dbClientes.registrarCliente({
+        nombre_cliente: cliente_nombre,
+        razon_social,
+        dni_cliente: cliente_dni,
+        ruc_cliente: cliente_ruc,
+        direccion_cliente,
+        correo_cliente,
+      })
+    }
 
     // 2. Se registra el nuevo movimiento
     const id_movimiento = await dbMovimientos.registrarMovimiento({

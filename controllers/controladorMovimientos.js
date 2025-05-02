@@ -39,7 +39,9 @@ async function verDetalleMovimiento(req, res) {
 async function registrarVentaGet(req, res) {
   try {
     const productosTotales = await dbProductos.obtenerProductos()
-    const productos = productosTotales.filter((p) => p.estado === "Activado")
+    const productos = productosTotales.filter(
+      (p) => p.estado === "Activado" && p.stock > 0
+    )
     res.render("nuevaVenta", { productos })
   } catch (error) {
     console.error("Error al obtener productos para la venta:", error)

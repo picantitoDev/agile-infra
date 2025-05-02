@@ -3,7 +3,7 @@ const dbCategorias = require("../model/queriesCategorias")
 async function obtenerCategorias(req, res) {
   try {
     const categorias = await dbCategorias.obtenerCategorias()
-    res.render("categorias", { categorias })
+    res.render("categorias", { categorias, title: "Categorias" })
   } catch (error) {
     console.error("Error al obtener categorias:", error)
     res.status(500).send("Error al obtener las categorias")

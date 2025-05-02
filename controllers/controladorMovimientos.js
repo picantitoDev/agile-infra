@@ -4,6 +4,7 @@ const dbProveedores = require("../model/queriesProveedores")
 const dbUsuarios = require("../model/queriesUsuarios")
 const dbClientes = require("../model/queriesClientes")
 const pdfUtils = require("../utils/pdfGenerator")
+const { DateTime } = require("luxon")
 
 async function obtenerMovimientos(req, res) {
   try {
@@ -61,7 +62,7 @@ async function registrarVentaPost(req, res) {
   } = req.body
 
   const usuarioId = req.user.id
-  const fecha = new Date() // Fecha actual
+  const fecha = DateTime.now().setZone("America/Lima").toJSDate() // Esto te da un Date ya ajustado
 
   // Parseamos el JSON de productos
   const productosArray = JSON.parse(productos)

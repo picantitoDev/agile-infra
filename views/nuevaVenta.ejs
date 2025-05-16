@@ -12,7 +12,7 @@
   </head>
   <body>
     <div class="venta-container">
-      <a href="/movimientos">← Atrás</a>
+      <a href="/movimientos">Atrás</a>
 
       <h1 class="title">Registrar Venta</h1>
 
@@ -615,6 +615,19 @@
           // Continuar con el envío si hay productos
           submitBtn.disabled = true;
           submitBtn.innerHTML = '<span class="spinner"></span> Procesando...';
+        });
+
+          document.addEventListener("DOMContentLoaded", function () {
+          const form = document.querySelector(".venta-form");
+
+          form.addEventListener("submit", function (event) {
+            if (!form.checkValidity()) {
+              event.preventDefault(); // Evita que se envíe si es inválido
+              event.stopPropagation();
+            }
+
+            form.classList.add("was-validated");
+          });
         });
     </script>
   </body>

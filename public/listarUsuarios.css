@@ -1,104 +1,87 @@
-* {
+/* Establece que todo el contenido se adapte al 100% del espacio disponible */
+html, body {
   margin: 0;
   padding: 0;
+  height: 100%;
+  font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+  background-color: #f9f9f9;
+}
+
+/* Estilo para la vista dentro del main content */
+.container {
+  display: flex;
+  flex-direction: column;
+  min-height: 100%;
+  padding: 20px;
   box-sizing: border-box;
 }
 
-body {
-  background: linear-gradient(135deg, #e0f2fe, #f8fafc);
-  font-family: "Segoe UI", Tahoma, Geneva, Verdana, sans-serif;
-  color: #1f2937;
-  min-height: 100vh;
+/* Parte superior: barra con botón atrás y crear */
+.header {
   display: flex;
-  justify-content: center;
-  align-items: flex-start;
-  padding: 3rem 1rem;
-}
-
-.container {
-  width: 100%;
-  max-width: 1000px;
-  background-color: #ffffff;
-  border-radius: 16px;
-  box-shadow: 0 15px 35px rgba(0, 0, 0, 0.08);
-  padding: 2rem;
-  overflow-x: auto;
-}
-
-.title {
-  font-size: 2rem;
-  font-weight: 600;
-  margin-bottom: 1.5rem;
-  text-align: center;
-  color: #0f172a;
-}
-
-.usuarios-table {
-  width: 100%;
-  border-collapse: collapse;
-}
-
-.usuarios-table thead {
-  background-color: #f1f5f9;
-}
-
-.usuarios-table th,
-.usuarios-table td {
-  text-align: left;
-  padding: 0.75rem 1rem;
-  border-bottom: 1px solid #e2e8f0;
-}
-
-.usuarios-table tbody tr:hover {
-  background-color: #f9fafb;
-}
-
-.usuarios-table th {
-  color: #475569;
-  font-weight: 600;
-  font-size: 0.95rem;
-}
-
-.usuarios-table td {
-  font-size: 0.95rem;
-  color: #334155;
-}
-
-@media (max-width: 600px) {
-  .title {
-    font-size: 1.5rem;
-  }
-
-  .usuarios-table th,
-  .usuarios-table td {
-    font-size: 0.85rem;
-    padding: 0.5rem;
-  }
+  justify-content: space-between;
+  align-items: center;
+  margin-bottom: 20px;
 }
 
 .back-btn {
   text-decoration: none;
-  color: black;
-  font-weight: 600;
+  color: #6b46c1;
+  font-weight: bold;
+  font-size: 16px;
 }
 
-.top-bar {
-  display: flex;
-  justify-content: flex-end;
-  margin-bottom: 1rem;
+.back-arrow {
+  margin-right: 5px;
 }
 
 .btn-crear {
-  background-color: #3b82f6;
+  background-color: #6b46c1;
   color: white;
-  padding: 0.5rem 1rem;
+  padding: 10px 16px;
   border-radius: 8px;
   text-decoration: none;
-  font-size: 0.95rem;
-  font-weight: 500;
+  font-weight: bold;
   transition: background-color 0.2s ease;
 }
 
 .btn-crear:hover {
-  background-color: #2563eb;
+  background-color: #553c9a;
+}
+
+/* Título */
+.title {
+  font-size: 28px;
+  color: #333;
+  margin-bottom: 20px;
+}
+
+/* Tabla de usuarios */
+.usuarios-table {
+  width: 100%;
+  border-collapse: collapse;
+  background-color: white;
+  box-shadow: 0 4px 6px rgba(0, 0, 0, 0.05);
+  border-radius: 8px;
+  overflow: hidden;
+}
+
+.usuarios-table th,
+.usuarios-table td {
+  padding: 14px 20px;
+  text-align: left;
+  border-bottom: 1px solid #eee;
+}
+
+.usuarios-table thead {
+  background-color: #f0ebfa;
+}
+
+.usuarios-table th {
+  color: #6b46c1;
+  font-weight: bold;
+}
+
+.usuarios-table tr:hover {
+  background-color: #f9f5ff;
 }

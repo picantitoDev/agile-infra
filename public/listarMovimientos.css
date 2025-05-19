@@ -1,338 +1,168 @@
-:root {
-  --primary: #2c3e50;
-  --secondary: #34495e;
-  --success: #27ae60;
-  --danger: #e74c3c;
-  --warning: #f39c12;
-  --info: #3498db;
-  --light: #ecf0f1;
-  --dark: #2c3e50;
-  --gray: #95a5a6;
-  --white: #ffffff;
-}
-
-* {
+/* Base general */
+html, body {
   margin: 0;
   padding: 0;
-  box-sizing: border-box;
-  font-family: "Segoe UI", Tahoma, Geneva, Verdana, sans-serif;
-}
-
-body {
-  background-color: #f8f9fa;
+  height: 100%;
+  font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+  background-color: #f9f9f9;
   color: #333;
-  line-height: 1.6;
 }
 
+/* Contenedor principal */
 .container {
-  max-width: 1200px;
-  margin: 0 auto;
+  display: flex;
+  flex-direction: column;
+  min-height: 100%;
   padding: 20px;
+  box-sizing: border-box;
 }
 
+/* Header con botón atrás y título */
 .header {
   display: flex;
-  gap: 0.5rem;
+  justify-content: space-between;
   align-items: center;
-  margin-bottom: 30px;
-  padding-bottom: 15px;
-  border-bottom: 1px solid #e0e0e0;
-}
-
-.header h1 {
-  color: var(--primary);
-  font-size: 24px;
-  font-weight: 600;
+  margin-bottom: 24px;
 }
 
 .header a {
   text-decoration: none;
-  color: black;
-  font: bolder;
+  color: #6b46c1;
+  font-weight: bold;
+  font-size: 16px;
 }
 
-/* Estilos para action-links (original) */
+.header-title {
+  font-size: 28px;
+  color: #333;
+  margin: 0;
+}
+
+/* Botones de acciones */
 .action-links {
-  display: grid;
-  grid-template-columns: repeat(4, 1fr);
-  gap: 15px;
+  display: flex;
+  flex-wrap: wrap;
+  gap: 16px;
   margin-bottom: 30px;
 }
 
 .action-links a {
-  padding: 18px 15px;
-  border: none;
-  border-radius: 6px;
-  font-size: 16px;
-  font-weight: 500;
-  cursor: pointer;
-  transition: all 0.3s ease;
-  text-align: center;
-  background-color: var(--white);
-  box-shadow: 0 2px 4px rgba(0, 0, 0, 0.05);
-  border: 1px solid #e0e0e0;
-  color: var(--dark);
   display: flex;
-  flex-direction: column;
   align-items: center;
+  gap: 8px;
+  padding: 10px 16px;
+  border-radius: 8px;
+  font-weight: bold;
   text-decoration: none;
+  color: white;
+  transition: background-color 0.2s ease;
+}
+
+.venta {
+  background-color: #6b46c1;
+}
+
+.entrada {
+  background-color: #38a169;
+}
+
+.sobrante {
+  background-color: #4299e1;
+}
+
+.merma {
+  background-color: #e53e3e;
 }
 
 .action-links a:hover {
-  transform: translateY(-2px);
-  box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
+  filter: brightness(0.9);
 }
 
-.action-links a i {
-  font-size: 24px;
-  margin-bottom: 8px;
-}
-
-.action-links a.venta {
-  border-left: 4px solid var(--danger);
-}
-
-.action-links a.entrada {
-  border-left: 4px solid var(--success);
-}
-
-.action-links a.sobrante {
-  border-left: 4px solid var(--warning);
-}
-
-.action-links a.merma {
-  border-left: 4px solid var(--info);
-}
-
-/* Estilos para movimientos-list (original) */
+/* Lista de movimientos */
 .movimientos-list {
-  background-color: var(--white);
-  border-radius: 6px;
-  box-shadow: 0 2px 4px rgba(0, 0, 0, 0.05);
-  padding: 20px;
-  margin-bottom: 30px;
-  list-style: none;
-}
-
-.section-header {
+  flex: 1;
   display: flex;
-  justify-content: space-between;
-  align-items: center;
-  margin-bottom: 20px;
-  padding-bottom: 10px;
-  border-bottom: 1px solid #e0e0e0;
+  flex-direction: column;
 }
 
 .section-header h2 {
-  color: var(--primary);
-  font-size: 18px;
-  font-weight: 500;
+  font-size: 22px;
+  margin-bottom: 16px;
 }
 
-.view-all {
-  color: var(--info);
-  font-size: 14px;
-  text-decoration: none;
-}
-
-/* Estilos para la tabla */
+/* Tabla responsive con estructura tipo grid */
 .table-container {
-  display: table;
-  width: 100%;
+  background: white;
+  border-radius: 8px;
+  box-shadow: 0 4px 6px rgba(0, 0, 0, 0.05);
+  overflow-x: auto;
+}
+
+.table-header,
+.table-row {
+  display: grid;
+  grid-template-columns: 80px 120px 100px 120px 1fr 140px;
+  align-items: center;
+  padding: 12px 16px;
 }
 
 .table-header {
-  display: table-header-group;
-  font-weight: 500;
-  color: var(--gray);
-  font-size: 14px;
-  text-transform: uppercase;
+  background-color: #f0ebfa;
+  font-weight: bold;
+  color: #6b46c1;
+  border-bottom: 1px solid #ddd;
 }
 
-.table-body {
-  display: table-row-group;
+.table-body .table-row {
+  border-bottom: 1px solid #eee;
 }
 
-.table-row {
-  display: table-row;
+.table-row:hover {
+  background-color: #f9f5ff;
 }
 
 .table-cell {
-  display: table-cell;
-  padding: 12px 15px;
-  text-align: left;
-  border-bottom: 1px solid #e0e0e0;
-  vertical-align: middle;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
 }
 
-.movimiento-item {
-  /* Mantenemos la clase pero los estilos se aplican a través de table-row y table-cell */
+/* Badge por tipo de movimiento */
+.badge {
+  padding: 4px 10px;
+  border-radius: 9999px;
+  font-size: 14px;
+  font-weight: bold;
+  color: white;
+  display: inline-block;
 }
-/* Estilos para view-detail (original) */
+
+.badge-venta {
+  background-color: #6b46c1;
+}
+
+.badge-entrada {
+  background-color: #38a169;
+}
+
+.badge-sobrante {
+  background-color: #4299e1;
+}
+
+.badge-merma {
+  background-color: #e53e3e;
+}
+
+/* Link a detalle */
 .view-detail {
-  color: var(--info);
   text-decoration: none;
-  font-weight: 500;
-  display: inline-flex;
+  color: #6b46c1;
+  font-weight: bold;
+  display: flex;
   align-items: center;
-  gap: 5px;
+  gap: 6px;
 }
 
 .view-detail:hover {
   text-decoration: underline;
-}
-
-.view-detail i {
-  font-size: 14px;
-}
-
-/* Estilos para badges */
-.badge {
-  display: inline-block;
-  padding: 4px 8px;
-  border-radius: 12px;
-  font-size: 12px;
-  font-weight: 500;
-  color: white;
-}
-
-.badge-venta {
-  background-color: var(--danger);
-}
-
-.badge-entrada {
-  background-color: var(--success);
-}
-
-.badge-sobrante {
-  background-color: var(--warning);
-}
-
-.badge-merma {
-  background-color: var(--info);
-}
-
-.badge-venta {
-  background-color: #4caf50; /* Verde */
-  color: white;
-}
-
-.badge-entrada {
-  background-color: #2196f3; /* Azul */
-  color: white;
-}
-
-.badge-sobrante {
-  background-color: #ff9800; /* Naranja */
-  color: white;
-}
-
-.badge-merma {
-  background-color: #f44336; /* Rojo */
-  color: white;
-}
-
-/* Paginación */
-.pagination {
-  display: flex;
-  justify-content: center;
-  margin-top: 20px;
-  gap: 5px;
-}
-
-.pagination button {
-  padding: 8px 12px;
-  border: 1px solid #e0e0e0;
-  background-color: var(--white);
-  border-radius: 4px;
-  cursor: pointer;
-}
-
-.pagination button.active {
-  background-color: var(--primary);
-  color: white;
-  border-color: var(--primary);
-}
-
-.movimientos-list {
-  max-height: 640px;
-  overflow-y: auto;
-  border: 1px solid #ddd;
-  border-radius: 4px;
-  margin-bottom: 20px;
-}
-
-.movimientos-list::-webkit-scrollbar {
-  width: 8px;
-}
-
-.header {
-  display: flex;
-  justify-content: space-between;
-  height: 40px;
-  width: 100%;
-}
-
-.header-title {
-  justify-self: center;
-}
-
-.movimientos-list::-webkit-scrollbar-track {
-  background: #f1f1f1;
-}
-.table-header .table-row .table-cell {
-  padding-top: 0;
-}
-.movimientos-list::-webkit-scrollbar-thumb {
-  background: #888;
-  border-radius: 4px;
-}
-.section-header {
-  height: 30px;
-}
-.movimientos-list::-webkit-scrollbar-thumb:hover {
-  background: #555;
-}
-
-/* Responsive */
-@media (max-width: 768px) {
-  .action-links {
-    grid-template-columns: 1fr;
-  }
-
-  .table-container {
-    display: block;
-    overflow-x: auto;
-  }
-
-  .table-header {
-    display: none;
-  }
-
-  .table-row {
-    display: block;
-    margin-bottom: 20px;
-    border-bottom: 1px solid #e0e0e0;
-    padding-bottom: 15px;
-  }
-
-  .table-cell {
-    display: block;
-    padding: 5px 0;
-    border-bottom: none;
-  }
-
-  .table-cell::before {
-    content: attr(data-label);
-    font-weight: bold;
-    display: inline-block;
-    width: 120px;
-    color: var(--gray);
-  }
-
-  .movimiento-header {
-    display: flex;
-    justify-content: space-between;
-    margin-bottom: 10px;
-  }
 }

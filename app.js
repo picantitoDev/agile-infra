@@ -5,6 +5,7 @@ const session = require("express-session")
 const methodOverride = require("method-override")
 const passport = require("passport")
 const flash = require("connect-flash")
+const expressLayouts = require('express-ejs-layouts');
 
 // Configurar passport
 require("./auth/passportConfig")
@@ -24,6 +25,8 @@ app.use(express.static(path.join(__dirname, "public")))
 app.set("view engine", "ejs")
 app.use(express.urlencoded({ extended: true }))
 app.use(methodOverride("_method"))
+app.use(expressLayouts);
+app.set('layout', 'layouts/main');
 
 // Configurar sesión
 app.use(
@@ -47,6 +50,10 @@ app.use((req, res, next) => {
 // Inicializar passport y sesiones
 app.use(passport.initialize())
 app.use(passport.session())
+app.use((req, res, next) => {
+  res.locals.user = req.user || null
+  next()
+})
 
 // Rutas principales
 app.get("/", (req, res) => {

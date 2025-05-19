@@ -1,0 +1,14 @@
+<aside class="sidebar">
+  <div class="sidebar-header">
+    <h2>Mi Sistema</h2>
+  </div>
+  <nav class="sidebar-menu">
+    <a href="/categorias" class="menu-link"><i class="fas fa-tags"></i> <span>Categorías</span></a>
+    <a href="/productos" class="menu-link"><i class="fas fa-box"></i> <span>Productos</span></a>
+    <a href="/proveedores" class="menu-link"><i class="fas fa-truck"></i> <span>Proveedores</span></a>
+    <a href="/movimientos" class="menu-link"><i class="fas fa-arrows-rotate"></i> <span>Movimientos</span></a>
+    <% if (user.rol === 'Admin') { %>
+      <a href="/usuarios" class="menu-link"><i class="fas fa-users"></i> <span>Usuarios</span></a>
+    <% } %>
+  </nav>
+</aside>

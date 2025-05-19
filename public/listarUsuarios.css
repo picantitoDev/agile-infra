@@ -85,3 +85,57 @@ html, body {
 .usuarios-table tr:hover {
   background-color: #f9f5ff;
 }
+
+/* Contenedor para hacer la tabla responsiva */
+.table-responsive {
+  width: 100%;
+  overflow-x: auto;
+}
+
+/* Tabla de usuarios */
+.usuarios-table {
+  width: 100%;
+  border-collapse: collapse;
+  background-color: white;
+  box-shadow: 0 4px 6px rgba(0, 0, 0, 0.05);
+  border-radius: 8px;
+  min-width: 600px; /* asegura que no se comprima demasiado en pantallas pequeñas */
+}
+
+.usuarios-table th,
+.usuarios-table td {
+  padding: 14px 20px;
+  text-align: left;
+  border-bottom: 1px solid #eee;
+}
+
+.usuarios-table thead {
+  background-color: #f0ebfa;
+}
+
+.usuarios-table th {
+  color: #6b46c1;
+  font-weight: bold;
+}
+
+.usuarios-table tr:hover {
+  background-color: #f9f5ff;
+}
+
+/* Media query para pantallas pequeñas */
+@media (max-width: 768px) {
+  .usuarios-table th,
+  .usuarios-table td {
+    padding: 10px;
+    font-size: 14px;
+  }
+
+  .btn-crear {
+    font-size: 14px;
+    padding: 8px 12px;
+  }
+
+  .title {
+    font-size: 22px;
+  }
+}

@@ -32,6 +32,7 @@
     </style>
   </head>
   <body>
+    <div class="container">
     <form action="/proveedores/nuevo" method="POST" class="form-container">
       <a href="/proveedores" class="btn-back">← Atrás</a>
       <h1>Registrar Nuevo Proveedor</h1>
@@ -99,6 +100,7 @@
 
       <button type="submit" class="btn-submit">Registrar Proveedor</button>
     </form>
+    </div>
 
     <script id="proveedores-data" type="application/json">
       <%- JSON.stringify(proveedores) %>

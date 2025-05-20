@@ -156,7 +156,7 @@ body {
 
 /* Active Menu Link */
 .menu-link.active {
-  background: #383746;
+  background: #1d1b31;
 }
 
 .menu-link.active:hover {
@@ -318,7 +318,6 @@ body {
     left: 100%;
   }
 }
-
 /* LOGIN FORM */
 /* Reset and Base Styles */
 * {

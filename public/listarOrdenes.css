@@ -1,0 +1,60 @@
+h1 {
+  margin-bottom: 20px;
+  color: #5a2e88;
+}
+
+.crear-orden-container {
+  margin-bottom: 20px;
+}
+
+.btn-crear-orden {
+  display: inline-block;
+  background-color: #7b3fe4;
+  color: white;
+  padding: 10px 20px;
+  border-radius: 8px;
+  text-decoration: none;
+  font-weight: bold;
+  transition: background-color 0.2s ease;
+}
+
+.btn-crear-orden:hover {
+  background-color: #652dd3;
+}
+
+.tabla-ordenes {
+  width: 100%;
+  border-collapse: collapse;
+  margin-top: 20px;
+}
+
+.tabla-ordenes th,
+.tabla-ordenes td {
+  border: 1px solid #ddd;
+  padding: 10px;
+  text-align: left;
+  vertical-align: top;
+}
+
+.tabla-ordenes th {
+  background-color: #eee;
+}
+
+.tabla-productos {
+  width: 100%;
+  border: 1px solid #ccc;
+  margin-top: 10px;
+  border-collapse: collapse;
+  background-color: #fafafa;
+}
+
+.tabla-productos th,
+.tabla-productos td {
+  border: 1px solid #ccc;
+  padding: 6px;
+  font-size: 14px;
+}
+
+.tabla-productos th {
+  background-color: #f0f0f0;
+}

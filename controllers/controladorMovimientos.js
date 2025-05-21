@@ -141,13 +141,39 @@ async function registrarVentaPost(req, res) {
   }
 }
 
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
 async function registrarEntradaGet(req, res) {
   try {
     const productosTotales = await dbProductos.obtenerProductos()
     const proveedores = await dbProveedores.obtenerProveedores()
     const productos = productosTotales.filter((p) => p.estado === "Activado")
-    console.log(productos)
-    console.log(proveedores)
     res.render("nuevaEntrada", { productos, proveedores })
   } catch (error) {
     console.error("Error al obtener detalle de movimiento:", error)
@@ -208,6 +234,33 @@ async function registrarEntradaPost(req, res) {
     res.status(500).send("Error al registrar entrada")
   }
 }
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
 
 async function registrarSobranteGet(req, res) {
   try {

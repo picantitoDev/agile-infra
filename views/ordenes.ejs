@@ -1,0 +1,78 @@
+<head>
+  <link rel="stylesheet" href="/listarOrdenes.css">
+</head>
+
+<div class="main-content">
+  <h1>Órdenes de Reabastecimiento</h1>
+
+  <!-- 🔘 BOTÓN “CREAR ORDEN” -->
+  <div class="crear-orden-container">
+    <a href="/ordenes/nueva" class="btn-crear-orden">
+      <i class="fas fa-plus-circle"></i> Crear Orden
+    </a>
+  </div>
+
+  <table class="tabla-ordenes">
+    <thead>
+      <tr>
+        <th>ID Orden</th>
+        <th>Proveedor</th>
+        <th>Fecha</th>
+        <th>Productos</th>
+      </tr>
+    </thead>
+    <tbody>
+      <% ordenes.forEach(orden => { %>
+        <tr>
+          <td><%= orden.id_order %></td>
+          <td><%= orden.proveedor %></td>
+          <td>
+            <% 
+              // Validar y mostrar fecha formateada
+              let fechaFormateada = 'Fecha inválida';
+              if (orden.fecha) {
+                try {
+                  fechaFormateada = new Date(orden.fecha).toLocaleString('es-PE', { timeZone: 'America/Lima' });
+                } catch {}
+              }
+            %>
+            <%= fechaFormateada %>
+          </td>
+          <td>
+            <% 
+              let productos = [];
+              try {
+                productos = typeof orden.products === 'string'
+                  ? JSON.parse(orden.products)
+                  : (Array.isArray(orden.products) ? orden.products : []);
+              } catch (e) {
+                productos = [];
+              }
+            %>
+
+            <% if (productos.length > 0) { %>
+              <table class="tabla-productos">
+                <thead>
+                  <tr>
+                    <th>Producto</th>
+                    <th>Cantidad</th>
+                  </tr>
+                </thead>
+                <tbody>
+                  <% productos.forEach(producto => { %>
+                    <tr>
+                      <td><%= producto.nombre %></td>
+                      <td><%= producto.cantidad %></td>
+                    </tr>
+                  <% }) %>
+                </tbody>
+              </table>
+            <% } else { %>
+              <em>Sin productos</em>
+            <% } %>
+          </td>
+        </tr>
+      <% }) %>
+    </tbody>
+  </table>
+</div>

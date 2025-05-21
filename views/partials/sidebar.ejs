@@ -7,6 +7,7 @@
     <a href="/productos" class="menu-link"><i class="fas fa-box"></i> <span>Productos</span></a>
     <a href="/proveedores" class="menu-link"><i class="fas fa-truck"></i> <span>Proveedores</span></a>
     <a href="/movimientos" class="menu-link"><i class="fas fa-arrows-rotate"></i> <span>Movimientos</span></a>
+    <a href="/ordenes" class="menu-link"><i class="fas fa-clipboard-list"></i><span>Órdenes</span></a>
     <% if (user.rol === 'Admin') { %>
       <a href="/usuarios" class="menu-link"><i class="fas fa-users"></i> <span>Usuarios</span></a>
     <% } %>
@@ -59,10 +60,10 @@ document.addEventListener('DOMContentLoaded', function() {
   // sidebar.insertAdjacentHTML('beforeend', profileSection);
   
   // Add mobile toggle button and overlay
-  const mobileToggle = document.createElement('div');
-  mobileToggle.className = 'mobile-toggle';
-  mobileToggle.innerHTML = '<i class="fas fa-bars"></i>';
-  document.body.appendChild(mobileToggle);
+  // const mobileToggle = document.createElement('div');
+  // mobileToggle.className = 'mobile-toggle';
+  // mobileToggle.innerHTML = '<i class="fas fa-bars"></i>';
+  // document.body.appendChild(mobileToggle);
   
   const overlay = document.createElement('div');
   overlay.className = 'overlay';

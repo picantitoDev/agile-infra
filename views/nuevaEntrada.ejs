@@ -40,14 +40,18 @@
         <button type="button" id="btnCargarOrden">Cargar Orden</button>
 
         <!-- Datos de la orden cargada -->
-        <div id="orden-info" style="display:none;">
-          <p>ID Orden: <span id="orden-id"></span></p>
-          <p>Fecha: <span id="orden-fecha"></span></p>
-          <p>Proveedor: <span id="orden-proveedor"></span></p>
-          
-          <!-- Aquí muestras los productos -->
-          <div id="productos-orden"></div>
+      <div id="orden-info" style="display: none;">
+        <div style="background-color: #f9fafb; padding: 1.5rem; border-radius: 0.75rem; box-shadow: 0 2px 8px rgba(0, 0, 0, 0.05); max-width: 700px; margin: auto; font-family: 'Inter', sans-serif;">
+          <p style="font-size: 1.2rem; font-weight: bold; margin: 0;">ID Orden: <span id="orden-id"></span></p>
+          <p style="margin: 0.3rem 0;">Fecha: <span id="orden-fecha"></span></p>
+          <p style="margin: 0.3rem 0;">Proveedor: <strong><span id="orden-proveedor"></span></strong></p>
+
+          <div id="productos-orden" style="margin-top: 1.25rem;">
+            <!-- Aquí se insertará la lista de productos desde JS -->
+          </div>
         </div>
+      </div>
+
       </div>
 
       <form
@@ -297,12 +301,30 @@ btnCargarOrden.addEventListener('click', async () => {
     if (orden.products && orden.products.length > 0) {
       productosOrdenDiv.innerHTML = '';
       orden.products.forEach(producto => {
-        const p = document.createElement('p');
-        p.textContent = `${producto.nombre} - Cantidad: ${producto.cantidad}`;
-        productosOrdenDiv.appendChild(p);
+        const card = document.createElement('div');
+        card.style = `
+          background-color: #ffffff;
+          border: 1px solid #e5e7eb;
+          border-radius: 0.5rem;
+          padding: 0.75rem 1rem;
+          margin-bottom: 0.5rem;
+          display: flex;
+          justify-content: space-between;
+          align-items: center;
+          font-size: 0.95rem;
+          color: #374151;
+          box-shadow: 0 1px 3px rgba(0,0,0,0.05);
+        `;
+
+        card.innerHTML = `
+          <span style="font-weight: 500;">${producto.nombre}</span>
+          <span style="font-weight: 600;">Cantidad: ${producto.cantidad}</span>
+        `;
+
+        productosOrdenDiv.appendChild(card);
       });
     } else {
-      productosOrdenDiv.innerHTML = '<p>No hay productos en esta orden.</p>';
+      productosOrdenDiv.innerHTML = '<p style="color: #6b7280;">No hay productos en esta orden.</p>';
     }
 
     // Limpiar carrito y resumen

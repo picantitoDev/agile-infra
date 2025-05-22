@@ -60,7 +60,7 @@ async function obtenerOrdenPorId(req, res) {
     }
 
     res.json(orden);
-    console.log(orden);
+    // console.log(orden);
   } catch (error) {
     console.error('Error al obtener la orden por ID:', error);
     res.status(500).json({ mensaje: 'Error interno del servidor' });

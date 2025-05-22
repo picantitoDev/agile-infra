@@ -183,11 +183,12 @@ async function registrarEntradaGet(req, res) {
 
 async function registrarEntradaPost(req, res) {
   const {
-    proveedor, // El proveedor de la compra
-    productos, // Este campo es un string JSON, lo convertimos a objeto
-    total, // El total de la compra
-    descripcion, // Descripción de la compra
-  } = req.body
+    proveedor,
+    productos,
+    total,
+    descripcion,
+    id_orden, 
+  } = req.body;
 
   console.log(req.body)
   const usuarioId = req.user.id // Asegúrate de que el usuario esté autenticado
@@ -210,7 +211,8 @@ async function registrarEntradaPost(req, res) {
       id_movimiento,
       id_proveedor: proveedor,
       total,
-    })
+      id_orden, // la id orden se pasa al query tambien
+    });
 
     // 3. Registrar los productos en `producto_movimiento` y actualizar el stock
     for (let producto of productosArray) {

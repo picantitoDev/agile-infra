@@ -129,19 +129,20 @@ async function registrarMovimientoCompra({
   id_movimiento,
   id_proveedor,
   total,
+  id_orden,
 }) {
   const query = `
-      INSERT INTO movimiento_entrada (id_movimiento, id_proveedor, total)
-      VALUES ($1, $2, $3)
-    `
+    INSERT INTO movimiento_entrada (id_movimiento, id_proveedor, total, id_orden)
+    VALUES ($1, $2, $3, $4)
+  `;
 
-  const values = [id_movimiento, id_proveedor, total]
+  const values = [id_movimiento, id_proveedor, total, id_orden];
 
   try {
-    await pool.query(query, values)
+    await pool.query(query, values);
   } catch (error) {
-    console.error("Error al insertar movimiento compra:", error)
-    throw error
+    console.error("Error al insertar movimiento compra:", error);
+    throw error;
   }
 }
 

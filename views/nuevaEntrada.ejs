@@ -144,6 +144,7 @@
 
         <!-- Resumen de Entrada -->
         <div class="seccion resumen-entrada">
+          
           <h3>
             <svg
               class="icon"
@@ -225,7 +226,7 @@
             ></textarea>
           </div>
         </div>
-
+        <input type="hidden" name="id_orden" id="input-id-orden" />
         <!-- Botón de Enviar -->
         <div class="seccion submit-btn">
           <button type="submit" class="submit-button btn-primary">
@@ -285,6 +286,7 @@ btnCargarOrden.addEventListener('click', async () => {
     ordenIdSpan.textContent = orden.id_order;
     ordenFechaSpan.textContent = new Date(orden.fecha).toLocaleDateString();
     ordenProveedorSpan.textContent = orden.proveedor || 'Sin proveedor';
+    document.getElementById('input-id-orden').value = orden.id_order
     ordenInfoDiv.style.display = 'block';
 
     proveedorSelect.disabled = false;

@@ -19,6 +19,41 @@ async function obtenerProductos() {
   return rows
 }
 
+async function obtenerProductosParaOrden() {
+  const { rows } = await pool.query(`
+    SELECT 
+      p.id_producto,
+      p.nombre,
+      p.stock,
+      p.precio_unitario,
+      p.cantidad_minima,
+      p.estado,
+      c.nombre AS categoria,
+      pr.razon_social AS proveedor,
+      p.id_proveedor
+    FROM producto p
+    JOIN categoria c ON p.id_categoria = c.id_categoria
+    JOIN proveedor pr ON p.id_proveedor = pr.id_proveedor
+    ORDER BY p.nombre ASC
+  `)
+  return rows
+}
+
+async function obtenerProductosCriticos() {
+  try {
+    const resultado = await pool.query(`
+      SELECT COUNT(*) AS total
+      FROM producto
+      WHERE stock < cantidad_minima AND estado = 'Activado'
+    `);
+
+    return parseInt(resultado.rows[0].total, 10);
+  } catch (error) {
+    console.error('Error al obtener productos críticos:', error);
+    return 0; // En caso de error, devolvemos 0
+  }
+}
+
 async function obtenerProductoPorId(id) {
   const { rows } = await pool.query(
     `SELECT 
@@ -127,4 +162,6 @@ module.exports = {
   obtenerIdProductoPorNombre,
   aumentarStock,
   disminuirStock,
+  obtenerProductosCriticos,
+  obtenerProductosParaOrden
 }

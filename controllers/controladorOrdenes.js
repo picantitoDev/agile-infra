@@ -1,33 +1,59 @@
 const dbOrdenes = require('../model/queriesOrdenes');
 const dbProductos = require("../model/queriesProductos")
 const dbProveedores = require("../model/queriesProveedores")
-async function listarOrdenes (req, res) {
+
+async function listarOrdenes(req, res) {
   try {
     const ordenes = await dbOrdenes.obtenerOrdenes();
-    ordenes.map(orden => ({
-  ...orden,
-  fecha: new Date(orden.fecha).toISOString() 
-    }));
-    console.log(ordenes)
-    res.render('ordenes', { ordenes, user: req.user });
+
+    const productosBajoStock = await dbProductos.obtenerProductosCriticos();
+
+    res.render('ordenes', { ordenes, productosBajoStock, user: req.user });
   } catch (error) {
     console.error('Error al obtener órdenes:', error);
     res.status(500).send('Error al obtener órdenes');
   }
-};
+}
 
-async function crearOrdenGet(req, res){
-  try{
-    const productosTotales = await dbProductos.obtenerProductos()
-    const proveedores = await dbProveedores.obtenerProveedores()
-    const productos = productosTotales.filter((p) => p.estado === "Activado")
-    res.render("crearOrden", {proveedores, productos})
-  }
-catch(error){
-      console.error('Error al crear orden:', error);
-      res.status(500).send('Error al crear orden');
+async function crearOrdenGet(req, res) {
+  try {
+    const productosTotales = await dbProductos.obtenerProductosParaOrden();
+    console.log("Ejemplo producto:", productosTotales[0]);
+    const proveedores     = await dbProveedores.obtenerProveedores();
+
+    // Solo productos activados (ignoramos mayúsculas/minúsculas)
+    const productos = productosTotales.filter(
+      p => (p.estado || '').toLowerCase() === 'activado'
+    );
+
+    // IDs de proveedores con productos críticos (forzamos a Number)
+    const proveedoresConStockBajo = new Set(
+      productos
+        .filter(p => Number(p.stock) < Number(p.cantidad_minima))
+        .map(p => Number(p.id_proveedor))
+    );
+
+    // Marcamos cada proveedor
+    const proveedoresMarcados = proveedores.map(p => ({
+      ...p,
+      tieneStockBajo: proveedoresConStockBajo.has(Number(p.id_proveedor))
+    }));
+
+    console.log("Productos activados:", productos.length);
+    console.log("Proveedores con stock bajo:", Array.from(proveedoresConStockBajo));
+    console.log("Proveedores marcados:", proveedoresMarcados.map(p => ({
+      id: p.id_proveedor,
+      tieneStockBajo: p.tieneStockBajo
+    })));
+
+    res.render('crearOrden', { proveedores: proveedoresMarcados, productos });
+  } catch (error) {
+    console.error('Error al crear orden:', error);
+    res.status(500).send('Error al crear orden');
   }
 }
+
+
 
 async function crearOrdenPost(req, res) {
   try {

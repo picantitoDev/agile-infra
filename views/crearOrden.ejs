@@ -1,6 +1,11 @@
 <head>
         <link rel="stylesheet" href="/registrarEntrada.css" />
 <title>Crear Orden</title>
+<style>
+  .stock-bajo {
+  color: red;
+}
+</style>
 </head>
 
   <body>
@@ -18,15 +23,15 @@
           <h3>
             Proveedor
           </h3>
-          <select id="proveedor" name="proveedor">
-            <option value="">Seleccione un proveedor</option>
+        <select id="proveedor" name="proveedor">
+          <option value="">Seleccione un proveedor</option>
             <% proveedores.forEach(proveedor => { %>
-            <option value="<%= proveedor.id_proveedor %>">
-              <%= proveedor.razon_social %>
-            </option>
+              <option value="<%= proveedor.id_proveedor %>" class="<%= proveedor.tieneStockBajo ? 'stock-bajo' : '' %>">                
+                <%= proveedor.razon_social %>
+                <% if (proveedor.tieneStockBajo) { %> - (Productos con bajo stock)<% } %>
+              </option>
             <% }); %>
-          </select>
-
+        </select>
           <!-- Mostrar información del proveedor seleccionado -->
           <div id="proveedor-info">
             <p>

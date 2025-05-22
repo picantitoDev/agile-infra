@@ -1,14 +1,60 @@
 <head>
   <link rel="stylesheet" href="/listarOrdenes.css">
+  <style>
+        .alerta-stock {
+      margin-top: 1rem;
+      padding: 10px 15px;
+      border-radius: 6px;
+      font-weight: bold;
+      background-color: #fff3cd;
+      color: #856404;
+      border: 1px solid #ffeeba;
+    }
+
+    .alerta-ok {
+      background-color: #d4edda;
+      color: #155724;
+      border: 1px solid #c3e6cb;
+    }
+
+    .btn-crear-orden {
+      position: relative;
+    }
+
+    .icono-alerta {
+      color: red;
+      margin-left: 8px;
+      animation: parpadeo 1.5s infinite;
+    }
+
+    @keyframes parpadeo {
+      0%, 100% { opacity: 1; }
+      50% { opacity: 0; }
+    }
+  </style>
 </head>
 
 <div class="main-content">
   <h1>Órdenes de Reabastecimiento</h1>
 
+    <% if (productosBajoStock > 0) { %>
+    <div class="alerta-stock">
+      🚨 Tienes <strong><%= productosBajoStock %></strong> producto(s) con stock bajo. ¡Necesitas crear una orden!
+    </div>
+  <% } else { %>
+    <div class="alerta-stock alerta-ok">
+      ✅ No tienes órdenes pendientes :)
+    </div>
+  <% } %>
+
+
   <!-- 🔘 BOTÓN “CREAR ORDEN” -->
   <div class="crear-orden-container">
     <a href="/ordenes/nueva" class="btn-crear-orden">
       <i class="fas fa-plus-circle"></i> Crear Orden
+      <% if (productosBajoStock > 0) { %>
+        <i class="fas fa-exclamation-circle icono-alerta"></i>
+      <% } %>
     </a>
   </div>
 

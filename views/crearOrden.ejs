@@ -67,7 +67,7 @@
             <thead>
               <tr>
                 <th>Producto</th>
-                <th>Precio</th>
+                <th>Stock</th>
                 <th>Acción</th>
               </tr>
             </thead>
@@ -200,24 +200,40 @@
       })
 
       // Función para renderizar la tabla de productos filtrados
-      function renderTablaBusqueda(filtrados) {
-        tablaProductos.innerHTML = "" // Limpiar la tabla antes de agregar nuevas filas
-        if (filtrados.length === 0) {
-          tablaProductos.innerHTML = `<tr><td colspan="3">No se encontraron productos</td></tr>`
-          return
-        }
+    function renderTablaBusqueda(filtrados) {
+      tablaProductos.innerHTML = ""; // Limpiar la tabla antes de agregar nuevas filas
 
-        // Itera sobre los productos filtrados y los muestra en la tabla
-        filtrados.forEach((prod) => {
-          const row = document.createElement("tr")
-          row.innerHTML = `
-            <td>${prod.nombre}</td>
-            <td>S/. ${prod.precio_unitario}</td>
-            <td><button type="button" onclick="agregarProducto(${prod.id_producto})">Agregar</button></td>
-          `
-          tablaProductos.appendChild(row)
-        })
+      if (filtrados.length === 0) {
+        tablaProductos.innerHTML = `<tr><td colspan="3">No se encontraron productos</td></tr>`;
+        return;
       }
+
+      // Ordenar: productos con stock bajo primero
+      filtrados.sort((a, b) => {
+        const aEsBajo = a.stock < a.cantidad_minima;
+        const bEsBajo = b.stock < b.cantidad_minima;
+        return aEsBajo === bEsBajo ? 0 : aEsBajo ? -1 : 1;
+      });
+
+      // Itera sobre los productos filtrados y los muestra en la tabla
+      filtrados.forEach((prod) => {
+        const row = document.createElement("tr");
+
+        const stockEsBajo = prod.stock < prod.cantidad_minima;
+        const stockTexto = stockEsBajo
+          ? `<span style="color: red; font-weight: bold;">${prod.stock} ⚠️ (bajo)</span>`
+          : prod.stock;
+
+        row.innerHTML = `
+          <td>${prod.nombre}</td>
+          <td>${stockTexto}</td>
+          <td><button type="button" onclick="agregarProducto(${prod.id_producto})">Agregar</button></td>
+        `;
+
+        tablaProductos.appendChild(row);
+      });
+    }
+
 
       // Función para agregar un producto al carrito
       function agregarProducto(idProducto) {

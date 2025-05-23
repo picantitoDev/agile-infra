@@ -197,37 +197,39 @@ async function registrarEntradaPost(req, res) {
   const productosArray = JSON.parse(productos)
 
   try {
-    // 1. Registrar el movimiento principal (tipo = "Compra")
-    const id_movimiento = await dbMovimientos.registrarMovimiento({
-      id_usuario: usuarioId,
-      tipo: "Compra", // Tipo de movimiento
-      fecha: fecha,
-      descripcion,
-    })
 
-    // 2. Registrar el movimiento de compra con el proveedor y el total
-    await dbMovimientos.registrarMovimientoCompra({
-      id_movimiento,
-      id_proveedor: proveedor,
-      total,
-      id_orden, // la id orden se pasa al query tambien
-    });
+    console.log(productosArray)
+    // // 1. Registrar el movimiento principal (tipo = "Compra")
+    // const id_movimiento = await dbMovimientos.registrarMovimiento({
+    //   id_usuario: usuarioId,
+    //   tipo: "Compra", // Tipo de movimiento
+    //   fecha: fecha,
+    //   descripcion,
+    // })
 
-    // 3. Registrar los productos en `producto_movimiento` y actualizar el stock
-    for (let producto of productosArray) {
-      const { id_producto, cantidad, precio_unitario } = producto
-      const subtotal = cantidad * parseFloat(precio_unitario)
+    // // 2. Registrar el movimiento de compra con el proveedor y el total
+    // await dbMovimientos.registrarMovimientoCompra({
+    //   id_movimiento,
+    //   id_proveedor: proveedor,
+    //   total,
+    //   id_orden, // la id orden se pasa al query tambien
+    // });
 
-      // 3.1 Registrar en `producto_movimiento`
-      await dbMovimientos.registrarProductoMovimiento({
-        id_producto,
-        id_movimiento,
-        cantidad,
-        precio_unitario,
-        subtotal,
-      })
-      await dbProductos.aumentarStock(id_producto, cantidad)
-    }
+    // // 3. Registrar los productos en `producto_movimiento` y actualizar el stock
+    // for (let producto of productosArray) {
+    //   const { id_producto, cantidad, precio_unitario } = producto
+    //   const subtotal = cantidad * parseFloat(precio_unitario)
+
+    //   // 3.1 Registrar en `producto_movimiento`
+    //   await dbMovimientos.registrarProductoMovimiento({
+    //     id_producto,
+    //     id_movimiento,
+    //     cantidad,
+    //     precio_unitario,
+    //     subtotal,
+    //   })
+    //   await dbProductos.aumentarStock(id_producto, cantidad)
+    // }
 
     res.redirect("/movimientos") // Redirige después de registrar la entrada
   } catch (error) {

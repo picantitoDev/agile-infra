@@ -9,15 +9,16 @@ const pool = require("./pool")
  * @param {string|null} incidencia.descripcion_general - Descripción general de la incidencia (opcional)
  * @param {Array} incidencia.detalle_productos - Lista de productos con incidencia (JSON serializable)
  */
-async function registrarIncidencia({ id_movimiento, descripcion_general, detalle_productos }) {
+async function registrarIncidencia({ id_movimiento, descripcion_general, detalle_productos, id_orden = null }) {
   const query = `
-    INSERT INTO incidencia (id_movimiento, descripcion_general, detalle_productos)
-    VALUES ($1, $2, $3)
+    INSERT INTO incidencia (id_movimiento, descripcion_general, detalle_productos, id_orden)
+    VALUES ($1, $2, $3, $4)
   `
   const values = [
     id_movimiento,
     descripcion_general || null,
     JSON.stringify(detalle_productos),
+    id_orden
   ]
 
   try {
@@ -28,11 +29,13 @@ async function registrarIncidencia({ id_movimiento, descripcion_general, detalle
   }
 }
 
+
 async function obtenerIncidencias() {
   const query = `
     SELECT 
       i.id_incidencia,
       i.id_movimiento,
+      i.id_orden,
       i.descripcion_general,
       i.detalle_productos,
       i.fecha_registro,
@@ -53,6 +56,7 @@ async function obtenerIncidencias() {
     throw error
   }
 }
+
 
 module.exports = {
   registrarIncidencia,

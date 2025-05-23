@@ -231,10 +231,11 @@ async function registrarEntradaPost(req, res) {
       await dbProductos.aumentarStock(id_producto, cantidad)
     }
     // 4. Registrar la incidencia si existe alguna
-    const productosConIncidencia = productosArray.filter(p => p.incidencia && p.incidencia.trim() !== "");
+    const productosConIncidencia = productosArray.filter(
+      p => p.incidencia && p.incidencia.trim() !== ""
+    );
 
     if (productosConIncidencia.length > 0) {
-      // Solo guarda los datos relevantes de la incidencia
       const detalleIncidencias = productosConIncidencia.map(p => ({
         id_producto: p.id_producto,
         nombre: p.nombre,
@@ -244,9 +245,9 @@ async function registrarEntradaPost(req, res) {
 
       await dbIncidencias.registrarIncidencia({
         id_movimiento,
-        descripcion_general: descripcion || null,
+        id_orden: id_orden || null,
+        descripcion_general: descripcion || "Complicaciones en la Llegada de la Entrada",
         detalle_productos: detalleIncidencias,
-        fecha,
       });
     }
     res.redirect("/movimientos") // Redirige después de registrar la entrada

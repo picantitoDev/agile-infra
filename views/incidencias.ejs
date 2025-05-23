@@ -1,0 +1,88 @@
+<section class="content-header mb-4">
+  <h1 class="text-2xl font-semibold">Incidencias</h1>
+</section>
+
+<section class="content">
+  <table class="table table-striped w-full">
+    <thead>
+      <tr>
+        <th>#</th>
+        <th>ID Movimiento</th>
+        <th>Fecha registro</th>
+        <th>Descripción general</th>
+        <th>Productos</th>
+      </tr>
+    </thead>
+    <tbody>
+      <% incidencias.forEach((inc, idx) => { %>
+        <tr>
+          <td><%= idx + 1 %></td>
+          <td><%= inc.id_movimiento %></td>
+          <td>
+            <%= new Date(inc.fecha_registro)
+                  .toLocaleString('es-PE', { dateStyle:'short', timeStyle:'short' }) %>
+          </td>
+          <td><%= inc.descripcion_general || '-' %></td>
+          <td>
+            <button type="button"
+                    class="btn btn-sm btn-primary ver-detalle"
+                    data-detalle='<%- JSON.stringify(inc.detalle_productos) %>'>
+              Ver detalle
+            </button>
+          </td>
+        </tr>
+      <% }) %>
+    </tbody>
+  </table>
+</section>
+
+<!-- Modal básico -->
+<div id="detalleModal"
+     class="fixed inset-0 bg-black/40 hidden items-center justify-center">
+  <div class="bg-white rounded-lg shadow-lg max-w-lg w-full">
+    <div class="flex justify-between items-center p-4 border-b">
+      <h3 class="text-lg font-semibold">Detalle de productos</h3>
+      <button class="text-xl leading-none" onclick="cerrarModal()">&times;</button>
+    </div>
+    <div class="p-4 overflow-y-auto max-h-96">
+      <table class="table table-sm w-full" id="detalleTabla">
+        <thead>
+          <tr>
+            <th>Producto</th>
+            <th>Cantidad</th>
+            <th>Incidencia</th>
+          </tr>
+        </thead>
+        <tbody></tbody>
+      </table>
+    </div>
+  </div>
+</div>
+
+<script>
+  // Modal helpers
+  const modal  = document.getElementById('detalleModal');
+  const tbody  = document.querySelector('#detalleTabla tbody');
+
+  document.querySelectorAll('.ver-detalle').forEach(btn => {
+    btn.addEventListener('click', () => {
+      const detalle = JSON.parse(btn.dataset.detalle || '[]');
+      tbody.innerHTML = '';
+      detalle.forEach(p => {
+        const tr = document.createElement('tr');
+        tr.innerHTML = `
+          <td>${p.nombre}</td>
+          <td>${p.cantidad}</td>
+          <td>${p.incidencia}</td>`;
+        tbody.appendChild(tr);
+      });
+      modal.classList.remove('hidden');
+      modal.classList.add('flex');
+    });
+  });
+
+  function cerrarModal() {
+    modal.classList.add('hidden');
+    modal.classList.remove('flex');
+  }
+</script>

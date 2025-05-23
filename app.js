@@ -19,6 +19,7 @@ const rutaProveedores = require("./routes/rutaProveedores")
 const rutaUsuarios = require("./routes/rutaUsuarios")
 const rutaMovimientos = require("./routes/rutaMovimientos")
 const rutaOrdenes = require('./routes/rutaOrdenes');
+const rutaIncidencias = require("./routes/rutaIncidencias")
 
 // Middleware
 app.use(express.json())
@@ -67,6 +68,7 @@ app.use("/proveedores", validarSesion, rutaProveedores)
 app.use("/usuarios", validarSesion, verificarAdmin, rutaUsuarios)
 app.use('/ordenes', validarSesion, rutaOrdenes);
 app.use("/movimientos", validarSesion, rutaMovimientos)
+app.use("/incidencias", validarSesion, rutaIncidencias)
 
 // Login
 app.post(

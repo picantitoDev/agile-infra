@@ -1,9 +1,11 @@
 const dbMovimientos = require("../model/queriesMovimientos")
 const dbProductos = require("../model/queriesProductos")
 const dbProveedores = require("../model/queriesProveedores")
+const dbIncidencias = require("../model/queriesIncidencias")
 const dbUsuarios = require("../model/queriesUsuarios")
 const dbClientes = require("../model/queriesClientes")
 const pdfUtils = require("../utils/pdfGenerator")
+
 const { DateTime } = require("luxon")
 
 async function obtenerMovimientos(req, res) {
@@ -197,54 +199,62 @@ async function registrarEntradaPost(req, res) {
   const productosArray = JSON.parse(productos)
 
   try {
+    // 1. Registrar el movimiento principal (tipo = "Compra")
+    const id_movimiento = await dbMovimientos.registrarMovimiento({
+      id_usuario: usuarioId,
+      tipo: "Compra", // Tipo de movimiento
+      fecha: fecha,
+      descripcion,
+    })
 
-    console.log(productosArray)
-    // // 1. Registrar el movimiento principal (tipo = "Compra")
-    // const id_movimiento = await dbMovimientos.registrarMovimiento({
-    //   id_usuario: usuarioId,
-    //   tipo: "Compra", // Tipo de movimiento
-    //   fecha: fecha,
-    //   descripcion,
-    // })
+    // 2. Registrar el movimiento de compra con el proveedor y el total
+    await dbMovimientos.registrarMovimientoCompra({
+      id_movimiento,
+      id_proveedor: proveedor,
+      total,
+      id_orden, // la id orden se pasa al query tambien
+    });
 
-    // // 2. Registrar el movimiento de compra con el proveedor y el total
-    // await dbMovimientos.registrarMovimientoCompra({
-    //   id_movimiento,
-    //   id_proveedor: proveedor,
-    //   total,
-    //   id_orden, // la id orden se pasa al query tambien
-    // });
+    // 3. Registrar los productos en `producto_movimiento` y actualizar el stock
+    for (let producto of productosArray) {
+      const { id_producto, cantidad, precio_unitario } = producto
+      const subtotal = cantidad * parseFloat(precio_unitario)
 
-    // // 3. Registrar los productos en `producto_movimiento` y actualizar el stock
-    // for (let producto of productosArray) {
-    //   const { id_producto, cantidad, precio_unitario } = producto
-    //   const subtotal = cantidad * parseFloat(precio_unitario)
+      // 3.1 Registrar en `producto_movimiento`
+      await dbMovimientos.registrarProductoMovimiento({
+        id_producto,
+        id_movimiento,
+        cantidad,
+        precio_unitario,
+        subtotal,
+      })
+      await dbProductos.aumentarStock(id_producto, cantidad)
+    }
+    // 4. Registrar la incidencia si existe alguna
+    const productosConIncidencia = productosArray.filter(p => p.incidencia && p.incidencia.trim() !== "");
 
-    //   // 3.1 Registrar en `producto_movimiento`
-    //   await dbMovimientos.registrarProductoMovimiento({
-    //     id_producto,
-    //     id_movimiento,
-    //     cantidad,
-    //     precio_unitario,
-    //     subtotal,
-    //   })
-    //   await dbProductos.aumentarStock(id_producto, cantidad)
-    // }
+    if (productosConIncidencia.length > 0) {
+      // Solo guarda los datos relevantes de la incidencia
+      const detalleIncidencias = productosConIncidencia.map(p => ({
+        id_producto: p.id_producto,
+        nombre: p.nombre,
+        cantidad: p.cantidad,
+        incidencia: p.incidencia,
+      }));
 
+      await dbIncidencias.registrarIncidencia({
+        id_movimiento,
+        descripcion_general: descripcion || null,
+        detalle_productos: detalleIncidencias,
+        fecha,
+      });
+    }
     res.redirect("/movimientos") // Redirige después de registrar la entrada
   } catch (error) {
     console.error("Error al registrar entrada:", error)
     res.status(500).send("Error al registrar entrada")
   }
 }
-
-
-
-
-
-
-
-
 
 
 

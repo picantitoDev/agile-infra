@@ -318,6 +318,40 @@ body {
     left: 100%;
   }
 }
+
+/* Logout Section */
+.logout-section {
+  position: absolute;
+  bottom: 20px;
+  left: 0;
+  width: 100%;
+  padding: 0 14px;
+}
+
+.logout-link {
+  margin-top: auto;
+  background: rgba(255, 255, 255, 0.1);
+}
+
+.logout-link:hover {
+  background: rgba(255, 0, 0, 0.2) !important;
+  color: #fff !important;
+}
+
+/* Ajustes para el tooltip del logout */
+.logout-link .tooltip {
+  left: 70px;
+  top: 50%;
+  transform: translateY(-50%);
+  width: 110px;
+  padding: 0 0 ;
+}
+
+/* Ajuste para cuando el sidebar está activo */
+.sidebar.active .logout-section {
+  padding: 0 14px;
+}
+
 /* LOGIN FORM */
 /* Reset and Base Styles */
 * {

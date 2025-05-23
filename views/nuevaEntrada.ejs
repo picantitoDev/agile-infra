@@ -123,20 +123,11 @@
             </svg>
             Productos
           </h3>
-          <div class="search">
-            <input
-              type="text"
-              id="buscarProducto"
-              class="search-input"
-              placeholder="Buscar producto..."
-              disabled
-            />
-          </div>
           <table class="productos-table">
             <thead>
               <tr>
                 <th>Producto</th>
-                <th>Precio</th>
+                <th>Stock</th>
                 <th>Acción</th>
               </tr>
             </thead>
@@ -170,9 +161,7 @@
             <thead>
               <tr>
                 <th>Producto</th>
-                <th>Precio</th>
                 <th>Cantidad</th>
-                <th>Subtotal</th>
                 <th>Quitar</th>
               </tr>
             </thead>
@@ -180,7 +169,7 @@
               <!-- Productos agregados se mostrarán aquí -->
             </tbody>
           </table>
-          <div class="total-container">
+          <div class="total-container" style="display: none;">
             <p class="total-text">
               Total: S/. <span id="totalVenta">0.00</span>
             </p>
@@ -200,7 +189,7 @@
         </div>
 
         <!-- Descripción -->
-        <div class="seccion descripcion">
+        <div class="seccion descripcion" style="display: none;">
           <div class="input-group">
             <label for="descripcion">
               <svg
@@ -226,7 +215,6 @@
               cols="50"
               placeholder="Agrega una breve descripción de la entrada"
               class="textarea-field"
-              required
             ></textarea>
           </div>
         </div>
@@ -258,7 +246,6 @@
       const proveedorSelect = document.getElementById("proveedor")
       const proveedorInfo = document.getElementById("proveedor-info")
       const tablaProductos = document.getElementById("tablaProductos")
-      const buscarInput = document.getElementById("buscarProducto")
       const resumenEntrada = document.getElementById("resumenEntrada")
       const totalVenta = document.getElementById("totalVenta")
       const productosInput = document.querySelector(".productos-seleccionados")
@@ -267,78 +254,88 @@
       const productosOrdenDiv = document.getElementById('productos-orden');
       const ordenProveedorSpan = document.getElementById('orden-proveedor');
 
-const ordenIdInput = document.getElementById('ordenId');
-const btnCargarOrden = document.getElementById('btnCargarOrden');
-const ordenInfoDiv = document.getElementById('orden-info');
-const ordenIdSpan = document.getElementById('orden-id');
-const ordenFechaSpan = document.getElementById('orden-fecha');
-const ordenDescripcionSpan = document.getElementById('orden-descripcion');
+    const ordenIdInput = document.getElementById('ordenId');
+    const btnCargarOrden = document.getElementById('btnCargarOrden');
+    const ordenInfoDiv = document.getElementById('orden-info');
+    const ordenIdSpan = document.getElementById('orden-id');
+    const ordenFechaSpan = document.getElementById('orden-fecha');
+    const ordenDescripcionSpan = document.getElementById('orden-descripcion');
 
-btnCargarOrden.addEventListener('click', async () => {
-  const id = ordenIdInput.value.trim();
-  if (!id) {
-    alert('Por favor ingrese un ID de orden válido.');
-    return;
-  }
+    btnCargarOrden.addEventListener('click', async () => {
+      const id = ordenIdInput.value.trim();
+      if (!id) {
+        alert('Por favor ingrese un ID de orden válido.');
+        return;
+      }
 
-  try {
-    const response = await fetch(`/ordenes/${id}`);
-    if (!response.ok) throw new Error('Orden no encontrada');
+      try {
+        const response = await fetch(`/ordenes/${id}`);
+        if (!response.ok) throw new Error('Orden no encontrada');
 
-    const orden = await response.json();
+        const orden = await response.json();
 
-    ordenIdSpan.textContent = orden.id_order;
-    ordenFechaSpan.textContent = new Date(orden.fecha).toLocaleDateString();
-    ordenProveedorSpan.textContent = orden.proveedor || 'Sin proveedor';
-    document.getElementById('input-id-orden').value = orden.id_order
-    ordenInfoDiv.style.display = 'block';
+        ordenIdSpan.textContent = orden.id_order;
+        ordenFechaSpan.textContent = new Date(orden.fecha).toLocaleDateString();
+        ordenProveedorSpan.textContent = orden.proveedor || 'Sin proveedor';
+        document.getElementById('input-id-orden').value = orden.id_order
+        ordenInfoDiv.style.display = 'block';
 
-    proveedorSelect.disabled = false;
-    buscarInput.disabled = false;
-    buscarInput.value = '';
+        proveedorSelect.disabled = false;
 
-    // Aquí muestras los productos en formato texto o como quieras
-    if (orden.products && orden.products.length > 0) {
-      productosOrdenDiv.innerHTML = '';
-      orden.products.forEach(producto => {
-        const card = document.createElement('div');
-        card.style = `
-          background-color: #ffffff;
-          border: 1px solid #e5e7eb;
-          border-radius: 0.5rem;
-          padding: 0.75rem 1rem;
-          margin-bottom: 0.5rem;
-          display: flex;
-          justify-content: space-between;
-          align-items: center;
-          font-size: 0.95rem;
-          color: #374151;
-          box-shadow: 0 1px 3px rgba(0,0,0,0.05);
-        `;
+        // Aquí muestras los productos en formato texto o como quieras
+        if (orden.products && orden.products.length > 0) {
+          productosOrdenDiv.innerHTML = '';
+          orden.products.forEach(producto => {
+            const card = document.createElement('div');
+            card.style = `
+              background-color: #ffffff;
+              border: 1px solid #e5e7eb;
+              border-radius: 0.5rem;
+              padding: 0.75rem 1rem;
+              margin-bottom: 0.5rem;
+              display: flex;
+              justify-content: space-between;
+              align-items: center;
+              font-size: 0.95rem;
+              color: #374151;
+              box-shadow: 0 1px 3px rgba(0,0,0,0.05);
+            `;
 
-        card.innerHTML = `
-          <span style="font-weight: 500;">${producto.nombre}</span>
-          <span style="font-weight: 600;">Cantidad: ${producto.cantidad}</span>
-        `;
+            card.innerHTML = `
+              <span style="font-weight: 500;">${producto.nombre}</span>
+              <span style="font-weight: 600;">Cantidad: ${producto.cantidad}</span>
+            `;
 
-        productosOrdenDiv.appendChild(card);
-      });
-    } else {
-      productosOrdenDiv.innerHTML = '<p style="color: #6b7280;">No hay productos en esta orden.</p>';
-    }
+            productosOrdenDiv.appendChild(card);
+          });
+        } else {
+          productosOrdenDiv.innerHTML = '<p style="color: #6b7280;">No hay productos en esta orden.</p>';
+        }
 
-    // Limpiar carrito y resumen
-    carrito.length = 0;
-    renderResumenEntrada();
+        /* --- AUToseleccionar proveedor y cargar tabla ------------------- */
+        const provId = orden.id_proveedor;                // el backend ya lo envía
+        // 1) Selecciona el proveedor en el <select> y dispara el cambio
+        proveedorSelect.value = provId;
+        proveedorSelect.dispatchEvent(new Event('change'));
+        // 2) Opcional: bloquea el select para que no lo puedan cambiar
+        proveedorSelect.disabled = true;
 
-  } catch (error) {
-    alert('Error al cargar la orden: ' + error.message);
-    ordenInfoDiv.style.display = 'none';
-    proveedorSelect.disabled = true;
-    buscarInput.disabled = true;
-    tablaProductos.innerHTML = '<tr><td colspan="5">Ingrese y cargue una orden primero</td></tr>';
-  }
-});
+        // 3) Carga inmediatamente los productos de la orden en la tabla
+        renderTablaBusqueda(orden.products);              // usa tu misma función
+        /* --------------------------------------------------------------- */
+
+
+        // Limpiar carrito y resumen
+        carrito.length = 0;
+        renderResumenEntrada();
+
+      } catch (error) {
+        alert('Error al cargar la orden: ' + error.message);
+        ordenInfoDiv.style.display = 'none';
+        proveedorSelect.disabled = true;
+        tablaProductos.innerHTML = '<tr><td colspan="5">Ingrese y cargue una orden primero</td></tr>';
+      }
+    });
 
 
 
@@ -367,10 +364,6 @@ btnCargarOrden.addEventListener('click', async () => {
             document.getElementById("proveedor-direccion").textContent =
               proveedor.direccion
 
-            // Habilitar la búsqueda de productos y filtrar por proveedor
-            buscarInput.disabled = false
-            buscarInput.value = "" // Limpiar búsqueda
-
             // Filtrar productos por nombre del proveedor (razón social)
             const productosFiltrados = productos.filter((p) => {
               return p.proveedor === proveedor.razon_social
@@ -387,8 +380,6 @@ btnCargarOrden.addEventListener('click', async () => {
           document.getElementById("proveedor-telefono").textContent = ""
           document.getElementById("proveedor-correo").textContent = ""
           document.getElementById("proveedor-direccion").textContent = ""
-          buscarInput.disabled = true
-          buscarInput.value = ""
 
           // Limpiar la tabla de productos
           tablaProductos.innerHTML = `<tr><td colspan="3">Seleccione un proveedor para ver los productos</td></tr>`
@@ -408,7 +399,7 @@ btnCargarOrden.addEventListener('click', async () => {
           const row = document.createElement("tr")
           row.innerHTML = `
             <td>${prod.nombre}</td>
-            <td>S/. ${prod.precio_unitario}</td>
+            <td>${prod.stock}</td>
             <td><button type="button" onclick="agregarProducto(${prod.id_producto})">Agregar</button></td>
           `
           tablaProductos.appendChild(row)
@@ -451,11 +442,9 @@ btnCargarOrden.addEventListener('click', async () => {
           const row = document.createElement("tr")
           row.innerHTML = `
       <td>${item.producto.nombre}</td>
-      <td>S/. ${item.producto.precio_unitario}</td>
       <td><input type="number" value="${
         item.cantidad
       }" min="1" max="100" class="cantidad-input" data-index="${index}" /></td>
-      <td>S/. ${subtotal.toFixed(2)}</td>
       <td><button type="button" onclick="quitarProducto(${index})">Quitar</button></td>
     `
           resumenEntrada.appendChild(row)
@@ -493,26 +482,6 @@ btnCargarOrden.addEventListener('click', async () => {
           renderResumenEntrada()
         }
       }
-
-      // Evento para buscar productos
-      buscarInput.addEventListener("input", (e) => {
-        const query = e.target.value.toLowerCase() // Obtener el valor de búsqueda
-        const idProveedor = parseInt(proveedorSelect.value)
-        const proveedor = proveedores.find(
-          (p) => p.id_proveedor === idProveedor
-        )
-
-        const productosFiltrados = productos.filter((p) => {
-          return (
-            p.nombre.toLowerCase().includes(query) &&
-            p.proveedor === proveedor.razon_social
-          )
-        })
-
-        // Renderizar la tabla con los productos filtrados
-        renderTablaBusqueda(productosFiltrados)
-      })
-
       // Validar formulario antes de enviar
       const form = document.querySelector(".entrada-form")
       const submitButton = document.querySelector(".submit-button")

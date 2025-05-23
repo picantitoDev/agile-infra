@@ -190,7 +190,6 @@ async function registrarEntradaPost(req, res) {
     id_orden, 
   } = req.body;
 
-  console.log(req.body)
   const usuarioId = req.user.id // Asegúrate de que el usuario esté autenticado
   const fecha = DateTime.now().minus({ hours: 5 }).toISO()
 

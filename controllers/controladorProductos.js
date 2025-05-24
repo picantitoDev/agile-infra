@@ -2,7 +2,9 @@ const dbProductos = require("../model/queriesProductos")
 const dbCategorias = require("../model/queriesCategorias")
 const dbProveedores = require("../model/queriesProveedores")
 const dbUsuarios = require("../model/queriesUsuarios")
+const dbAuditoria = require("../model/queriesAuditoria")
 const pdfUtils = require("../utils/pdfGenerator")
+const { DateTime } = require("luxon")
 
 async function obtenerProductos(req, res) {
   try {
@@ -47,9 +49,9 @@ async function obtenerProductoPorId(req, res) {
 
 async function actualizarProducto(req, res) {
   try {
-    const id = parseInt(req.params.id, 10)
+    const id = parseInt(req.params.id, 10);
     if (isNaN(id)) {
-      return res.status(400).send("ID de producto no válido")
+      return res.status(400).send("ID de producto no válido");
     }
 
     const {
@@ -60,7 +62,7 @@ async function actualizarProducto(req, res) {
       id_proveedor,
       cantidad_minima,
       estado,
-    } = req.body
+    } = req.body;
 
     const datosActualizados = {
       nombre,
@@ -70,15 +72,56 @@ async function actualizarProducto(req, res) {
       id_proveedor: parseInt(id_proveedor),
       cantidad_minima: parseInt(cantidad_minima),
       estado,
+    };
+
+    // 1. Obtener datos actuales del producto
+    const productoActual = await dbProductos.obtenerProductoPorId(id);
+
+    if (!productoActual) {
+      return res.status(404).send("Producto no encontrado");
     }
 
-    await dbProductos.actualizarProducto(id, datosActualizados)
-    res.redirect("/productos")
+    // 2. Detectar campos modificados
+    const camposModificados = {};
+    for (const campo in datosActualizados) {
+      const actual = productoActual[campo];
+      const nuevo = datosActualizados[campo];
+
+      const esNumerico = typeof nuevo === 'number' || typeof actual === 'number';
+      const iguales = esNumerico
+        ? Number(actual) === Number(nuevo)
+        : actual === nuevo;
+
+      if (!iguales) {
+        camposModificados[campo] = {
+          antes: actual,
+          despues: nuevo,
+        };
+      }
+    }
+
+    // 3. Actualizar el producto
+    await dbProductos.actualizarProducto(id, datosActualizados);
+    const fecha = DateTime.now().minus({ hours: 5 }).toISO()
+    
+    // 4. Registrar auditoría si hubo cambios
+    if (Object.keys(camposModificados).length > 0) {
+      await dbAuditoria.registrarAuditoriaProducto({
+        id_producto: id,
+        id_usuario: req.user.id,
+        accion: "actualizar",
+        campos_modificados: camposModificados,
+        fecha: fecha
+      });
+    }
+
+    res.redirect("/productos");
   } catch (error) {
-    console.error("Error al actualizar el producto:", error)
-    res.status(500).send("Error al actualizar el producto")
+    console.error("Error al actualizar el producto:", error);
+    res.status(500).send("Error al actualizar el producto");
   }
 }
+
 
 async function crearProductoGet(req, res) {
   try {

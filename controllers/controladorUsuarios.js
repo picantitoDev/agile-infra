@@ -1,5 +1,6 @@
 const bcrypt = require("bcryptjs")
 const dbUsuarios = require("../model/queriesUsuarios")
+const dbAuditoria = require("../model/queriesAuditoria") 
 
 async function crearUsuarioGet(req, res) {
   try {
@@ -53,13 +54,14 @@ const crearUsuarioPost = async (req, res, next) => {
 const obtenerUsuarios = async (req, res) => {
   try {
     const usuarios = await dbUsuarios.obtenerUsuarios()
-    res.render("usuarios", { usuarios })
+    const auditorias = await dbAuditoria.obtenerAuditoriasConUsuarios() // nueva función
+
+    res.render("usuarios", { usuarios, auditorias })
   } catch (error) {
-    console.error("Error al obtener usuarios:", error)
-    res.status(500).send("Error al obtener las usuarios")
+    console.error("Error al obtener usuarios o auditorías:", error)
+    res.status(500).send("Error al obtener los datos de usuarios")
   }
 }
-
 module.exports = {
   crearUsuarioPost,
   obtenerUsuarios,

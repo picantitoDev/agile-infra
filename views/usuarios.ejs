@@ -55,6 +55,45 @@
         </tbody>
       </table>
       </div>
+      <h2 class="subtitle">Auditoría de productos</h2>
+        <div class="table-responsive">
+          <table class="usuarios-table">
+            <thead>
+              <tr>
+                <th>ID Auditoría</th>
+                <th>Usuario</th>
+                <th>ID Producto</th>
+                <th>Nombre Producto</th>  <!-- Nueva columna -->
+                <th>Acción</th>
+                <th>Campos Modificados</th>
+                <th>Fecha</th>
+              </tr>
+            </thead>
+            <tbody>
+              <% auditorias.forEach(a => { %>
+                <tr>
+                  <td><%= a.id_auditoria %></td>
+                  <td><%= a.username %></td>
+                  <td><%= a.id_producto %></td>
+                  <td><%= a.nombre_producto %></td>  <!-- Mostrar nombre del producto -->
+                  <td><%= a.accion %></td>
+                  <td>
+                    <ul class="cambios-lista">
+                      <% Object.keys(a.campos_modificados).forEach(campo => { 
+                          const cambio = a.campos_modificados[campo]; %>
+                        <li>
+                          <strong><%= campo %>:</strong>
+                          <%= cambio.antes %> &rarr; <%= cambio.despues %>
+                        </li>
+                      <% }) %>
+                    </ul>
+                  </td>
+                  <td><%= new Date(a.fecha).toLocaleString() %></td>
+                </tr>
+              <% }) %>
+            </tbody>
+          </table>
+        </div>
     </div>
   </body>
 </html>

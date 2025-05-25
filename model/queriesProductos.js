@@ -40,18 +40,22 @@ async function obtenerProductosParaOrden() {
 }
 
 async function obtenerProductosCriticos() {
-  try {
-    const resultado = await pool.query(`
-      SELECT COUNT(*) AS total
-      FROM producto
-      WHERE stock < cantidad_minima AND estado = 'Activado'
-    `);
-
-    return parseInt(resultado.rows[0].total, 10);
-  } catch (error) {
-    console.error('Error al obtener productos críticos:', error);
-    return 0; // En caso de error, devolvemos 0
-  }
+  const query = `
+    SELECT COUNT(*) AS total
+    FROM producto pr
+    WHERE pr.stock < pr.cantidad_minima
+      AND pr.estado = 'Activado'
+      AND NOT EXISTS (
+        SELECT 1
+        FROM orden_reabastecimiento o
+        WHERE o.estado = 'en_curso'
+          AND (
+            o.products::jsonb @> to_jsonb(json_build_array(json_build_object('id_producto', pr.id_producto)))
+          )
+      )
+  `;
+  const result = await pool.query(query);
+  return parseInt(result.rows[0].total, 10);
 }
 
 async function obtenerProductoPorId(id) {

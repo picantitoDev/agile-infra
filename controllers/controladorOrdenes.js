@@ -1,6 +1,7 @@
 const dbOrdenes = require('../model/queriesOrdenes');
 const dbProductos = require("../model/queriesProductos")
 const dbProveedores = require("../model/queriesProveedores")
+const dbIncidencias = require('../model/queriesIncidencias'); 
 
 async function listarOrdenes(req, res) {
   try {
@@ -41,8 +42,8 @@ async function crearOrdenGet(req, res) {
 
   const productosEnCurso = await dbProductos.obtenerProductosEnOrdenesEnCurso();
 
-  console.log("Productos en curso: ")
-    console.log(productosEnCurso)
+  // console.log("Productos en curso: ")
+  //   console.log(productosEnCurso)
 
     res.render('crearOrden', {
       proveedores: proveedoresMarcados,
@@ -80,15 +81,20 @@ async function crearOrdenPost(req, res) {
 
 async function obtenerOrdenPorId(req, res) {
   try {
-    const id_order = req.params.id; // tomamos el id de la URL
+    const id_order = req.params.id;
     const orden = await dbOrdenes.obtenerOrdenPorId(id_order);
 
     if (!orden) {
       return res.status(404).json({ mensaje: 'Orden no encontrada' });
     }
 
-    res.json(orden);
-    console.log(orden);
+    // 🔍 Buscar incidencias asociadas a la orden
+    const incidencias = await dbIncidencias.obtenerIncidenciasPorOrden(id_order);
+
+    // Incluir las incidencias en el JSON de respuesta
+    console.log({ ...orden, incidencias })
+    res.json({ ...orden, incidencias });
+
   } catch (error) {
     console.error('Error al obtener la orden por ID:', error);
     res.status(500).json({ mensaje: 'Error interno del servidor' });

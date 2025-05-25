@@ -50,6 +50,7 @@
             <!-- Aquí se insertará la lista de productos desde JS -->
           </div>
         </div>
+        <div id="incidencias-previas" style="margin-top: 1rem; display: none;"></div>
       </div>
 
       </div>
@@ -254,6 +255,7 @@
       const carrito = []
       const productosOrdenDiv = document.getElementById('productos-orden');
       const ordenProveedorSpan = document.getElementById('orden-proveedor');
+      const incidenciasDiv = document.getElementById('incidencias-previas');
 
     const ordenIdInput = document.getElementById('ordenId');
     const btnCargarOrden = document.getElementById('btnCargarOrden');
@@ -263,88 +265,117 @@
     const ordenDescripcionSpan = document.getElementById('orden-descripcion');
 
     btnCargarOrden.addEventListener('click', async () => {
-      const id = ordenIdInput.value.trim();
-      if (!id) {
-        alert('Por favor ingrese un ID de orden válido.');
-        return;
-      }
+  const id = ordenIdInput.value.trim();
+  if (!id) {
+    alert('Por favor ingrese un ID de orden válido.');
+    return;
+  }
 
-      try {
-        const response = await fetch(`/ordenes/${id}`);
-        if (!response.ok) throw new Error('Orden no encontrada');
+  try {
+    const response = await fetch(`/ordenes/${id}`);
+    if (!response.ok) throw new Error('Orden no encontrada');
 
-        const orden = await response.json();
+    const orden = await response.json();
 
-        if (orden.estado === 'finalizada') {
-          alert('Esta orden ya ha sido finalizada. No puedes registrar otra entrada para ella.');
-          ordenInfoDiv.style.display = 'none';
-          proveedorSelect.disabled = true;
-          tablaProductos.innerHTML = '<tr><td colspan="5">Ingrese y cargue una orden válida.</td></tr>';
-          return;
-        }
+    if (orden.estado === 'finalizada') {
+      alert('Esta orden ya ha sido finalizada. No puedes registrar otra entrada para ella.');
+      ordenInfoDiv.style.display = 'none';
+      proveedorSelect.disabled = true;
+      tablaProductos.innerHTML = '<tr><td colspan="5">Ingrese y cargue una orden válida.</td></tr>';
+      return;
+    }
 
-        ordenIdSpan.textContent = orden.id_order;
-        ordenFechaSpan.textContent = new Date(orden.fecha).toLocaleDateString();
-        ordenProveedorSpan.textContent = orden.proveedor || 'Sin proveedor';
-        document.getElementById('input-id-orden').value = orden.id_order
-        ordenInfoDiv.style.display = 'block';
+    ordenIdSpan.textContent = orden.id_order;
+    ordenFechaSpan.textContent = new Date(orden.fecha).toLocaleDateString();
+    ordenProveedorSpan.textContent = orden.proveedor || 'Sin proveedor';
+    document.getElementById('input-id-orden').value = orden.id_order;
+    ordenInfoDiv.style.display = 'block';
 
-        proveedorSelect.disabled = false;
+    proveedorSelect.disabled = false;
 
-        // Aquí muestras los productos en formato texto o como quieras
-        if (orden.products && orden.products.length > 0) {
-          productosOrdenDiv.innerHTML = '';
-          orden.products.forEach(producto => {
-            const card = document.createElement('div');
-            card.style = `
-              background-color: #ffffff;
-              border: 1px solid #e5e7eb;
-              border-radius: 0.5rem;
-              padding: 0.75rem 1rem;
-              margin-bottom: 0.5rem;
-              display: flex;
-              justify-content: space-between;
-              align-items: center;
-              font-size: 0.95rem;
-              color: #374151;
-              box-shadow: 0 1px 3px rgba(0,0,0,0.05);
-            `;
+    // Mostrar productos de la orden como tarjetas
+    if (orden.products && orden.products.length > 0) {
+      productosOrdenDiv.innerHTML = '';
+      orden.products.forEach(producto => {
+        const card = document.createElement('div');
+        card.style = `
+          background-color: #ffffff;
+          border: 1px solid #e5e7eb;
+          border-radius: 0.5rem;
+          padding: 0.75rem 1rem;
+          margin-bottom: 0.5rem;
+          display: flex;
+          justify-content: space-between;
+          align-items: center;
+          font-size: 0.95rem;
+          color: #374151;
+          box-shadow: 0 1px 3px rgba(0,0,0,0.05);
+        `;
 
-            card.innerHTML = `
-              <span style="font-weight: 500;">${producto.nombre}</span>
-              <span style="font-weight: 600;">Cantidad: ${producto.cantidad}</span>
-            `;
+        card.innerHTML = `
+          <span style="font-weight: 500;">${producto.nombre}</span>
+          <span style="font-weight: 600;">Cantidad: ${producto.cantidad}</span>
+        `;
 
-            productosOrdenDiv.appendChild(card);
-          });
-        } else {
-          productosOrdenDiv.innerHTML = '<p style="color: #6b7280;">No hay productos en esta orden.</p>';
-        }
+        productosOrdenDiv.appendChild(card);
+      });
+    } else {
+      productosOrdenDiv.innerHTML = '<p style="color: #6b7280;">No hay productos en esta orden.</p>';
+    }
 
-        /* --- AUToseleccionar proveedor y cargar tabla ------------------- */
-        const provId = orden.id_proveedor;                // el backend ya lo envía
-        // 1) Selecciona el proveedor en el <select> y dispara el cambio
-        proveedorSelect.value = provId;
-        proveedorSelect.dispatchEvent(new Event('change'));
-        // 2) Opcional: bloquea el select para que no lo puedan cambiar
-        proveedorSelect.disabled = true;
+    // Autoseleccionar proveedor
+    const provId = orden.id_proveedor;
+    proveedorSelect.value = provId;
+    proveedorSelect.dispatchEvent(new Event('change'));
+    proveedorSelect.disabled = true;
 
-        // 3) Carga inmediatamente los productos de la orden en la tabla
-        renderTablaBusqueda(orden.products);              // usa tu misma función
-        /* --------------------------------------------------------------- */
+    // Cargar productos de la orden en la tabla de entrada
+    renderTablaBusqueda(orden.products);
 
+    // Mostrar incidencias previas (si existen)
+    const incidenciasDiv = document.getElementById('incidencias-previas');
+    if (orden.incidencias && orden.incidencias.length > 0) {
+    incidenciasDiv.innerHTML = '<h4 style="margin-bottom: 0.5rem;">📋 Incidencias previas asociadas a esta orden:</h4>';
 
-        // Limpiar carrito y resumen
-        carrito.length = 0;
-        renderResumenEntrada();
+    orden.incidencias.forEach(inc => {
+      const fecha = new Date(inc.fecha).toLocaleDateString();
 
-      } catch (error) {
-        alert('Error al cargar la orden: ' + error.message);
-        ordenInfoDiv.style.display = 'none';
-        proveedorSelect.disabled = true;
-        tablaProductos.innerHTML = '<tr><td colspan="5">Ingrese y cargue una orden primero</td></tr>';
-      }
+      inc.detalle_productos.forEach(detalle => {
+        const item = document.createElement('div');
+        item.style = `
+          background-color: #fef2f2;
+          border: 1px solid #fca5a5;
+          padding: 0.5rem;
+          border-radius: 0.375rem;
+          margin-bottom: 0.5rem;
+          font-size: 0.9rem;
+          color: #991b1b;
+        `;
+        item.innerHTML = `
+          <strong>${fecha}</strong> - <strong>${detalle.nombre || 'Producto desconocido'}</strong>: ${detalle.incidencia || 'Sin detalle'}
+        `;
+        incidenciasDiv.appendChild(item);
+      });
     });
+
+    incidenciasDiv.style.display = 'block';
+  } else {
+      incidenciasDiv.innerHTML = '<p style="color: #6b7280;">No se han registrado incidencias previas para esta orden.</p>';
+      incidenciasDiv.style.display = 'block';
+    }
+
+    // Limpiar carrito y resumen
+    carrito.length = 0;
+    renderResumenEntrada();
+
+  } catch (error) {
+    alert('Error al cargar la orden: ' + error.message);
+    ordenInfoDiv.style.display = 'none';
+    proveedorSelect.disabled = true;
+    tablaProductos.innerHTML = '<tr><td colspan="5">Ingrese y cargue una orden primero</td></tr>';
+  }
+});
+
 
 
 

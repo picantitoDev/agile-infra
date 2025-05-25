@@ -9,23 +9,24 @@ const pool = require("./pool")
  * @param {string|null} incidencia.descripcion_general - Descripción general de la incidencia (opcional)
  * @param {Array} incidencia.detalle_productos - Lista de productos con incidencia (JSON serializable)
  */
-async function registrarIncidencia({ id_movimiento, descripcion_general, detalle_productos, id_orden = null }) {
+async function registrarIncidencia({ id_movimiento, descripcion_general, detalle_productos, id_orden = null, fecha = new Date() }) {
   const query = `
-    INSERT INTO incidencia (id_movimiento, descripcion_general, detalle_productos, id_orden)
-    VALUES ($1, $2, $3, $4)
-  `
+    INSERT INTO incidencia (id_movimiento, descripcion_general, detalle_productos, id_orden, fecha)
+    VALUES ($1, $2, $3, $4, $5)
+  `;
   const values = [
     id_movimiento,
     descripcion_general || null,
     JSON.stringify(detalle_productos),
-    id_orden
-  ]
+    id_orden,
+    fecha
+  ];
 
   try {
-    await pool.query(query, values)
+    await pool.query(query, values);
   } catch (error) {
-    console.error("Error al registrar incidencia:", error)
-    throw error
+    console.error("Error al registrar incidencia:", error);
+    throw error;
   }
 }
 
@@ -57,8 +58,26 @@ async function obtenerIncidencias() {
   }
 }
 
+async function obtenerIncidenciasPorOrden(id_orden) {
+  const query = `
+    SELECT id_incidencia, id_movimiento, id_orden, detalle_productos, fecha
+    FROM incidencia
+    WHERE id_orden = $1
+    ORDER BY id_incidencia ASC
+  `;
+  const { rows } = await pool.query(query, [id_orden]);
+
+  return rows.map(row => ({
+    id_incidencia: row.id_incidencia,
+    id_movimiento: row.id_movimiento,
+    detalle_productos: row.detalle_productos, // esto ya es JSON si la columna es tipo JSONB o text convertido
+    fecha: row.fecha
+  }));
+}
+
 
 module.exports = {
   registrarIncidencia,
   obtenerIncidencias,
+  obtenerIncidenciasPorOrden
 }

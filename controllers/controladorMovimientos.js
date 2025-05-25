@@ -249,6 +249,7 @@ async function registrarEntradaPost(req, res) {
         id_orden: id_orden || null,
         descripcion_general: descripcion || "Complicaciones en la Llegada de la Entrada",
         detalle_productos: detalleIncidencias,
+        fecha: fecha,
       });
     }
 

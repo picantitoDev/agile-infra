@@ -158,6 +158,18 @@ async function disminuirStock(id_producto, cantidad) {
   await pool.query(query, [cantidad, id_producto])
 }
 
+async function obtenerProductosEnOrdenesEnCurso() {
+  const query = `
+    SELECT DISTINCT (prod->>'id_producto')::int AS id_producto
+    FROM orden_reabastecimiento,
+         jsonb_array_elements(products::jsonb) AS prod
+    WHERE estado = 'en_curso';
+  `;
+
+  const { rows } = await pool.query(query);
+  return rows.map(row => row.id_producto);
+}
+
 module.exports = {
   obtenerProductos,
   crearProducto,
@@ -167,5 +179,6 @@ module.exports = {
   aumentarStock,
   disminuirStock,
   obtenerProductosCriticos,
-  obtenerProductosParaOrden
+  obtenerProductosParaOrden,
+  obtenerProductosEnOrdenesEnCurso
 }

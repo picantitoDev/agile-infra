@@ -130,12 +130,21 @@
       <%- JSON.stringify(proveedores) %>
     </script>
 
+    <script id="productos-curso" type="application/json">
+      <%- JSON.stringify(productosEnCurso) %>
+    </script>
+
+
     <script>
       const productos = JSON.parse(
         document.getElementById("productos-data").textContent
       )
       const proveedores = JSON.parse(
         document.getElementById("proveedores-data").textContent
+      )
+
+      const productosEnCurso = JSON.parse(
+        document.getElementById("productos-curso").textContent
       )
       const proveedorSelect = document.getElementById("proveedor")
       const proveedorInfo = document.getElementById("proveedor-info")
@@ -180,7 +189,7 @@
               return p.proveedor === proveedor.razon_social
             })
 
-            renderTablaBusqueda(productosFiltrados)
+            renderTablaBusqueda(productosFiltrados, productosEnCurso)
           } else {
             console.log("Proveedor no encontrado")
           }
@@ -200,39 +209,45 @@
       })
 
       // Función para renderizar la tabla de productos filtrados
-    function renderTablaBusqueda(filtrados) {
-      tablaProductos.innerHTML = ""; // Limpiar la tabla antes de agregar nuevas filas
+   function renderTablaBusqueda(filtrados, productosEnCurso = []) {
+  tablaProductos.innerHTML = ""; // Limpiar la tabla antes de agregar nuevas filas
 
-      if (filtrados.length === 0) {
-        tablaProductos.innerHTML = `<tr><td colspan="3">No se encontraron productos</td></tr>`;
-        return;
-      }
+  if (filtrados.length === 0) {
+    tablaProductos.innerHTML = `<tr><td colspan="3">No se encontraron productos</td></tr>`;
+    return;
+  }
 
-      // Ordenar: productos con stock bajo primero
-      filtrados.sort((a, b) => {
-        const aEsBajo = a.stock < a.cantidad_minima;
-        const bEsBajo = b.stock < b.cantidad_minima;
-        return aEsBajo === bEsBajo ? 0 : aEsBajo ? -1 : 1;
-      });
+  // Ordenar: productos con stock bajo primero
+  filtrados.sort((a, b) => {
+    const aEsBajo = a.stock < a.cantidad_minima;
+    const bEsBajo = b.stock < b.cantidad_minima;
+    return aEsBajo === bEsBajo ? 0 : aEsBajo ? -1 : 1;
+  });
 
-      // Itera sobre los productos filtrados y los muestra en la tabla
-      filtrados.forEach((prod) => {
-        const row = document.createElement("tr");
+  filtrados.forEach((prod) => {
+    const row = document.createElement("tr");
 
-        const stockEsBajo = prod.stock < prod.cantidad_minima;
-        const stockTexto = stockEsBajo
-          ? `<span style="color: red; font-weight: bold;">${prod.stock} ⚠️ (bajo)</span>`
-          : prod.stock;
+    const stockEsBajo = prod.stock < prod.cantidad_minima;
+    const enOrden = productosEnCurso.includes(prod.id_producto);
 
-        row.innerHTML = `
-          <td>${prod.nombre}</td>
-          <td>${stockTexto}</td>
-          <td><button type="button" onclick="agregarProducto(${prod.id_producto})">Agregar</button></td>
-        `;
+    const stockTexto = stockEsBajo
+      ? `<span style="color: red; font-weight: bold;">${prod.stock} ⚠️ (bajo)</span>`
+      : prod.stock;
 
-        tablaProductos.appendChild(row);
-      });
-    }
+    const boton = enOrden
+  ? `<span style="color: gray; font-style: italic;">Orden en curso</span>`
+  : `<button type="button" onclick="agregarProducto(${prod.id_producto})">Agregar</button>`;
+
+    row.innerHTML = `
+      <td>${prod.nombre}</td>
+      <td>${stockTexto}</td>
+      <td>${boton}</td>
+    `;
+
+    tablaProductos.appendChild(row);
+  });
+}
+
 
 
       // Función para agregar un producto al carrito

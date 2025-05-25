@@ -39,15 +39,17 @@ async function crearOrdenGet(req, res) {
       tieneStockBajo: proveedoresConStockBajo.has(Number(p.id_proveedor))
     }));
 
-    console.log("Productos activados:", productos.length);
-    console.log("Proveedores con stock bajo:", Array.from(proveedoresConStockBajo));
-    console.log("Proveedores marcados:", proveedoresMarcados.map(p => ({
-      id: p.id_proveedor,
-      tieneStockBajo: p.tieneStockBajo
-    })));
+  const productosEnCurso = await dbProductos.obtenerProductosEnOrdenesEnCurso();
 
-    res.render('crearOrden', { proveedores: proveedoresMarcados, productos });
-  } catch (error) {
+  console.log("Productos en curso: ")
+    console.log(productosEnCurso)
+
+    res.render('crearOrden', {
+      proveedores: proveedoresMarcados,
+      productos,
+      productosEnCurso // <-- aquí pasamos la lista para el frontend
+    });
+    } catch (error) {
     console.error('Error al crear orden:', error);
     res.status(500).send('Error al crear orden');
   }

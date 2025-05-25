@@ -50,7 +50,8 @@ async function obtenerOrdenPorId(id_order) {
       o.id_proveedor,
       p.razon_social AS proveedor,
       o.products,
-      o.fecha
+      o.fecha,
+      o.estado
     FROM orden_reabastecimiento o
     JOIN proveedor p ON o.id_proveedor = p.id_proveedor
     WHERE o.id_order = $1

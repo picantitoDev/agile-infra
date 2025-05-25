@@ -275,6 +275,14 @@
 
         const orden = await response.json();
 
+        if (orden.estado === 'finalizada') {
+          alert('Esta orden ya ha sido finalizada. No puedes registrar otra entrada para ella.');
+          ordenInfoDiv.style.display = 'none';
+          proveedorSelect.disabled = true;
+          tablaProductos.innerHTML = '<tr><td colspan="5">Ingrese y cargue una orden válida.</td></tr>';
+          return;
+        }
+
         ordenIdSpan.textContent = orden.id_order;
         ordenFechaSpan.textContent = new Date(orden.fecha).toLocaleDateString();
         ordenProveedorSpan.textContent = orden.proveedor || 'Sin proveedor';

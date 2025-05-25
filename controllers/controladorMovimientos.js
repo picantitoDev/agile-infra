@@ -4,6 +4,7 @@ const dbProveedores = require("../model/queriesProveedores")
 const dbIncidencias = require("../model/queriesIncidencias")
 const dbUsuarios = require("../model/queriesUsuarios")
 const dbClientes = require("../model/queriesClientes")
+const dbOrdenes = require("../model/queriesOrdenes")
 const pdfUtils = require("../utils/pdfGenerator")
 
 const { DateTime } = require("luxon")
@@ -250,6 +251,13 @@ async function registrarEntradaPost(req, res) {
         detalle_productos: detalleIncidencias,
       });
     }
+
+    // 5. Si no hubo incidencias, finalizar la orden
+    if (productosConIncidencia.length === 0 && id_orden) {
+      await dbOrdenes.actualizarEstadoOrden(id_orden, 'finalizada');
+    }
+
+
     res.redirect("/movimientos") // Redirige después de registrar la entrada
   } catch (error) {
     console.error("Error al registrar entrada:", error)

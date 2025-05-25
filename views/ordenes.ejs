@@ -64,6 +64,7 @@
         <th>ID Orden</th>
         <th>Proveedor</th>
         <th>Fecha</th>
+        <th>Estado</th>
         <th>Productos</th>
       </tr>
     </thead>
@@ -83,6 +84,9 @@
               }
             %>
             <%= fechaFormateada %>
+          </td>
+          <td>
+            <%= orden.estado %>
           </td>
           <td>
             <% 

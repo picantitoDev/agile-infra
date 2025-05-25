@@ -6,7 +6,8 @@ async function obtenerOrdenes(){
       o.id_order, 
       p.razon_social AS proveedor, 
       o.products, 
-      o.fecha
+      o.fecha,
+      o.estado
     FROM orden_reabastecimiento o
     JOIN proveedor p ON o.id_proveedor = p.id_proveedor
     ORDER BY o.id_order DESC
@@ -32,6 +33,15 @@ async function crearOrden(id_proveedor, productos, fecha, estado = 'en_curso') {
   }
 }
 
+async function actualizarEstadoOrden(id_orden, nuevoEstado) {
+  const query = `
+    UPDATE orden_reabastecimiento
+    SET estado = $1
+    WHERE id_order = $2
+  `;
+  await pool.query(query, [nuevoEstado, id_orden]);
+}
+
 
 async function obtenerOrdenPorId(id_order) {
   const query = `
@@ -52,5 +62,6 @@ async function obtenerOrdenPorId(id_order) {
 module.exports = {
     obtenerOrdenes,
     crearOrden,
-    obtenerOrdenPorId
+    obtenerOrdenPorId,
+    actualizarEstadoOrden
 }

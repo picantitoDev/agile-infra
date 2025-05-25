@@ -66,7 +66,7 @@ async function crearOrdenPost(req, res) {
     const fechaConOffset = new Date(ahora.getTime() + 5 * 60 * 60 * 1000); // suma 5 horas
 
     // 3. Insertar la orden en la base de datos
-    await dbOrdenes.crearOrden(proveedor, productos, fechaConOffset);
+    await dbOrdenes.crearOrden(proveedor, productos, fechaConOffset, 'en_curso');
 
     // 4. Redireccionar
     res.redirect("/ordenes");

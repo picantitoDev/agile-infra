@@ -17,16 +17,16 @@ async function obtenerOrdenes(){
 
 
 
-async function crearOrden(id_proveedor, productos, fecha) {
+async function crearOrden(id_proveedor, productos, fecha, estado = 'en_curso') {
   const client = await pool.connect();
   try {
     const productosJson = JSON.stringify(productos);
 
     const query = `
-      INSERT INTO orden_reabastecimiento (id_proveedor, products, fecha)
-      VALUES ($1, $2::json, $3)
+      INSERT INTO orden_reabastecimiento (id_proveedor, products, fecha, estado)
+      VALUES ($1, $2::json, $3, $4)
     `;
-    await client.query(query, [id_proveedor, productosJson, fecha]);
+    await client.query(query, [id_proveedor, productosJson, fecha, estado]);
   } finally {
     client.release();
   }

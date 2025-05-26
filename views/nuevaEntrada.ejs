@@ -263,6 +263,7 @@
     const ordenIdSpan = document.getElementById('orden-id');
     const ordenFechaSpan = document.getElementById('orden-fecha');
     const ordenDescripcionSpan = document.getElementById('orden-descripcion');
+      let ordenActual = null;
 
     btnCargarOrden.addEventListener('click', async () => {
   const id = ordenIdInput.value.trim();
@@ -276,6 +277,8 @@
     if (!response.ok) throw new Error('Orden no encontrada');
 
     const orden = await response.json();
+    ordenActual = orden;
+
 
     if (orden.estado === 'finalizada') {
       alert('Esta orden ya ha sido finalizada. No puedes registrar otra entrada para ella.');
@@ -486,13 +489,17 @@ function renderResumenEntrada() {
   carrito.forEach((item, index) => {
     const subtotal = item.producto.precio_unitario * item.cantidad;
     total += subtotal;
+    
+    const productoOrden = ordenActual?.products.find(p => p.nombre === item.producto.nombre);
+    const cantidadMaxima = productoOrden ? productoOrden.cantidad : 100;
 
     const row = document.createElement("tr");
     row.innerHTML = `
       <td>${item.producto.nombre}</td>
       <td>
-        <input type="number" value="${item.cantidad}" min="1" max="100" 
-               class="cantidad-input" data-index="${index}" />
+        <input type="number" value="${item.cantidad}" min="1" 
+               max="${cantidadMaxima}" class="cantidad-input" 
+               data-index="${index}" />
       </td>
       <td>
         <input type="text" class="incidencia-input" 

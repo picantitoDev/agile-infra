@@ -95,7 +95,7 @@ async function obtenerOrdenPorId(req, res) {
     const incidencias = await dbIncidencias.obtenerIncidenciasPorOrden(id_order);
 
     // Incluir las incidencias en el JSON de respuesta
-    console.log({ ...orden, incidencias })
+    console.log(orden)
     res.json({ ...orden, incidencias });
 
   } catch (error) {

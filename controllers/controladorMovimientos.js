@@ -232,6 +232,21 @@ async function registrarEntradaPost(req, res) {
       await dbProductos.aumentarStock(id_producto, cantidad)
     }
     // 4. Registrar la incidencia si existe alguna
+    if (id_orden) {
+      const orden = await dbOrdenes.obtenerOrdenPorId(id_orden); // Debe devolver { products: [...] }
+      const productosOrden = orden.products;
+
+      for (let productoEntrada of productosArray) {
+        const productoOrden = productosOrden.find(p => p.id_producto === productoEntrada.id_producto);
+        if (productoOrden) {
+          productoOrden.ingresado = (productoOrden.ingresado || 0) + productoEntrada.cantidad;
+        }
+      }
+
+      await dbOrdenes.actualizarProductosOrden(id_orden, productosOrden);
+    }
+
+    // Registro de incidencias
     const productosConIncidencia = productosArray.filter(
       p => p.incidencia && p.incidencia.trim() !== ""
     );
@@ -253,9 +268,13 @@ async function registrarEntradaPost(req, res) {
       });
     }
 
-    // 5. Si no hubo incidencias, finalizar la orden
+    // 5. Si no hubo incidencias y todo fue ingresado
     if (productosConIncidencia.length === 0 && id_orden) {
-      await dbOrdenes.actualizarEstadoOrden(id_orden, 'finalizada');
+      const orden = await dbOrdenes.obtenerOrdenPorId(id_orden);
+      const completada = orden.products.every(p => p.ingresado >= p.cantidad);
+      if (completada) {
+        await dbOrdenes.actualizarEstadoOrden(id_orden, 'finalizada');
+      }
     }
 
 

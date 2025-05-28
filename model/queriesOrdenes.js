@@ -60,9 +60,23 @@ async function obtenerOrdenPorId(id_order) {
   const result = await pool.query(query, [id_order]);
   return result.rows[0]; // solo una orden por id
 }
+
+async function actualizarProductosOrden(id_order, nuevosProductos) {
+  const query = `
+    UPDATE orden_reabastecimiento
+    SET products = $1
+    WHERE id_order = $2
+  `;
+
+  // Asegúrate de convertir el array de productos a JSON string si `products` es de tipo JSON o JSONB
+  await pool.query(query, [JSON.stringify(nuevosProductos), id_order]);
+}
+
+
 module.exports = {
     obtenerOrdenes,
     crearOrden,
     obtenerOrdenPorId,
-    actualizarEstadoOrden
+    actualizarEstadoOrden,
+    actualizarProductosOrden
 }

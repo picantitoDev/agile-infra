@@ -491,9 +491,10 @@ function renderResumenEntrada() {
     total += subtotal;
     
     const productoOrden = ordenActual?.products.find(p => p.nombre === item.producto.nombre);
-    const cantidadMaxima = productoOrden ? productoOrden.cantidad : 100;
+    const cantidadMaxima = productoOrden ? productoOrden.cantidad - productoOrden.ingresado : 100;
 
     const row = document.createElement("tr");
+    console.log("Cantidad Maxima:", cantidadMaxima)
     row.innerHTML = `
       <td>${item.producto.nombre}</td>
       <td>

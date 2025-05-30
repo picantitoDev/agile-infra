@@ -17,25 +17,25 @@ async function procesarFormularioRecuperacion(req, res) {
 
   // Generar token y expiración
   const token = crypto.randomBytes(32).toString("hex");
-  const expires = new Date(Date.now() + 3600000); // 1 hora
+  const expires = new Date(Date.now() + 24 * 60 * 60 * 1000); // 24 horas
 
   await dbUsuarios.guardarTokenDeReset(usuario.id, token, expires);
 
-  const resetUrl = `http://${req.headers.host}/reset-password/${token}`;
+  const resetUrl = `https://stock-cloudc.info/recovery/reset-password/${token}`;
 
   // Configurar transporte de correo
   const transporter = nodemailer.createTransport({
     service: 'gmail',
     auth: {
-      user: 'tuemail@gmail.com',       // usa una cuenta válida
-      pass: 'tu-contraseña-app',       // o contraseña de app
+      user: 'stockcloud.soporte@gmail.com',
+      pass: 'ktte cwnu eojo eaxt',       // contraseña de app
     }
   });
 
   // Enviar email
   await transporter.sendMail({
     to: usuario.email,
-    from: 'no-reply@tusitio.com',
+    from: 'no-reply@stockcloud.info',
     subject: 'Restablecer tu contraseña',
     html: `<p>Haz clic <a href="${resetUrl}">aquí</a> para restablecer tu contraseña. El enlace es válido por 1 hora.</p>`
   });
@@ -43,16 +43,39 @@ async function procesarFormularioRecuperacion(req, res) {
   res.render("forgot-password", { message });
 }
 
+async function mostrarFormularioReset(req, res) {
+  const token = req.params.token;
+  const usuario = await dbUsuarios.buscarUsuarioPorToken(token);
 
+  if (!usuario || new Date(usuario.reset_token_expires) < new Date()) {
+    return res.send("Token inválido o expirado.");
+  }
 
-async function mostrarFormularioReset(req, res){
-    
+  res.render("reset-password", { token, error: null });
 }
 
+async function procesarResetPassword(req, res) {
+  const { password, confirmar } = req.body;
+  const { token } = req.params;
 
-async function procesarResetPassword(req, res){
-    
+  if (password !== confirmar) {
+    return res.render("reset-password", {
+      token,
+      error: "Las contraseñas no coinciden.",
+    });
+  }
+
+  const usuario = await dbUsuarios.buscarUsuarioPorToken(token);
+  if (!usuario || new Date(usuario.reset_token_expires) < new Date()) {
+    return res.send("Token inválido o expirado.");
+  }
+
+  const hash = await bcrypt.hash(password, 10);
+  await dbUsuarios.actualizarPasswordYLimpiarToken(usuario.id, hash);
+
+  res.send("Contraseña restablecida correctamente. Ahora puedes iniciar sesión.");
 }
+
 
 module.exports = {
     mostrarFormularioRecuperacion,

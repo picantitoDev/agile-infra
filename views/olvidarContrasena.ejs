@@ -1,0 +1,13 @@
+<div class="forgot-password-container">
+  <h2>¿Olvidaste tu contraseña?</h2>
+  <p>Ingresa tu correo y te enviaremos instrucciones para restablecerla.</p>
+  
+  <% if (message) { %>
+    <div class="message"><%= message %></div>
+  <% } %>
+
+  <form action="/forgot-password" method="POST">
+    <input type="email" name="email" placeholder="Correo electrónico" required />
+    <button type="submit">Enviar instrucciones</button>
+  </form>
+</div>

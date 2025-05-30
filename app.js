@@ -20,6 +20,7 @@ const rutaUsuarios = require("./routes/rutaUsuarios")
 const rutaMovimientos = require("./routes/rutaMovimientos")
 const rutaOrdenes = require('./routes/rutaOrdenes');
 const rutaIncidencias = require("./routes/rutaIncidencias")
+const rutaRecovery = require("./routes/rutaRecovery")
 
 // Middleware
 app.use(express.json())
@@ -69,6 +70,7 @@ app.use("/usuarios", validarSesion, verificarAdmin, rutaUsuarios)
 app.use('/ordenes', validarSesion, rutaOrdenes);
 app.use("/movimientos", validarSesion, rutaMovimientos)
 app.use("/incidencias", validarSesion, rutaIncidencias)
+app.use("/recovery", rutaRecovery)
 
 // Login
 app.post(

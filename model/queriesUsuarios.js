@@ -42,6 +42,34 @@ const crearUsuario = async ({ username, password, email, rol }) => {
   )
 }
 
+// Guardar token y expiración
+const guardarTokenDeReset = async (id, token, expires) => {
+  await pool.query(
+    "UPDATE usuarios SET reset_token = $1, reset_token_expires = $2 WHERE id = $3",
+    [token, expires, id]
+  );
+};
+
+// Buscar usuario por token válido (aún no vencido)
+const buscarUsuarioPorToken = async (token) => {
+  const { rows } = await pool.query(
+    `SELECT * FROM usuarios WHERE reset_token = $1 AND reset_token_expires > NOW()`,
+    [token]
+  );
+  return rows[0];
+};
+
+// Restablecer contraseña y limpiar token
+const actualizarPasswordYLimpiarToken = async (id, newPassword) => {
+  await pool.query(
+    `UPDATE usuarios 
+     SET password = $1, reset_token = NULL, reset_token_expires = NULL 
+     WHERE id = $2`,
+    [newPassword, id]
+  );
+};
+
+
 module.exports = {
   buscarUsuarioPorNombre,
   buscarUsuarioPorId,
@@ -49,4 +77,7 @@ module.exports = {
   obtenerUsuarios,
   buscarUsuarioPorNombreOCorreo,
   buscarUsuarioPorEmail,
+  guardarTokenDeReset,
+  buscarUsuarioPorToken,
+  actualizarPasswordYLimpiarToken
 }

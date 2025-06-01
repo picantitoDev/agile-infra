@@ -235,7 +235,7 @@
       : prod.stock;
 
     const boton = enOrden
-  ? `<span style="color: gray; font-style: italic;">Orden en curso</span>`
+  ? `<span style="color: gray; font-style: italic;">Orden en curso <a href="/ordenes"> Ver </a> </span>`
   : `<button type="button" onclick="agregarProducto(${prod.id_producto})">Agregar</button>`;
 
     row.innerHTML = `

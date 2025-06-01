@@ -73,7 +73,7 @@ async function procesarResetPassword(req, res) {
   const hash = await bcrypt.hash(password, 10);
   await dbUsuarios.actualizarPasswordYLimpiarToken(usuario.id, hash);
 
-  res.send("Contraseña restablecida correctamente. Ahora puedes iniciar sesión.");
+  res.send("Contraseña restablecida correctamente. Ahora puedes iniciar sesión. <br></br> <href="/"a>Volver a Inicio</a>");
 }
 
 

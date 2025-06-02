@@ -31,6 +31,375 @@
       0%, 100% { opacity: 1; }
       50% { opacity: 0; }
     }
+
+    /* Modern Restocking Orders Styles */
+
+/* Main container */
+.main-content {
+  max-width: 100%;
+  margin: 0 auto;
+  padding: 2rem;
+  font-family: 'Inter', -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif;
+  background-color: #f8fafc;
+  min-height: 100vh;
+}
+
+/* Page title */
+.main-content h1 {
+  font-size: 2.5rem;
+  font-weight: 700;
+  color: #1e293b;
+  margin-bottom: 2rem;
+  text-align: center;
+  position: relative;
+}
+
+.main-content h1::after {
+  content: '';
+  position: absolute;
+  bottom: -0.5rem;
+  left: 50%;
+  transform: translateX(-50%);
+  width: 80px;
+  height: 4px;
+  background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+  border-radius: 2px;
+}
+
+/* Alert styles */
+.alerta-stock {
+  margin: 2rem 0;
+  padding: 1.5rem 2rem;
+  border-radius: 12px;
+  font-weight: 600;
+  font-size: 1.1rem;
+  box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.1);
+  border-left: 6px solid #f59e0b;
+  background: linear-gradient(135deg, #fef3c7 0%, #fde68a 100%);
+  color: #92400e;
+  display: flex;
+  align-items: center;
+  gap: 0.75rem;
+  transition: all 0.3s ease;
+}
+
+.alerta-stock:hover {
+  transform: translateY(-2px);
+  box-shadow: 0 8px 15px -3px rgba(0, 0, 0, 0.1);
+}
+
+.alerta-ok {
+  border-left-color: #10b981;
+  background: linear-gradient(135deg, #d1fae5 0%, #a7f3d0 100%);
+  color: #065f46;
+}
+
+/* Create order button container */
+.crear-orden-container {
+  display: flex;
+  justify-content: center;
+  margin: 2.5rem 0;
+}
+
+.btn-crear-orden {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.75rem;
+  padding: 1rem 2rem;
+  background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+  color: white;
+  text-decoration: none;
+  border-radius: 12px;
+  font-weight: 600;
+  font-size: 1.1rem;
+  box-shadow: 0 4px 15px rgba(102, 126, 234, 0.4);
+  transition: all 0.3s ease;
+  position: relative;
+  overflow: hidden;
+}
+
+.btn-crear-orden::before {
+  content: '';
+  position: absolute;
+  top: 0;
+  left: -100%;
+  width: 100%;
+  height: 100%;
+  background: linear-gradient(90deg, transparent, rgba(255, 255, 255, 0.2), transparent);
+  transition: left 0.5s;
+}
+
+.btn-crear-orden:hover::before {
+  left: 100%;
+}
+
+.btn-crear-orden:hover {
+  transform: translateY(-3px);
+  box-shadow: 0 8px 25px rgba(102, 126, 234, 0.6);
+}
+
+.btn-crear-orden:active {
+  transform: translateY(-1px);
+}
+
+/* Alert icon animation */
+.icono-alerta {
+  color: #fbbf24;
+  margin-left: 8px;
+  animation: parpadeo 1.5s infinite;
+  filter: drop-shadow(0 0 4px rgba(251, 191, 36, 0.6));
+}
+
+@keyframes parpadeo {
+  0%, 100% { 
+    opacity: 1; 
+    transform: scale(1);
+  }
+  50% { 
+    opacity: 0.3; 
+    transform: scale(1.1);
+  }
+}
+
+/* Main table styles */
+.tabla-ordenes {
+  width: 100%;
+  background: white;
+  border-radius: 16px;
+  overflow: hidden;
+  box-shadow: 0 10px 30px rgba(0, 0, 0, 0.1);
+  border: none;
+  margin-top: 2rem;
+}
+
+.tabla-ordenes thead {
+  background: linear-gradient(135deg, #1e293b 0%, #334155 100%);
+}
+
+.tabla-ordenes thead th {
+  padding: 1.5rem 1.25rem;
+  text-align: left;
+  font-weight: 600;
+  color: white;
+  font-size: 0.95rem;
+  letter-spacing: 0.5px;
+  text-transform: uppercase;
+  border: none;
+}
+
+.tabla-ordenes tbody tr {
+  border-bottom: 1px solid #e2e8f0;
+  transition: all 0.3s ease;
+}
+
+.tabla-ordenes tbody tr:hover {
+  background-color: #f8fafc;
+  transform: scale(1.005);
+}
+
+.tabla-ordenes tbody tr:last-child {
+  border-bottom: none;
+}
+
+.tabla-ordenes tbody td {
+  padding: 1.5rem 1.25rem;
+  vertical-align: top;
+  color: #475569;
+  font-size: 0.95rem;
+  line-height: 1.5;
+}
+
+/* Product table within cells */
+.tabla-productos {
+  width: 100%;
+  border-radius: 8px;
+  overflow: hidden;
+  border: 1px solid #e2e8f0;
+  font-size: 0.875rem;
+  margin-top: 0.5rem;
+}
+
+.tabla-productos thead {
+  background: linear-gradient(135deg, #f1f5f9 0%, #e2e8f0 100%);
+}
+
+.tabla-productos thead th {
+  padding: 0.75rem 1rem;
+  font-weight: 600;
+  color: #475569;
+  text-transform: none;
+  font-size: 0.875rem;
+  letter-spacing: normal;
+}
+
+.tabla-productos tbody tr {
+  border-bottom: 1px solid #f1f5f9;
+}
+
+.tabla-productos tbody tr:last-child {
+  border-bottom: none;
+}
+
+.tabla-productos tbody td {
+  padding: 0.75rem 1rem;
+  color: #64748b;
+  font-size: 0.875rem;
+}
+
+.tabla-productos tbody tr:hover {
+  background-color: #f8fafc;
+}
+
+/* Status badges */
+.tabla-ordenes tbody td:nth-child(4) {
+  font-weight: 600;
+}
+
+/* Order ID styling */
+.tabla-ordenes tbody td:first-child {
+  font-weight: 600;
+  color: #667eea;
+  font-family: 'JetBrains Mono', monospace;
+}
+
+/* Provider name styling */
+.tabla-ordenes tbody td:nth-child(2) {
+  font-weight: 500;
+  color: #1e293b;
+}
+
+/* Date styling */
+.tabla-ordenes tbody td:nth-child(3) {
+  color: #64748b;
+  font-size: 0.9rem;
+}
+
+/* Empty state */
+em {
+  color: #94a3b8;
+  font-style: italic;
+}
+
+/* Responsive design */
+@media (max-width: 1024px) {
+  .main-content {
+    padding: 1.5rem;
+  }
+  
+  .main-content h1 {
+    font-size: 2rem;
+  }
+  
+  .tabla-ordenes {
+    font-size: 0.875rem;
+  }
+  
+  .tabla-ordenes thead th,
+  .tabla-ordenes tbody td {
+    padding: 1rem 0.75rem;
+  }
+}
+
+@media (max-width: 768px) {
+  .main-content {
+    padding: 1rem;
+  }
+  
+  .main-content h1 {
+    font-size: 1.75rem;
+  }
+  
+  .alerta-stock {
+    padding: 1rem 1.5rem;
+    font-size: 1rem;
+  }
+  
+  .btn-crear-orden {
+    padding: 0.875rem 1.5rem;
+    font-size: 1rem;
+  }
+  
+  .tabla-ordenes {
+    overflow-x: auto;
+    display: block;
+    white-space: nowrap;
+  }
+  
+  .tabla-ordenes thead,
+  .tabla-ordenes tbody {
+    display: table;
+    width: 100%;
+  }
+  
+  .tabla-ordenes thead th,
+  .tabla-ordenes tbody td {
+    padding: 0.75rem 0.5rem;
+    font-size: 0.8rem;
+  }
+  
+  .tabla-productos {
+    min-width: 250px;
+  }
+}
+
+@media (max-width: 480px) {
+  .main-content h1 {
+    font-size: 1.5rem;
+  }
+  
+  .alerta-stock {
+    padding: 0.875rem 1rem;
+    font-size: 0.9rem;
+  }
+  
+  .btn-crear-orden {
+    padding: 0.75rem 1.25rem;
+    font-size: 0.9rem;
+  }
+}
+
+/* Custom scrollbar for better UX */
+.tabla-ordenes::-webkit-scrollbar {
+  height: 8px;
+}
+
+.tabla-ordenes::-webkit-scrollbar-track {
+  background: #f1f5f9;
+  border-radius: 4px;
+}
+
+.tabla-ordenes::-webkit-scrollbar-thumb {
+  background: #cbd5e1;
+  border-radius: 4px;
+}
+
+.tabla-ordenes::-webkit-scrollbar-thumb:hover {
+  background: #94a3b8;
+}
+
+/* Subtle animations for better user experience */
+@keyframes fadeInUp {
+  from {
+    opacity: 0;
+    transform: translateY(30px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+.tabla-ordenes {
+  animation: fadeInUp 0.6s ease-out;
+}
+
+.alerta-stock {
+  animation: fadeInUp 0.4s ease-out;
+}
+
+.btn-crear-orden {
+  animation: fadeInUp 0.5s ease-out;
+}
   </style>
 </head>
 

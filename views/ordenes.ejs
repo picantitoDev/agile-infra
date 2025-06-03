@@ -1,104 +1,75 @@
 <head>
   <link rel="stylesheet" href="/listarOrdenes.css">
   <style>
-        .alerta-stock {
-      margin-top: 1rem;
-      padding: 10px 15px;
-      border-radius: 6px;
-      font-weight: bold;
-      background-color: #fff3cd;
-      color: #856404;
-      border: 1px solid #ffeeba;
-    }
+/* ===== VARIABLES CSS ===== */
+:root {
+  --primary-color: #3b82f6;
+  --primary-hover: #2563eb;
+  --success-color: #10b981;
+  --warning-color: #f59e0b;
+  --danger-color: #ef4444;
+  --gray-50: #f9fafb;
+  --gray-100: #f3f4f6;
+  --gray-200: #e5e7eb;
+  --gray-300: #d1d5db;
+  --gray-600: #4b5563;
+  --gray-700: #374151;
+  --gray-800: #1f2937;
+  --gray-900: #111827;
+  --shadow-sm: 0 1px 2px 0 rgb(0 0 0 / 0.05);
+  --shadow-md: 0 4px 6px -1px rgb(0 0 0 / 0.1), 0 2px 4px -2px rgb(0 0 0 / 0.1);
+  --shadow-lg: 0 10px 15px -3px rgb(0 0 0 / 0.1), 0 4px 6px -4px rgb(0 0 0 / 0.1);
+  --border-radius: 0.75rem;
+  --border-radius-sm: 0.5rem;
+}
 
-    .alerta-ok {
-      background-color: #d4edda;
-      color: #155724;
-      border: 1px solid #c3e6cb;
-    }
-
-    .btn-crear-orden {
-      position: relative;
-    }
-
-    .icono-alerta {
-      color: red;
-      margin-left: 8px;
-      animation: parpadeo 1.5s infinite;
-    }
-
-    @keyframes parpadeo {
-      0%, 100% { opacity: 1; }
-      50% { opacity: 0; }
-    }
-
-    /* Modern Restocking Orders Styles */
-
-/* Main container */
+/* ===== ESTILOS GENERALES ===== */
 .main-content {
-  max-width: 100%;
+  max-width: 1200px;
   margin: 0 auto;
   padding: 2rem;
   font-family: 'Inter', -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif;
-  background-color: #f8fafc;
+  background: linear-gradient(135deg, #f8fafc 0%, #e2e8f0 100%);
   min-height: 100vh;
 }
 
-/* Page title */
 .main-content h1 {
   font-size: 2.5rem;
   font-weight: 700;
-  color: #1e293b;
+  color: var(--gray-900);
   margin-bottom: 2rem;
   text-align: center;
-  position: relative;
+  background: linear-gradient(135deg, var(--primary-color), var(--primary-hover));
+  -webkit-background-clip: text;
+  -webkit-text-fill-color: transparent;
+  background-clip: text;
 }
 
-.main-content h1::after {
-  content: '';
-  position: absolute;
-  bottom: -0.5rem;
-  left: 50%;
-  transform: translateX(-50%);
-  width: 80px;
-  height: 4px;
-  background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
-  border-radius: 2px;
-}
-
-/* Alert styles */
+/* ===== ALERTAS DE STOCK ===== */
 .alerta-stock {
-  margin: 2rem 0;
-  padding: 1.5rem 2rem;
-  border-radius: 12px;
+  padding: 1.25rem 1.5rem;
+  border-radius: var(--border-radius);
+  margin-bottom: 2rem;
   font-weight: 600;
   font-size: 1.1rem;
-  box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.1);
-  border-left: 6px solid #f59e0b;
-  background: linear-gradient(135deg, #fef3c7 0%, #fde68a 100%);
-  color: #92400e;
-  display: flex;
-  align-items: center;
-  gap: 0.75rem;
-  transition: all 0.3s ease;
+  box-shadow: var(--shadow-md);
+  border-left: 5px solid var(--danger-color);
+  background: linear-gradient(135deg, #fef2f2, #fee2e2);
+  color: var(--danger-color);
+  animation: slideInDown 0.5s ease-out;
 }
 
-.alerta-stock:hover {
-  transform: translateY(-2px);
-  box-shadow: 0 8px 15px -3px rgba(0, 0, 0, 0.1);
+.alerta-stock.alerta-ok {
+  border-left-color: var(--success-color);
+  background: linear-gradient(135deg, #f0fdf4, #dcfce7);
+  color: var(--success-color);
 }
 
-.alerta-ok {
-  border-left-color: #10b981;
-  background: linear-gradient(135deg, #d1fae5 0%, #a7f3d0 100%);
-  color: #065f46;
-}
-
-/* Create order button container */
+/* ===== BOTÓN CREAR ORDEN ===== */
 .crear-orden-container {
   display: flex;
   justify-content: center;
-  margin: 2.5rem 0;
+  margin-bottom: 2.5rem;
 }
 
 .btn-crear-orden {
@@ -106,14 +77,14 @@
   align-items: center;
   gap: 0.75rem;
   padding: 1rem 2rem;
-  background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+  background: linear-gradient(135deg, var(--primary-color), var(--primary-hover));
   color: white;
   text-decoration: none;
-  border-radius: 12px;
+  border-radius: var(--border-radius);
   font-weight: 600;
   font-size: 1.1rem;
-  box-shadow: 0 4px 15px rgba(102, 126, 234, 0.4);
-  transition: all 0.3s ease;
+  box-shadow: var(--shadow-lg);
+  transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
   position: relative;
   overflow: hidden;
 }
@@ -125,7 +96,7 @@
   left: -100%;
   width: 100%;
   height: 100%;
-  background: linear-gradient(90deg, transparent, rgba(255, 255, 255, 0.2), transparent);
+  background: linear-gradient(90deg, transparent, rgba(255,255,255,0.2), transparent);
   transition: left 0.5s;
 }
 
@@ -134,156 +105,206 @@
 }
 
 .btn-crear-orden:hover {
-  transform: translateY(-3px);
-  box-shadow: 0 8px 25px rgba(102, 126, 234, 0.6);
+  transform: translateY(-2px);
+  box-shadow: 0 20px 25px -5px rgb(0 0 0 / 0.1), 0 8px 10px -6px rgb(0 0 0 / 0.1);
 }
 
-.btn-crear-orden:active {
-  transform: translateY(-1px);
-}
-
-/* Alert icon animation */
 .icono-alerta {
-  color: #fbbf24;
-  margin-left: 8px;
-  animation: parpadeo 1.5s infinite;
-  filter: drop-shadow(0 0 4px rgba(251, 191, 36, 0.6));
+  color: var(--warning-color);
+  animation: pulse 2s infinite;
 }
 
-@keyframes parpadeo {
-  0%, 100% { 
-    opacity: 1; 
-    transform: scale(1);
-  }
-  50% { 
-    opacity: 0.3; 
-    transform: scale(1.1);
-  }
-}
-
-/* Main table styles */
+/* ===== TABLA PRINCIPAL ===== */
 .tabla-ordenes {
   width: 100%;
   background: white;
-  border-radius: 16px;
+  border-radius: var(--border-radius);
   overflow: hidden;
-  box-shadow: 0 10px 30px rgba(0, 0, 0, 0.1);
-  border: none;
-  margin-top: 2rem;
+  box-shadow: var(--shadow-lg);
+  border-collapse: collapse;
 }
 
 .tabla-ordenes thead {
-  background: linear-gradient(135deg, #1e293b 0%, #334155 100%);
+  background: linear-gradient(135deg, var(--gray-800), var(--gray-700));
+  color: white;
 }
 
-.tabla-ordenes thead th {
-  padding: 1.5rem 1.25rem;
+.tabla-ordenes th {
+  padding: 1.25rem 1rem;
   text-align: left;
   font-weight: 600;
-  color: white;
   font-size: 0.95rem;
-  letter-spacing: 0.5px;
   text-transform: uppercase;
-  border: none;
+  letter-spacing: 0.05em;
 }
 
 .tabla-ordenes tbody tr {
-  border-bottom: 1px solid #e2e8f0;
-  transition: all 0.3s ease;
+  border-bottom: 1px solid var(--gray-200);
+  transition: all 0.2s ease;
 }
 
 .tabla-ordenes tbody tr:hover {
-  background-color: #f8fafc;
-  transform: scale(1.005);
+  background: var(--gray-50);
+  transform: scale(1.01);
+  box-shadow: var(--shadow-md);
 }
 
 .tabla-ordenes tbody tr:last-child {
   border-bottom: none;
 }
 
-.tabla-ordenes tbody td {
-  padding: 1.5rem 1.25rem;
+.tabla-ordenes td {
+  padding: 1.25rem 1rem;
+  color: var(--gray-700);
   vertical-align: top;
-  color: #475569;
-  font-size: 0.95rem;
-  line-height: 1.5;
 }
 
-/* Product table within cells */
+/* ===== COLUMNA DE PRODUCTOS CON BOTÓN DESPLEGABLE ===== */
+.productos-container {
+  position: relative;
+}
+
+.btn-toggle-productos {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.5rem;
+  padding: 0.5rem 1rem;
+  background: linear-gradient(135deg, var(--primary-color), var(--primary-hover));
+  color: white;
+  border: none;
+  border-radius: var(--border-radius-sm);
+  font-size: 0.875rem;
+  font-weight: 500;
+  cursor: pointer;
+  transition: all 0.2s ease;
+  box-shadow: var(--shadow-sm);
+}
+
+.btn-toggle-productos:hover {
+  transform: translateY(-1px);
+  box-shadow: var(--shadow-md);
+}
+
+.btn-toggle-productos i {
+  transition: transform 0.3s ease;
+}
+
+.btn-toggle-productos.active i {
+  transform: rotate(180deg);
+}
+
+.productos-desplegable {
+  display: none;
+  margin-top: 1rem;
+  background: var(--gray-50);
+  border-radius: var(--border-radius-sm);
+  padding: 1rem;
+  border: 2px solid var(--gray-200);
+  animation: slideDown 0.3s ease-out;
+}
+
+.productos-desplegable.show {
+  display: block;
+}
+
+/* ===== TABLA DE PRODUCTOS ANIDADA ===== */
 .tabla-productos {
   width: 100%;
-  border-radius: 8px;
-  overflow: hidden;
-  border: 1px solid #e2e8f0;
+  border-collapse: collapse;
   font-size: 0.875rem;
-  margin-top: 0.5rem;
+  background: white;
+  border-radius: var(--border-radius-sm);
+  overflow: hidden;
+  box-shadow: var(--shadow-sm);
 }
 
 .tabla-productos thead {
-  background: linear-gradient(135deg, #f1f5f9 0%, #e2e8f0 100%);
+  background: linear-gradient(135deg, var(--gray-600), var(--gray-700));
 }
 
-.tabla-productos thead th {
-  padding: 0.75rem 1rem;
+.tabla-productos th {
+  padding: 0.75rem;
+  color: white;
   font-weight: 600;
-  color: #475569;
-  text-transform: none;
-  font-size: 0.875rem;
-  letter-spacing: normal;
+  font-size: 0.8rem;
+  text-transform: uppercase;
+  letter-spacing: 0.05em;
 }
 
-.tabla-productos tbody tr {
-  border-bottom: 1px solid #f1f5f9;
-}
-
-.tabla-productos tbody tr:last-child {
-  border-bottom: none;
-}
-
-.tabla-productos tbody td {
-  padding: 0.75rem 1rem;
-  color: #64748b;
-  font-size: 0.875rem;
+.tabla-productos td {
+  padding: 0.75rem;
+  border-bottom: 1px solid var(--gray-200);
+  color: var(--gray-700);
 }
 
 .tabla-productos tbody tr:hover {
-  background-color: #f8fafc;
+  background: var(--gray-50);
 }
 
-/* Status badges */
-.tabla-ordenes tbody td:nth-child(4) {
+.tabla-productos tbody tr:last-child td {
+  border-bottom: none;
+}
+
+/* ===== ESTADOS DE ÓRDENES ===== */
+.estado-badge {
+  display: inline-block;
+  padding: 0.25rem 0.75rem;
+  border-radius: 9999px;
+  font-size: 0.75rem;
   font-weight: 600;
+  text-transform: uppercase;
+  letter-spacing: 0.05em;
 }
 
-/* Order ID styling */
-.tabla-ordenes tbody td:first-child {
-  font-weight: 600;
-  color: #667eea;
-  font-family: 'JetBrains Mono', monospace;
-}
+.estado-pendiente { background: #fef3c7; color: #92400e; }
+.estado-proceso { background: #dbeafe; color: #1e40af; }
+.estado-completado { background: #d1fae5; color: #065f46; }
+.estado-cancelado { background: #fee2e2; color: #991b1b; }
 
-/* Provider name styling */
-.tabla-ordenes tbody td:nth-child(2) {
-  font-weight: 500;
-  color: #1e293b;
-}
-
-/* Date styling */
-.tabla-ordenes tbody td:nth-child(3) {
-  color: #64748b;
-  font-size: 0.9rem;
-}
-
-/* Empty state */
-em {
-  color: #94a3b8;
+/* ===== MENSAJE SIN PRODUCTOS ===== */
+.sin-productos {
+  color: var(--gray-600);
   font-style: italic;
+  text-align: center;
+  padding: 1rem;
+  background: var(--gray-100);
+  border-radius: var(--border-radius-sm);
 }
 
-/* Responsive design */
-@media (max-width: 1024px) {
+/* ===== ANIMACIONES ===== */
+@keyframes slideInDown {
+  from {
+    opacity: 0;
+    transform: translateY(-20px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+@keyframes slideDown {
+  from {
+    opacity: 0;
+    max-height: 0;
+    transform: translateY(-10px);
+  }
+  to {
+    opacity: 1;
+    max-height: 500px;
+    transform: translateY(0);
+  }
+}
+
+@keyframes pulse {
+  0%, 100% { opacity: 1; }
+  50% { opacity: 0.5; }
+}
+
+/* ===== RESPONSIVE DESIGN ===== */
+@media (max-width: 768px) {
   .main-content {
-    padding: 1.5rem;
+    padding: 1rem;
   }
   
   .main-content h1 {
@@ -294,204 +315,237 @@ em {
     font-size: 0.875rem;
   }
   
-  .tabla-ordenes thead th,
-  .tabla-ordenes tbody td {
-    padding: 1rem 0.75rem;
-  }
-}
-
-@media (max-width: 768px) {
-  .main-content {
-    padding: 1rem;
-  }
-  
-  .main-content h1 {
-    font-size: 1.75rem;
-  }
-  
-  .alerta-stock {
-    padding: 1rem 1.5rem;
-    font-size: 1rem;
+  .tabla-ordenes th,
+  .tabla-ordenes td {
+    padding: 0.75rem 0.5rem;
   }
   
   .btn-crear-orden {
-    padding: 0.875rem 1.5rem;
+    padding: 0.75rem 1.5rem;
     font-size: 1rem;
   }
   
-  .tabla-ordenes {
-    overflow-x: auto;
-    display: block;
-    white-space: nowrap;
-  }
-  
-  .tabla-ordenes thead,
-  .tabla-ordenes tbody {
-    display: table;
-    width: 100%;
-  }
-  
-  .tabla-ordenes thead th,
-  .tabla-ordenes tbody td {
-    padding: 0.75rem 0.5rem;
-    font-size: 0.8rem;
-  }
-  
-  .tabla-productos {
-    min-width: 250px;
+  .alerta-stock {
+    padding: 1rem;
+    font-size: 1rem;
   }
 }
 
 @media (max-width: 480px) {
-  .main-content h1 {
-    font-size: 1.5rem;
+  .tabla-ordenes {
+    display: block;
+    overflow-x: auto;
+    white-space: nowrap;
   }
   
-  .alerta-stock {
-    padding: 0.875rem 1rem;
-    font-size: 0.9rem;
+  .tabla-ordenes thead,
+  .tabla-ordenes tbody,
+  .tabla-ordenes th,
+  .tabla-ordenes td,
+  .tabla-ordenes tr {
+    display: block;
   }
   
-  .btn-crear-orden {
-    padding: 0.75rem 1.25rem;
-    font-size: 0.9rem;
+  .tabla-ordenes thead tr {
+    position: absolute;
+    top: -9999px;
+    left: -9999px;
   }
-}
-
-/* Custom scrollbar for better UX */
-.tabla-ordenes::-webkit-scrollbar {
-  height: 8px;
-}
-
-.tabla-ordenes::-webkit-scrollbar-track {
-  background: #f1f5f9;
-  border-radius: 4px;
-}
-
-.tabla-ordenes::-webkit-scrollbar-thumb {
-  background: #cbd5e1;
-  border-radius: 4px;
-}
-
-.tabla-ordenes::-webkit-scrollbar-thumb:hover {
-  background: #94a3b8;
-}
-
-/* Subtle animations for better user experience */
-@keyframes fadeInUp {
-  from {
-    opacity: 0;
-    transform: translateY(30px);
+  
+  .tabla-ordenes tr {
+    border: 1px solid var(--gray-200);
+    margin-bottom: 1rem;
+    border-radius: var(--border-radius-sm);
+    background: white;
+    padding: 1rem;
   }
-  to {
-    opacity: 1;
-    transform: translateY(0);
+  
+  .tabla-ordenes td {
+    border: none;
+    position: relative;
+    padding-left: 30%;
+    padding-right: 1rem;
+    padding-top: 0.5rem;
+    padding-bottom: 0.5rem;
   }
-}
-
-.tabla-ordenes {
-  animation: fadeInUp 0.6s ease-out;
-}
-
-.alerta-stock {
-  animation: fadeInUp 0.4s ease-out;
-}
-
-.btn-crear-orden {
-  animation: fadeInUp 0.5s ease-out;
+  
+  .tabla-ordenes td:before {
+    content: attr(data-label) ": ";
+    position: absolute;
+    left: 6px;
+    width: 25%;
+    padding-right: 10px;
+    white-space: nowrap;
+    font-weight: 600;
+    color: var(--gray-900);
+  }
 }
   </style>
 </head>
-
-<div class="main-content">
+<div class="main-content">   
   <h1>Órdenes de Reabastecimiento</h1>
+     
+  <% if (productosBajoStock > 0) { %>     
+    <div class="alerta-stock">       
+      🚨 Tienes <strong><%= productosBajoStock %></strong> producto(s) con stock bajo. ¡Necesitas crear una orden!     
+    </div>   
+  <% } else { %>     
+    <div class="alerta-stock alerta-ok">       
+      ✅ No tienes órdenes pendientes :)     
+    </div>   
+  <% } %>     
 
-    <% if (productosBajoStock > 0) { %>
-    <div class="alerta-stock">
-      🚨 Tienes <strong><%= productosBajoStock %></strong> producto(s) con stock bajo. ¡Necesitas crear una orden!
-    </div>
-  <% } else { %>
-    <div class="alerta-stock alerta-ok">
-      ✅ No tienes órdenes pendientes :)
-    </div>
-  <% } %>
+  <!-- BOTÓN "CREAR ORDEN" -->   
+  <div class="crear-orden-container">     
+    <a href="/ordenes/nueva" class="btn-crear-orden">       
+      <i class="fas fa-plus-circle"></i> Crear Orden       
+      <% if (productosBajoStock > 0) { %>         
+        <i class="fas fa-exclamation-circle icono-alerta"></i>       
+      <% } %>     
+    </a>   
+  </div>    
 
-
-  <!-- 🔘 BOTÓN “CREAR ORDEN” -->
-  <div class="crear-orden-container">
-    <a href="/ordenes/nueva" class="btn-crear-orden">
-      <i class="fas fa-plus-circle"></i> Crear Orden
-      <% if (productosBajoStock > 0) { %>
-        <i class="fas fa-exclamation-circle icono-alerta"></i>
-      <% } %>
-    </a>
-  </div>
-
-  <table class="tabla-ordenes">
-    <thead>
-      <tr>
-        <th>ID Orden</th>
-        <th>Proveedor</th>
-        <th>Fecha</th>
-        <th>Estado</th>
-        <th>Productos</th>
-      </tr>
-    </thead>
-    <tbody>
-      <% ordenes.forEach(orden => { %>
-        <tr>
-          <td><%= orden.id_order %></td>
-          <td><%= orden.proveedor %></td>
-          <td>
-            <% 
-              // Validar y mostrar fecha formateada
-              let fechaFormateada = 'Fecha inválida';
-              if (orden.fecha) {
-                try {
-                  fechaFormateada = new Date(orden.fecha).toLocaleString('es-PE', { timeZone: 'America/Lima' });
-                } catch {}
-              }
-            %>
-            <%= fechaFormateada %>
-          </td>
-          <td>
-            <%= orden.estado %>
-          </td>
-          <td>
-            <% 
-              let productos = [];
-              try {
-                productos = typeof orden.products === 'string'
-                  ? JSON.parse(orden.products)
-                  : (Array.isArray(orden.products) ? orden.products : []);
-              } catch (e) {
-                productos = [];
-              }
-            %>
-
-            <% if (productos.length > 0) { %>
-              <table class="tabla-productos">
-                <thead>
-                  <tr>
-                    <th>Producto</th>
-                    <th>Cantidad</th>
-                  </tr>
-                </thead>
-                <tbody>
-                  <% productos.forEach(producto => { %>
-                    <tr>
-                      <td><%= producto.nombre %></td>
-                      <td><%= producto.cantidad %></td>
-                    </tr>
-                  <% }) %>
-                </tbody>
-              </table>
-            <% } else { %>
-              <em>Sin productos</em>
-            <% } %>
-          </td>
-        </tr>
-      <% }) %>
-    </tbody>
-  </table>
+  <table class="tabla-ordenes">     
+    <thead>       
+      <tr>         
+        <th>ID Orden</th>         
+        <th>Proveedor</th>         
+        <th>Fecha</th>         
+        <th>Estado</th>         
+        <th>Productos</th>       
+      </tr>     
+    </thead>     
+    <tbody>       
+      <% ordenes.forEach((orden, index) => { %>         
+        <tr>           
+          <td data-label="ID Orden"><%= orden.id_order %></td>           
+          <td data-label="Proveedor"><%= orden.proveedor %></td>           
+          <td data-label="Fecha">             
+            <%                
+              // Validar y mostrar fecha formateada               
+              let fechaFormateada = 'Fecha inválida';               
+              if (orden.fecha) {                 
+                try {                   
+                  fechaFormateada = new Date(orden.fecha).toLocaleString('es-PE', { 
+                    timeZone: 'America/Lima',
+                    year: 'numeric',
+                    month: 'short',
+                    day: 'numeric',
+                    hour: '2-digit',
+                    minute: '2-digit'
+                  });                 
+                } catch {}               
+              }             
+            %>             
+            <%= fechaFormateada %>           
+          </td>           
+          <td data-label="Estado">             
+            <%               
+              let estadoClass = '';               
+              const estado = orden.estado ? orden.estado.toLowerCase() : '';               
+              if (estado.includes('pendiente')) estadoClass = 'estado-pendiente';               
+              else if (estado.includes('proceso')) estadoClass = 'estado-proceso';               
+              else if (estado.includes('completado')) estadoClass = 'estado-completado';               
+              else if (estado.includes('cancelado')) estadoClass = 'estado-cancelado';               
+              else estadoClass = 'estado-pendiente';             
+            %>             
+            <span class="estado-badge <%= estadoClass %>">               
+              <%= orden.estado || 'Pendiente' %>             
+            </span>           
+          </td>           
+          <td data-label="Productos">             
+            <%                
+              let productos = [];               
+              try {                 
+                productos = typeof orden.products === 'string'                   
+                  ? JSON.parse(orden.products)                   
+                  : (Array.isArray(orden.products) ? orden.products : []);               
+              } catch (e) {                 
+                productos = [];               
+              }             
+            %>              
+            <div class="productos-container">               
+              <% if (productos.length > 0) { %>                 
+                <button class="btn-toggle-productos" onclick="toggleProductos(index)">                   
+                  <i class="fas fa-eye"></i>                   
+                  Ver Productos (<%= productos.length %>)                 
+                </button>                  
+                <div id="productos-<%= index %>" class="productos-desplegable">                   
+                  <table class="tabla-productos">                     
+                    <thead>                       
+                      <tr>                         
+                        <th>Producto</th>                         
+                        <th>Cantidad</th>                       
+                      </tr>                     
+                    </thead>                     
+                    <tbody>                       
+                      <% productos.forEach(producto => { %>                         
+                        <tr>                           
+                          <td><%= producto.nombre || 'Producto sin nombre' %></td>                           
+                          <td>
+                            <span style="font-weight: 600; color: #1f2937;">
+                              <%= producto.cantidad || 0 %>
+                            </span>
+                          </td>                         
+                        </tr>                       
+                      <% }) %>                     
+                    </tbody>                   
+                  </table>                 
+                </div>               
+              <% } else { %>                 
+                <div class="sin-productos">                   
+                  <i class="fas fa-inbox"></i> Sin productos                 
+                </div>               
+              <% } %>             
+            </div>           
+          </td>         
+        </tr>       
+      <% }) %>     
+    </tbody>   
+  </table> 
 </div>
+
+<!-- JavaScript para el funcionamiento de los botones desplegables -->
+<script>
+  function toggleProductos(index) {
+    const desplegable = document.getElementById(`productos-${index}`);
+    const boton = event.target.closest('.btn-toggle-productos');
+    
+    if (desplegable.classList.contains('show')) {
+      desplegable.classList.remove('show');
+      boton.classList.remove('active');
+      boton.innerHTML = '<i class="fas fa-eye"></i> Ver Productos (' + 
+        boton.textContent.match(/\((\d+)\)/)[1] + ')';
+    } else {
+      // Cerrar otros desplegables abiertos
+      document.querySelectorAll('.productos-desplegable.show').forEach(el => {
+        el.classList.remove('show');
+      });
+      document.querySelectorAll('.btn-toggle-productos.active').forEach(el => {
+        el.classList.remove('active');
+        const count = el.textContent.match(/\((\d+)\)/)[1];
+        el.innerHTML = '<i class="fas fa-eye"></i> Ver Productos (' + count + ')';
+      });
+      
+      // Abrir el desplegable actual
+      desplegable.classList.add('show');
+      boton.classList.add('active');
+      boton.innerHTML = '<i class="fas fa-eye-slash"></i> Ocultar Productos (' + 
+        boton.textContent.match(/\((\d+)\)/)[1] + ')';
+    }
+  }
+
+  // Cerrar desplegables al hacer clic fuera
+  document.addEventListener('click', function(event) {
+    if (!event.target.closest('.productos-container')) {
+      document.querySelectorAll('.productos-desplegable.show').forEach(el => {
+        el.classList.remove('show');
+      });
+      document.querySelectorAll('.btn-toggle-productos.active').forEach(el => {
+        el.classList.remove('active');
+        const count = el.textContent.match(/\((\d+)\)/)[1];
+        el.innerHTML = '<i class="fas fa-eye"></i> Ver Productos (' + count + ')';
+      });
+    }
+  });
+</script>

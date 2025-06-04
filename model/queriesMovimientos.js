@@ -64,7 +64,7 @@ async function obtenerDetalleMovimiento(idMov) {
   return rows
 }
 
-async function obtenerMovimientosVentas() {
+async function obtenerMovimientosVentas(fechaInicio, fechaFin) {
   const query = `
     SELECT
       m.id_movimiento,
@@ -93,14 +93,16 @@ async function obtenerMovimientosVentas() {
     JOIN producto_movimiento pm ON m.id_movimiento = pm.id_movimiento
     JOIN producto p ON pm.id_producto = p.id_producto
     WHERE m.tipo = 'Venta'
+     AND m.fecha::date BETWEEN $1 AND $2
     ORDER BY m.fecha DESC, m.id_movimiento
   `;
 
-  const { rows } = await pool.query(query);
+  const { rows } = await pool.query(query, [fechaInicio, fechaFin]);
   return rows;
 }
 
-async function obtenerMovimientosMermas() {
+
+async function obtenerMovimientosMermas(fechaInicio, fechaFin) {
   const query = `
     SELECT
       m.id_movimiento,
@@ -118,15 +120,18 @@ async function obtenerMovimientosMermas() {
     JOIN usuarios u ON m.id_usuario = u.id
     JOIN producto_movimiento pm ON m.id_movimiento = pm.id_movimiento
     JOIN producto p ON pm.id_producto = p.id_producto
-    WHERE m.tipo = 'Merma' AND ma.tipo_ajuste = 'Merma'
+    WHERE m.tipo = 'Merma'
+      AND ma.tipo_ajuste = 'Merma'
+      AND m.fecha::date BETWEEN $1 AND $2
     ORDER BY m.fecha DESC, m.id_movimiento
   `;
 
-  const { rows } = await pool.query(query);
+  const { rows } = await pool.query(query, [fechaInicio, fechaFin]);
   return rows;
 }
 
-async function obtenerMovimientosEntradas() {
+
+async function obtenerMovimientosEntradas(fechaInicio, fechaFin) {
   const query = `
     SELECT
       m.id_movimiento,
@@ -151,12 +156,41 @@ async function obtenerMovimientosEntradas() {
     JOIN producto_movimiento pm ON m.id_movimiento = pm.id_movimiento
     JOIN producto p ON pm.id_producto = p.id_producto
     WHERE m.tipo = 'Compra'
+      AND m.fecha::date BETWEEN $1 AND $2
+    ORDER BY m.fecha DESC, m.id_movimiento
+  `;
+  const { rows } = await pool.query(query, [fechaInicio, fechaFin]);
+  return rows;
+}
+
+async function obtenerMovimientosSobrantes(fechaInicio, fechaFin) {
+  const query = `
+    SELECT
+      m.id_movimiento,
+      m.fecha,
+      m.descripcion,
+      u.username AS usuario,
+      ma.motivo,
+      p.id_producto,
+      p.nombre AS producto,
+      pm.cantidad,
+      pm.precio_unitario,
+      pm.subtotal
+    FROM movimiento m
+    JOIN movimiento_ajuste ma ON m.id_movimiento = ma.id_movimiento
+    JOIN usuarios u ON m.id_usuario = u.id
+    JOIN producto_movimiento pm ON m.id_movimiento = pm.id_movimiento
+    JOIN producto p ON pm.id_producto = p.id_producto
+    WHERE m.tipo = 'Sobrante'
+      AND ma.tipo_ajuste = 'Sobrante'
+      AND m.fecha::date BETWEEN $1 AND $2
     ORDER BY m.fecha DESC, m.id_movimiento
   `;
 
-  const { rows } = await pool.query(query);
+  const { rows } = await pool.query(query, [fechaInicio, fechaFin]);
   return rows;
 }
+
 
 
 async function registrarMovimiento({ id_usuario, tipo, fecha, descripcion }) {
@@ -299,5 +333,6 @@ module.exports = {
   registrarProductoMovimiento,
   obtenerMovimientosVentas,
   obtenerMovimientosEntradas,
-  obtenerMovimientosMermas
+  obtenerMovimientosMermas,
+  obtenerMovimientosSobrantes
 }

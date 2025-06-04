@@ -1,157 +1,249 @@
 const ExcelJS = require("exceljs")
 const dbMovimientos = require("../model/queriesMovimientos")
 
-async function generarExcelVentas(req, res) {
-  try {
-    const { tipo, fechaInicio, fechaFin } = req.query
-    const rows = await dbMovimientos.obtenerMovimientosVentas();
-    const workbook = new ExcelJS.Workbook();
-    const worksheet = workbook.addWorksheet('Reporte de Ventas');
+async function generarExcelVentas(desde, hasta) {
+  const rows = await dbMovimientos.obtenerMovimientosVentas(desde, hasta);
+  const workbook = new ExcelJS.Workbook();
+  const worksheet = workbook.addWorksheet('Reporte de Ventas');
 
-    worksheet.columns = [
-      { header: 'ID Movimiento', key: 'id_movimiento', width: 15 },
-      { header: 'Fecha de Venta', key: 'fecha', width: 20 },
-      { header: 'Usuario', key: 'usuario', width: 20 },
-      { header: 'Tipo Comprobante', key: 'tipo_comprobante', width: 20 },
-      { header: 'Serie', key: 'serie', width: 10 },
-      { header: 'Correlativo', key: 'correlativo', width: 15 },
-      { header: 'Total Venta', key: 'total_venta', width: 15 },
-      { header: 'Cliente - Nombre', key: 'nombre_cliente', width: 25 },
-      { header: 'Cliente - Razón Social', key: 'razon_social', width: 25 },
-      { header: 'Cliente - RUC', key: 'ruc_cliente', width: 18 },
-      { header: 'Cliente - DNI', key: 'dni_cliente', width: 18 },
-      { header: 'Cliente - Dirección', key: 'direccion_cliente', width: 30 },
-      { header: 'Cliente - Correo', key: 'correo_cliente', width: 25 },
-      { header: 'ID Producto', key: 'id_producto', width: 15 },
-      { header: 'Producto', key: 'producto', width: 30 },
-      { header: 'Cantidad', key: 'cantidad', width: 10 },
-      { header: 'Precio Unitario', key: 'precio_unitario', width: 15 },
-      { header: 'Subtotal', key: 'subtotal', width: 15 },
-      { header: 'Descripción Movimiento', key: 'descripcion', width: 30 }
-    ];
+  worksheet.columns = [
+    { header: 'ID Movimiento', key: 'id_movimiento', width: 15 },
+    { header: 'Fecha de Venta', key: 'fecha', width: 20 },
+    { header: 'Usuario', key: 'usuario', width: 20 },
+    { header: 'Tipo Comprobante', key: 'tipo_comprobante', width: 20 },
+    { header: 'Serie', key: 'serie', width: 10 },
+    { header: 'Correlativo', key: 'correlativo', width: 15 },
+    { header: 'Total Venta', key: 'total_venta', width: 15 },
+    { header: 'Cliente - Nombre', key: 'nombre_cliente', width: 25 },
+    { header: 'Cliente - Razón Social', key: 'razon_social', width: 25 },
+    { header: 'Cliente - RUC', key: 'ruc_cliente', width: 18 },
+    { header: 'Cliente - DNI', key: 'dni_cliente', width: 18 },
+    { header: 'Cliente - Dirección', key: 'direccion_cliente', width: 30 },
+    { header: 'Cliente - Correo', key: 'correo_cliente', width: 25 },
+    { header: 'ID Producto', key: 'id_producto', width: 15 },
+    { header: 'Producto', key: 'producto', width: 30 },
+    { header: 'Cantidad', key: 'cantidad', width: 10 },
+    { header: 'Precio Unitario', key: 'precio_unitario', width: 15 },
+    { header: 'Subtotal', key: 'subtotal', width: 15 },
+    { header: 'Descripción Movimiento', key: 'descripcion', width: 30 }
+  ];
 
-    rows.forEach(row => {
-      worksheet.addRow(row);
+  rows.forEach(row => {
+    worksheet.addRow({
+      ...row,
+      fecha: new Date(row.fecha).toLocaleString('es-PE') // formato legible
     });
+  });
 
-    worksheet.getRow(1).font = { bold: true };
-
-    res.setHeader(
-      'Content-Type',
-      'application/vnd.openxmlformats-officedocument.spreadsheetml.sheet'
-    );
-    res.setHeader(
-      'Content-Disposition',
-      'attachment; filename=reporte_ventas.xlsx'
-    );
-
-    await workbook.xlsx.write(res);
-    res.end()
-  } catch (error) {
-    console.error("Error exportando Excel:", error)
-    res.status(500).send("Error generando el reporte")
-  }
+  return workbook.xlsx.writeBuffer();
 }
 
-async function generarExcelEntradas(req, res) {
-  try {
-    const entradas = await dbMovimientos.obtenerMovimientosEntradas();
+async function generarExcelEntradas(desde, hasta) {
+  const rows = await dbMovimientos.obtenerMovimientosEntradas(desde, hasta);
+  const workbook = new ExcelJS.Workbook();
+  const worksheet = workbook.addWorksheet('Reporte de Entradas');
 
-    const workbook = new ExcelJS.Workbook();
-    const worksheet = workbook.addWorksheet('Entradas');
+  worksheet.columns = [
+    { header: 'ID Movimiento', key: 'id_movimiento', width: 15 },
+    { header: 'Fecha', key: 'fecha', width: 20 },
+    { header: 'Usuario', key: 'usuario', width: 20 },
+    { header: 'Descripción Movimiento', key: 'descripcion', width: 30 },
+    { header: 'Total Entrada', key: 'total_entrada', width: 15 },
+    { header: 'ID Orden', key: 'id_orden', width: 12 },
+    { header: 'Proveedor - Razón Social', key: 'razon_social', width: 25 },
+    { header: 'Proveedor - RUC', key: 'ruc', width: 15 },
+    { header: 'Proveedor - Dirección', key: 'direccion', width: 30 },
+    { header: 'Proveedor - Correo', key: 'correo', width: 25 },
+    { header: 'ID Producto', key: 'id_producto', width: 12 },
+    { header: 'Producto', key: 'producto', width: 30 },
+    { header: 'Cantidad', key: 'cantidad', width: 10 },
+    { header: 'Precio Unitario', key: 'precio_unitario', width: 15 },
+    { header: 'Subtotal', key: 'subtotal', width: 15 }
+  ];
 
-    // Encabezados
-    worksheet.columns = [
-      { header: 'ID Movimiento', key: 'id_movimiento', width: 15 },
-      { header: 'Fecha', key: 'fecha', width: 20 },
-      { header: 'Usuario', key: 'usuario', width: 20 },
-      { header: 'Descripción', key: 'descripcion', width: 30 },
-      { header: 'Total Entrada', key: 'total_entrada', width: 15 },
-      { header: 'ID Orden', key: 'id_orden', width: 12 },
-
-      { header: 'Razón Social (Proveedor)', key: 'razon_social', width: 25 },
-      { header: 'RUC Proveedor', key: 'ruc', width: 15 },
-      { header: 'Dirección Proveedor', key: 'direccion', width: 30 },
-      { header: 'Correo Proveedor', key: 'correo', width: 25 },
-
-      { header: 'ID Producto', key: 'id_producto', width: 12 },
-      { header: 'Nombre Producto', key: 'producto', width: 30 },
-      { header: 'Cantidad', key: 'cantidad', width: 10 },
-      { header: 'Precio Unitario', key: 'precio_unitario', width: 15 },
-      { header: 'Subtotal', key: 'subtotal', width: 15 }
-    ];
-
-    // Filas
-    entradas.forEach((entrada) => {
-      worksheet.addRow({
-        ...entrada,
-        fecha: new Date(entrada.fecha).toLocaleString(), // formato legible
-      });
+  rows.forEach(row => {
+    worksheet.addRow({
+      ...row,
+      fecha: new Date(row.fecha).toLocaleString('es-PE') // formato legible
     });
+  });
 
-    // Estilo de encabezado
-    worksheet.getRow(1).font = { bold: true };
+  return workbook.xlsx.writeBuffer();
+}
+async function generarExcelMermas(desde, hasta) {
+  const rows = await dbMovimientos.obtenerMovimientosMermas(desde, hasta);
 
-    // Enviar el archivo
-    res.setHeader('Content-Type', 'application/vnd.openxmlformats-officedocument.spreadsheetml.sheet');
-    res.setHeader('Content-Disposition', 'attachment; filename=Reporte_Entradas.xlsx');
+  const workbook = new ExcelJS.Workbook();
+  const worksheet = workbook.addWorksheet('Reporte de Mermas');
 
-    await workbook.xlsx.write(res);
-    res.end();
-  } catch (error) {
-    console.error('Error al generar el Excel de entradas:', error);
-    res.status(500).json({ error: 'Error al generar el reporte de entradas' });
-  }
+  worksheet.columns = [
+    { header: 'ID Movimiento', key: 'id_movimiento', width: 15 },
+    { header: 'Fecha', key: 'fecha', width: 20 },
+    { header: 'Usuario', key: 'usuario', width: 20 },
+    { header: 'Motivo', key: 'motivo', width: 30 },
+    { header: 'ID Producto', key: 'id_producto', width: 12 },
+    { header: 'Producto', key: 'producto', width: 25 },
+    { header: 'Cantidad', key: 'cantidad', width: 12 },
+    { header: 'Precio Unitario', key: 'precio_unitario', width: 15 },
+    { header: 'Subtotal', key: 'subtotal', width: 15 },
+    { header: 'Descripción', key: 'descripcion', width: 30 },
+  ];
+
+  rows.forEach(row => {
+    worksheet.addRow({
+      ...row,
+      fecha: new Date(row.fecha).toLocaleString('es-PE'),
+    });
+  });
+
+  return workbook.xlsx.writeBuffer();
 }
 
-async function generarExcelMermas(req, res) {
-  try {
-    const mermas = await dbMovimientos.obtenerMovimientosMermas();
+async function generarExcelSobrantes(desde, hasta) {
+  const rows = await dbMovimientos.obtenerMovimientosSobrantes(desde, hasta);
 
-    const workbook = new ExcelJS.Workbook();
-    const worksheet = workbook.addWorksheet('Reporte de Mermas');
+  const workbook = new ExcelJS.Workbook();
+  const worksheet = workbook.addWorksheet('Reporte de Sobrantes');
 
-    // Cabecera
-    worksheet.columns = [
-      { header: 'ID Movimiento', key: 'id_movimiento', width: 15 },
-      { header: 'Fecha', key: 'fecha', width: 20 },
-      { header: 'Usuario', key: 'usuario', width: 20 },
-      { header: 'Motivo', key: 'motivo', width: 30 },
-      { header: 'Producto', key: 'producto', width: 25 },
-      { header: 'Cantidad', key: 'cantidad', width: 12 },
-      { header: 'Precio Unitario', key: 'precio_unitario', width: 15 },
-      { header: 'Subtotal', key: 'subtotal', width: 15 },
-      { header: 'Descripción', key: 'descripcion', width: 30 },
-    ];
+  worksheet.columns = [
+    { header: 'ID Movimiento', key: 'id_movimiento', width: 15 },
+    { header: 'Fecha', key: 'fecha', width: 20 },
+    { header: 'Usuario', key: 'usuario', width: 20 },
+    { header: 'Motivo', key: 'motivo', width: 30 },
+    { header: 'ID Producto', key: 'id_producto', width: 12 },
+    { header: 'Producto', key: 'producto', width: 25 },
+    { header: 'Cantidad', key: 'cantidad', width: 12 },
+    { header: 'Precio Unitario', key: 'precio_unitario', width: 15 },
+    { header: 'Subtotal', key: 'subtotal', width: 15 },
+    { header: 'Descripción', key: 'descripcion', width: 30 },
+  ];
 
-    // Filas
-    mermas.forEach(item => {
-      worksheet.addRow(item);
+  rows.forEach(row => {
+    worksheet.addRow({
+      ...row,
+      fecha: new Date(row.fecha).toLocaleString('es-PE'),
     });
+  });
 
-    // Estilos básicos
-    worksheet.getRow(1).font = { bold: true };
-
-    // Enviar Excel como descarga
-    res.setHeader(
-      'Content-Type',
-      'application/vnd.openxmlformats-officedocument.spreadsheetml.sheet'
-    );
-    res.setHeader(
-      'Content-Disposition',
-      'attachment; filename=reporte_mermas.xlsx'
-    );
-
-    await workbook.xlsx.write(res);
-    res.end();
-  } catch (error) {
-    console.error('Error al generar el Excel de mermas:', error);
-    res.status(500).send('Error al generar el Excel');
-  }
+  return workbook.xlsx.writeBuffer();
 }
+
+async function generarExcelTodos(desde, hasta) {
+  const [
+    ventas,
+    entradas,
+    mermas,
+    sobrantes
+  ] = await Promise.all([
+    dbMovimientos.obtenerMovimientosVentas(desde, hasta),
+    dbMovimientos.obtenerMovimientosEntradas(desde, hasta),
+    dbMovimientos.obtenerMovimientosMermas(desde, hasta),
+    dbMovimientos.obtenerMovimientosSobrantes(desde, hasta)
+  ]);
+
+  const workbook = new ExcelJS.Workbook();
+
+  // --- Ventas ---
+  const hojaVentas = workbook.addWorksheet('Ventas');
+  hojaVentas.columns = [
+    { header: 'ID Movimiento', key: 'id_movimiento', width: 15 },
+    { header: 'Fecha de Venta', key: 'fecha', width: 20 },
+    { header: 'Usuario', key: 'usuario', width: 20 },
+    { header: 'Tipo Comprobante', key: 'tipo_comprobante', width: 20 },
+    { header: 'Serie', key: 'serie', width: 10 },
+    { header: 'Correlativo', key: 'correlativo', width: 15 },
+    { header: 'Total Venta', key: 'total_venta', width: 15 },
+    { header: 'Cliente - Nombre', key: 'nombre_cliente', width: 25 },
+    { header: 'Cliente - Razón Social', key: 'razon_social', width: 25 },
+    { header: 'Cliente - RUC', key: 'ruc_cliente', width: 18 },
+    { header: 'Cliente - DNI', key: 'dni_cliente', width: 18 },
+    { header: 'Cliente - Dirección', key: 'direccion_cliente', width: 30 },
+    { header: 'Cliente - Correo', key: 'correo_cliente', width: 25 },
+    { header: 'ID Producto', key: 'id_producto', width: 15 },
+    { header: 'Producto', key: 'producto', width: 30 },
+    { header: 'Cantidad', key: 'cantidad', width: 10 },
+    { header: 'Precio Unitario', key: 'precio_unitario', width: 15 },
+    { header: 'Subtotal', key: 'subtotal', width: 15 },
+    { header: 'Descripción Movimiento', key: 'descripcion', width: 30 }
+  ];
+  ventas.forEach(row => hojaVentas.addRow(row));
+
+  // --- Entradas ---
+  const hojaEntradas = workbook.addWorksheet('Entradas');
+  hojaEntradas.columns = [
+    { header: 'ID Movimiento', key: 'id_movimiento', width: 15 },
+    { header: 'Fecha', key: 'fecha', width: 20 },
+    { header: 'Usuario', key: 'usuario', width: 20 },
+    { header: 'Descripción Movimiento', key: 'descripcion', width: 30 },
+    { header: 'Total Entrada', key: 'total_entrada', width: 15 },
+    { header: 'ID Orden', key: 'id_orden', width: 12 },
+    { header: 'Proveedor - Razón Social', key: 'razon_social', width: 25 },
+    { header: 'Proveedor - RUC', key: 'ruc', width: 15 },
+    { header: 'Proveedor - Dirección', key: 'direccion', width: 30 },
+    { header: 'Proveedor - Correo', key: 'correo', width: 25 },
+    { header: 'ID Producto', key: 'id_producto', width: 12 },
+    { header: 'Producto', key: 'producto', width: 30 },
+    { header: 'Cantidad', key: 'cantidad', width: 10 },
+    { header: 'Precio Unitario', key: 'precio_unitario', width: 15 },
+    { header: 'Subtotal', key: 'subtotal', width: 15 }
+  ];
+  entradas.forEach(row => {
+    hojaEntradas.addRow({
+      ...row,
+      fecha: new Date(row.fecha).toLocaleString('es-PE')
+    });
+  });
+
+  // --- Mermas ---
+  const hojaMermas = workbook.addWorksheet('Mermas');
+  hojaMermas.columns = [
+    { header: 'ID Movimiento', key: 'id_movimiento', width: 15 },
+    { header: 'Fecha', key: 'fecha', width: 20 },
+    { header: 'Usuario', key: 'usuario', width: 20 },
+    { header: 'Motivo', key: 'motivo', width: 30 },
+    { header: 'ID Producto', key: 'id_producto', width: 12 },
+    { header: 'Producto', key: 'producto', width: 25 },
+    { header: 'Cantidad', key: 'cantidad', width: 12 },
+    { header: 'Precio Unitario', key: 'precio_unitario', width: 15 },
+    { header: 'Subtotal', key: 'subtotal', width: 15 },
+    { header: 'Descripción', key: 'descripcion', width: 30 },
+  ];
+  mermas.forEach(row => {
+    hojaMermas.addRow({
+      ...row,
+      fecha: new Date(row.fecha).toLocaleString('es-PE')
+    });
+  });
+
+  // --- Sobrantes ---
+  const hojaSobrantes = workbook.addWorksheet('Sobrantes');
+  hojaSobrantes.columns = [
+    { header: 'ID Movimiento', key: 'id_movimiento', width: 15 },
+    { header: 'Fecha', key: 'fecha', width: 20 },
+    { header: 'Usuario', key: 'usuario', width: 20 },
+    { header: 'Motivo', key: 'motivo', width: 30 },
+    { header: 'ID Producto', key: 'id_producto', width: 12 },
+    { header: 'Producto', key: 'producto', width: 25 },
+    { header: 'Cantidad', key: 'cantidad', width: 12 },
+    { header: 'Precio Unitario', key: 'precio_unitario', width: 15 },
+    { header: 'Subtotal', key: 'subtotal', width: 15 },
+    { header: 'Descripción', key: 'descripcion', width: 30 },
+  ];
+  sobrantes.forEach(row => {
+    hojaSobrantes.addRow({
+      ...row,
+      fecha: new Date(row.fecha).toLocaleString('es-PE')
+    });
+  });
+
+  return workbook.xlsx.writeBuffer();
+}
+
 
 module.exports = {
     generarExcelVentas,
     generarExcelEntradas,
-    generarExcelMermas
+    generarExcelMermas,
+    generarExcelSobrantes,
+    generarExcelTodos
 }

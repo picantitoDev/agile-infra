@@ -23,7 +23,52 @@ async function obtenerMovimientos(req, res) {
 
 async function exportarReporteExcel(req, res) {
   try {
-    await excelUtils.generarExcelMermas(req, res); // espera a que termine
+    const { tipo, desde, hasta } = req.query;
+    console.log(req.query);
+
+    // Validar que se reciban los parámetros necesarios
+    if (!tipo) {
+      return res.status(400).send("El parámetro 'tipo' es obligatorio");
+    }
+    if (!desde || !hasta) {
+      return res.status(400).send("Debe especificar los parámetros 'desde' y 'hasta'");
+    }
+
+    let buffer;
+
+    switch (tipo) {
+      case 'Venta':
+        buffer = await excelUtils.generarExcelVentas(desde, hasta);
+        break;
+      case 'Compra':
+        buffer = await excelUtils.generarExcelEntradas(desde, hasta);
+        break;
+      case 'Merma':
+        buffer = await excelUtils.generarExcelMermas(desde, hasta);
+        break;
+      case 'Sobrante':
+        buffer = await excelUtils.generarExcelSobrantes(desde, hasta);
+        break;
+      case 'Todos':
+        buffer = await excelUtils.generarExcelTodos(desde, hasta);
+        break;
+      default:
+        return res.status(400).send("Tipo de reporte no válido. Debe ser uno de: ventas, entradas, mermas, sobrantes, todos.");
+    }
+
+    // Configurar headers para que el navegador descargue el archivo
+    res.setHeader('Content-Type', 'application/vnd.openxmlformats-officedocument.spreadsheetml.sheet');
+
+    // Nombre del archivo con fecha para mejor orden
+    const fechaDesde = new Date(desde).toISOString().split('T')[0];
+    const fechaHasta = new Date(hasta).toISOString().split('T')[0];
+    const nombreArchivo = `Reporte_${tipo}_${fechaDesde}_a_${fechaHasta}.xlsx`;
+
+    res.setHeader('Content-Disposition', `attachment; filename=${nombreArchivo}`);
+
+    // Enviar buffer
+    res.send(buffer);
+
   } catch (error) {
     console.error("Error exportando Excel:", error);
     res.status(500).send("Error generando el reporte");

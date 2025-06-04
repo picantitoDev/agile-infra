@@ -89,6 +89,10 @@
             <input type="date" id="filtro-desde" />
             <input type="date" id="filtro-hasta" />
         </div>
+
+        <button id="btn-exportar" class="btn-exportar">
+          📤 Exportar
+        </button>
     </div>
 </div>
 
@@ -151,6 +155,58 @@
       </div>
     </div>
   </body>
+
+  <div id="modal-exportar" class="modal">
+  <div class="modal-contenido">
+    <span class="cerrar" id="cerrar-modal">&times;</span>
+    <h2>Exportar movimientos</h2>
+    <form id="form-exportar" method="GET" action="/movimientos/exportar">
+      <div class="form-group">
+        <label for="tipo">Tipo de movimiento:</label>
+        <select name="tipo" id="tipo">
+          <option value="">Todos</option>
+          <option value="Venta">Venta</option>
+          <option value="Compra">Entrada</option>
+          <option value="Merma">Merma</option>
+          <option value="Sobrante">Sobrante</option>
+        </select>
+      </div>
+
+      <div class="form-group">
+        <label for="desde">Fecha desde:</label>
+        <input type="date" id="desde" name="desde">
+      </div>
+
+      <div class="form-group">
+        <label for="hasta">Fecha hasta:</label>
+        <input type="date" id="hasta" name="hasta">
+      </div>
+
+      <button type="submit" class="btn-confirmar">Exportar Excel</button>
+    </form>
+  </div>
+</div>
+    <script>
+  const btnExportar = document.getElementById("btn-exportar");
+  const modalExportar = document.getElementById("modal-exportar");
+  const cerrarModal = document.getElementById("cerrar-modal");
+
+  btnExportar.addEventListener("click", () => {
+    modalExportar.style.display = "block";
+  });
+
+  cerrarModal.addEventListener("click", () => {
+    modalExportar.style.display = "none";
+  });
+
+  window.addEventListener("click", (e) => {
+    if (e.target === modalExportar) {
+      modalExportar.style.display = "none";
+    }
+  });
+</script>
+
+
   <script>
     const filtroId = document.getElementById('filtro-id');
 const filtroTipo = document.getElementById('filtro-tipo');

@@ -17,5 +17,6 @@ router.get(
   "/detalle/:id/comprobante",
   controladorMovimientos.generarComprobantePDF
 )
+router.get("/exportar", controladorMovimientos.exportarReporteExcel)
 
 module.exports = router

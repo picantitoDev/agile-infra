@@ -6,7 +6,7 @@ const dbUsuarios = require("../model/queriesUsuarios")
 const dbClientes = require("../model/queriesClientes")
 const dbOrdenes = require("../model/queriesOrdenes")
 const pdfUtils = require("../utils/pdfGenerator")
-const ExcelJS = require("exceljs")
+const excelUtils = require("../utils/excelGenerator")
 
 const { DateTime } = require("luxon")
 
@@ -14,7 +14,6 @@ async function obtenerMovimientos(req, res) {
   try {
     const movimientos = await dbMovimientos.obtenerMovimientos()
     const usuarios = await dbUsuarios.obtenerUsuarios()
-    console.log(movimientos)
     res.render("movimientos", { movimientos, usuarios })
   } catch (error) {
     console.error("Error al obtener movimientos:", error)
@@ -24,77 +23,10 @@ async function obtenerMovimientos(req, res) {
 
 async function exportarReporteExcel(req, res) {
   try {
-    const { tipo, fechaInicio, fechaFin } = req.query
-
-    const movimientos = await dbMovimientos.obtenerMovimientosConFiltros(
-      tipo,
-      fechaInicio,
-      fechaFin
-    )
-
-    if (movimientos.length === 0) {
-      return res.status(404).send("No hay movimientos para exportar")
-    }
-
-    const workbook = new ExcelJS.Workbook()
-    const worksheet = workbook.addWorksheet("Movimientos")
-
-    // Cabeceras
-    worksheet.columns = [
-      { header: "ID", key: "id_movimiento", width: 10 },
-      { header: "Fecha", key: "fecha", width: 15 },
-      { header: "Tipo", key: "tipo", width: 12 },
-      { header: "Descripción", key: "descripcion", width: 25 },
-      { header: "Usuario", key: "usuario", width: 20 },
-      { header: "Producto", key: "producto", width: 20 },
-      { header: "Cantidad", key: "cantidad", width: 10 },
-      { header: "Precio Unitario", key: "precio_unitario", width: 15 },
-      { header: "Subtotal", key: "subtotal", width: 12 },
-      { header: "Cliente/Proveedor", key: "entidad", width: 25 },
-      { header: "Total", key: "total", width: 12 },
-    ]
-
-    movimientos.forEach((mov) => {
-      worksheet.addRow({
-        id_movimiento: mov.id_movimiento,
-        fecha: mov.fecha.toISOString().split("T")[0],
-        tipo: mov.tipo,
-        descripcion: mov.descripcion,
-        usuario: mov.usuario,
-        producto: mov.producto,
-        cantidad: mov.cantidad,
-        precio_unitario: mov.precio_unitario,
-        subtotal: mov.subtotal,
-        entidad:
-          mov.tipo === "venta"
-            ? mov.nombre_cliente || mov.razon_social
-            : mov.tipo === "entrada"
-            ? mov.id_proveedor
-            : "",
-        total:
-          mov.tipo === "venta"
-            ? mov.total_venta
-            : mov.tipo === "entrada"
-            ? mov.total_compra
-            : "",
-      })
-    })
-
-    // Cabeceras HTTP para descarga
-    res.setHeader(
-      "Content-Disposition",
-      "attachment; filename=Reporte_Movimientos.xlsx"
-    )
-    res.setHeader(
-      "Content-Type",
-      "application/vnd.openxmlformats-officedocument.spreadsheetml.sheet"
-    )
-
-    await workbook.xlsx.write(res)
-    res.end()
+    await excelUtils.generarExcelMermas(req, res); // espera a que termine
   } catch (error) {
-    console.error("Error exportando Excel:", error)
-    res.status(500).send("Error generando el reporte")
+    console.error("Error exportando Excel:", error);
+    res.status(500).send("Error generando el reporte");
   }
 }
 
@@ -270,6 +202,8 @@ async function registrarEntradaPost(req, res) {
     descripcion,
     id_orden, 
   } = req.body;
+
+  console.log(req.body)
 
   const usuarioId = req.user.id // Asegúrate de que el usuario esté autenticado
   const fecha = DateTime.now().minus({ hours: 5 }).toISO()

@@ -64,81 +64,98 @@ async function obtenerDetalleMovimiento(idMov) {
   return rows
 }
 
-async function obtenerMovimientosConFiltros(tipo, fechaInicio, fechaFin) {
-  const valores = []
-  let condiciones = []
-
-  if (tipo && tipo !== 'todos') {
-    valores.push(tipo)
-    condiciones.push(`m.tipo = $${valores.length}`)
-  }
-
-  if (fechaInicio) {
-    valores.push(fechaInicio)
-    condiciones.push(`m.fecha >= $${valores.length}`)
-  }
-
-  if (fechaFin) {
-    valores.push(fechaFin)
-    condiciones.push(`m.fecha <= $${valores.length}`)
-  }
-
-  const whereClause = condiciones.length > 0 ? `WHERE ${condiciones.join(' AND ')}` : ''
-
+async function obtenerMovimientosVentas() {
   const query = `
-    SELECT 
+    SELECT
       m.id_movimiento,
       m.fecha,
-      m.tipo,
       m.descripcion,
       u.username AS usuario,
-      -- Datos de cliente (venta)
-      mv.id_cliente,
-      c.nombre_cliente,
-      c.razon_social,
-      c.dni_cliente,
-      c.ruc_cliente,
-      c.correo_cliente,
-      c.direccion_cliente,
       mv.tipo_comprobante,
       mv.serie,
       mv.correlativo,
       mv.total AS total_venta,
-      -- Datos de proveedor (compra)
-      me.id_proveedor,
-      me.total AS total_compra,
-      me.id_orden,
-      -- Datos de ajuste
-      ma.tipo_ajuste,
-      ma.motivo,
-      -- Productos involucrados
+      c.nombre_cliente,
+      c.razon_social,
+      c.ruc_cliente,
+      c.dni_cliente,
+      c.direccion_cliente,
+      c.correo_cliente,
       p.id_producto,
       p.nombre AS producto,
       pm.cantidad,
       pm.precio_unitario,
       pm.subtotal
-    FROM 
-      movimiento m
-    JOIN 
-      usuarios u ON m.id_usuario = u.id
-    LEFT JOIN 
-      movimiento_venta mv ON m.id_movimiento = mv.id_movimiento
-    LEFT JOIN 
-      cliente c ON mv.id_cliente = c.id_cliente
-    LEFT JOIN 
-      movimiento_entrada me ON m.id_movimiento = me.id_movimiento
-    LEFT JOIN 
-      movimiento_ajuste ma ON m.id_movimiento = ma.id_movimiento
-    LEFT JOIN 
-      producto_movimiento pm ON m.id_movimiento = pm.id_movimiento
-    LEFT JOIN 
-      producto p ON pm.id_producto = p.id_producto
-    ${whereClause}
+    FROM movimiento m
+    JOIN movimiento_venta mv ON m.id_movimiento = mv.id_movimiento
+    JOIN usuarios u ON m.id_usuario = u.id
+    JOIN cliente c ON mv.id_cliente = c.id_cliente
+    JOIN producto_movimiento pm ON m.id_movimiento = pm.id_movimiento
+    JOIN producto p ON pm.id_producto = p.id_producto
+    WHERE m.tipo = 'Venta'
     ORDER BY m.fecha DESC, m.id_movimiento
-  `
+  `;
 
-  const { rows } = await pool.query(query, valores)
-  return rows
+  const { rows } = await pool.query(query);
+  return rows;
+}
+
+async function obtenerMovimientosMermas() {
+  const query = `
+    SELECT
+      m.id_movimiento,
+      m.fecha,
+      m.descripcion,
+      u.username AS usuario,
+      ma.motivo,
+      p.id_producto,
+      p.nombre AS producto,
+      pm.cantidad,
+      pm.precio_unitario,
+      pm.subtotal
+    FROM movimiento m
+    JOIN movimiento_ajuste ma ON m.id_movimiento = ma.id_movimiento
+    JOIN usuarios u ON m.id_usuario = u.id
+    JOIN producto_movimiento pm ON m.id_movimiento = pm.id_movimiento
+    JOIN producto p ON pm.id_producto = p.id_producto
+    WHERE m.tipo = 'Merma' AND ma.tipo_ajuste = 'Merma'
+    ORDER BY m.fecha DESC, m.id_movimiento
+  `;
+
+  const { rows } = await pool.query(query);
+  return rows;
+}
+
+async function obtenerMovimientosEntradas() {
+  const query = `
+    SELECT
+      m.id_movimiento,
+      m.fecha,
+      m.descripcion,
+      u.username AS usuario,
+      me.total AS total_entrada,
+      me.id_orden,
+      pr.razon_social,
+      pr.ruc,
+      pr.direccion,
+      pr.correo,
+      p.id_producto,
+      p.nombre AS producto,
+      pm.cantidad,
+      pm.precio_unitario,
+      pm.subtotal
+    FROM movimiento m
+    JOIN movimiento_entrada me ON m.id_movimiento = me.id_movimiento
+    JOIN usuarios u ON m.id_usuario = u.id
+    JOIN proveedor pr ON me.id_proveedor = pr.id_proveedor
+    JOIN producto_movimiento pm ON m.id_movimiento = pm.id_movimiento
+    JOIN producto p ON pm.id_producto = p.id_producto
+    WHERE m.tipo = 'Compra'
+    ORDER BY m.fecha DESC, m.id_movimiento
+  `;
+
+  const { rows } = await pool.query(query);
+  return rows;
 }
 
 
@@ -280,5 +297,7 @@ module.exports = {
   registrarMovimientoCompra,
   registrarMovimientoAjuste,
   registrarProductoMovimiento,
-  obtenerMovimientosConFiltros
+  obtenerMovimientosVentas,
+  obtenerMovimientosEntradas,
+  obtenerMovimientosMermas
 }

@@ -79,7 +79,7 @@
             </svg>
             Proveedor
           </h3>
-          <select id="proveedor" name="proveedor">
+          <select id="proveedor" name="proveedor-select">
             <option value="">Seleccione un proveedor</option>
             <% proveedores.forEach(proveedor => { %>
             <option value="<%= proveedor.id_proveedor %>">
@@ -221,6 +221,7 @@
           </div>
         </div>
         <input type="hidden" name="id_orden" id="input-id-orden" />
+        <input type="hidden" name="proveedor" id="input-proveedor" />
         <!-- Botón de Enviar -->
         <div class="seccion submit-btn">
           <button type="submit" class="submit-button btn-primary">
@@ -330,6 +331,7 @@
           // Autoseleccionar proveedor
           const provId = orden.id_proveedor;
           proveedorSelect.value = provId;
+          document.getElementById('input-proveedor').value = provId;
           proveedorSelect.dispatchEvent(new Event('change'));
           proveedorSelect.disabled = true;
 

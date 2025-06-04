@@ -70,6 +70,7 @@ async function generarExcelEntradas(desde, hasta) {
 
   return workbook.xlsx.writeBuffer();
 }
+
 async function generarExcelMermas(desde, hasta) {
   const rows = await dbMovimientos.obtenerMovimientosMermas(desde, hasta);
 

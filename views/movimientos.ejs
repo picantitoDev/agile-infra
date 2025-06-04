@@ -60,24 +60,39 @@
           <h2>Movimientos Recientes</h2>
         </div>
 
-<div class="filtros">
-  <input type="text" id="filtro-id" placeholder="Buscar por ID" />
-  <div class="space-filtros">
-    <select id="filtro-tipo">
-    <option value="">Todos los tipos</option>
-    <option value="Venta">Venta</option>
-    <option value="Compra">Entrada</option>
-    <option value="Merma">Merma</option>
-    <option value="Sobrante">Sobrante</option>
-  </select>
-  <select id="filtro-fecha">
-    <option value="">Todas las fechas</option>
-    <option value="7">Últimos 7 días</option>
-    <option value="30">Últimos 30 días</option>
-    <option value="90">Últimos 3 meses</option>
-  </select>
-  </div>
+<div class="filtros-barra">
+    <!-- Barra de búsqueda a la izquierda -->
+    <div class="filtro-busqueda">
+        <input type="text" id="filtro-id" placeholder="Buscar por ID" />
+    </div>
+
+    <!-- Filtros alineados a la derecha -->
+    <div class="filtros-derecha">
+        <select id="filtro-tipo">
+            <option value="">Todos los tipos</option>
+            <option value="Venta">Venta</option>
+            <option value="Compra">Entrada</option>
+            <option value="Merma">Merma</option>
+            <option value="Sobrante">Sobrante</option>
+        </select>
+
+        <select id="filtro-fecha">
+            <option value="">Todas las fechas</option>
+            <option value="7">Últimos 7 días</option>
+            <option value="30">Últimos 30 días</option>
+            <option value="90">Últimos 3 meses</option>
+        </select>
+
+        <!-- Agrupación con etiqueta -->
+        <div class="filtro-rango-fechas">
+            <label for="filtro-desde">Filtrar por rango:</label>
+            <input type="date" id="filtro-desde" />
+            <input type="date" id="filtro-hasta" />
+        </div>
+    </div>
 </div>
+
+
 
         <div class="table-container">
           <div class="table-header">
@@ -137,55 +152,68 @@
     </div>
   </body>
   <script>
-  
-  const filtroId = document.getElementById('filtro-id');
-  const filtroTipo = document.getElementById('filtro-tipo');
-  const filtroFecha = document.getElementById('filtro-fecha');
+    const filtroId = document.getElementById('filtro-id');
+const filtroTipo = document.getElementById('filtro-tipo');
+const filtroFecha = document.getElementById('filtro-fecha');
+const filtroDesde = document.getElementById('filtro-desde');
+const filtroHasta = document.getElementById('filtro-hasta');
 
-  const movimientos = document.querySelectorAll('.movimiento-item');
+const movimientos = document.querySelectorAll('.movimiento-item');
 
-  function filtrar() {
-    const idFiltro = filtroId.value.trim();
-    let tipoFiltro = filtroTipo.value;
-    if(tipoFiltro === "ajuste"){
+function filtrar() {
+  const idFiltro = filtroId.value.trim();
+  const tipoFiltro = filtroTipo.value;
+  const diasFiltro = parseInt(filtroFecha.value);
 
+  const desde = filtroDesde.value ? new Date(filtroDesde.value) : null;
+  const hasta = filtroHasta.value ? new Date(filtroHasta.value) : null;
+  if (hasta) hasta.setHours(23, 59, 59, 999); // incluir el final del día
+
+  const hoy = new Date();
+
+  movimientos.forEach(item => {
+    const id = item.querySelector('.table-cell:nth-child(1)').textContent.trim();
+    const fechaTexto = item.querySelector('.table-cell:nth-child(2)').textContent.trim();
+    const tipo = item.querySelector('.badge')?.dataset.tipo;
+
+    const partes = fechaTexto.split('/');
+    const fecha = new Date(`${partes[2]}-${partes[1]}-${partes[0]}`);
+
+    let visible = true;
+
+    if (idFiltro && !id.includes(idFiltro)) {
+      visible = false;
     }
 
-    const diasFiltro = parseInt(filtroFecha.value);
+    if (tipoFiltro && tipo !== tipoFiltro) {
+      visible = false;
+    }
 
-    const hoy = new Date();
-
-    movimientos.forEach(item => {
-      const id = item.querySelector('.table-cell:nth-child(1)').textContent.trim();
-      const fechaTexto = item.querySelector('.table-cell:nth-child(2)').textContent.trim();
-      const tipo = item.querySelector('.badge')?.dataset.tipo;
-      const partes = fechaTexto.split('/');
-      const fecha = new Date(`${partes[2]}-${partes[1]}-${partes[0]}`); // dd/mm/yyyy → yyyy-mm-dd
-
-      let visible = true;
-
-      if (idFiltro && !id.includes(idFiltro)) {
+    if (!isNaN(diasFiltro)) {
+      const diasMs = diasFiltro * 24 * 60 * 60 * 1000;
+      if ((hoy - fecha) > diasMs) {
         visible = false;
       }
+    }
 
-      if (tipoFiltro && tipo !== tipoFiltro) {
-        visible = false;
-      }
+    if (desde && fecha < desde) {
+      visible = false;
+    }
 
-      if (!isNaN(diasFiltro)) {
-        const diasMs = diasFiltro * 24 * 60 * 60 * 1000;
-        if ((hoy - fecha) > diasMs) {
-          visible = false;
-        }
-      }
+    if (hasta && fecha > hasta) {
+      visible = false;
+    }
 
-      item.style.display = visible ? 'flex' : 'none';
-    });
-  }
+    item.style.display = visible ? 'flex' : 'none';
+  });
+}
 
-  filtroId.addEventListener('input', filtrar);
-  filtroTipo.addEventListener('change', filtrar);
-  filtroFecha.addEventListener('change', filtrar);
+filtroId.addEventListener('input', filtrar);
+filtroTipo.addEventListener('change', filtrar);
+filtroFecha.addEventListener('change', filtrar);
+filtroDesde.addEventListener('change', filtrar);
+filtroHasta.addEventListener('change', filtrar);
+
 </script>
 
 </html>

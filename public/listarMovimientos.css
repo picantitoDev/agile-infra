@@ -278,18 +278,112 @@ body {
 /* Custom Font Import */
 @import url('https://fonts.googleapis.com/css2?family=Poppins:wght@300;400;500;600;700&display=swap');
 
-
-.filtros {
-  display: flex;
-  gap: 1rem;
-  margin: 1rem 0;
-  padding-left: 1rem;
-  width: 100%;
-  justify-content: space-between;
+.filtros-barra {
+    display: block;
+    flex-wrap: wrap;
+    gap: 2rem;
+    align-items: center;
+    padding: 1rem;
 }
 
-.filtros input,
-.filtros select {
-  padding: 0.5rem;
-  font-size: 1rem;
+.filtro-busqueda {
+    flex: 1;
+    max-width: 100%;
+    margin-bottom: 1rem;
+}
+
+.filtro-busqueda input {
+    width: 100%;
+    padding: 10px 12px;
+    border: 1px solid #d1d5db;
+    border-radius: 6px;
+    font-size: 14px;
+    background: white;
+    transition: border-color 0.2s ease;
+}
+
+.filtro-busqueda input:focus {
+    outline: none;
+    border-color: #3b82f6;
+    box-shadow: 0 0 0 3px rgba(59, 130, 246, 0.1);
+}
+
+.filtro-busqueda input::placeholder {
+    color: #9ca3af;
+}
+
+.filtros-derecha {
+    display: flex;
+    gap: 12px;
+    align-items: center;
+    flex-wrap: wrap;
+}
+
+.filtros-derecha select {
+    padding: 10px 12px;
+    border: 1px solid #d1d5db;
+    border-radius: 6px;
+    font-size: 14px;
+    background: white;
+    color: #374151;
+    cursor: pointer;
+    transition: border-color 0.2s ease;
+}
+
+.filtros-derecha select:focus {
+    outline: none;
+    border-color: #3b82f6;
+    box-shadow: 0 0 0 3px rgba(59, 130, 246, 0.1);
+}
+
+.filtro-rango-fechas {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+}
+
+.filtro-rango-fechas label {
+    font-size: 14px;
+    color: #6b7280;
+    white-space: nowrap;
+}
+
+.filtro-rango-fechas input[type="date"] {
+    padding: 10px 12px;
+    border: 1px solid #d1d5db;
+    border-radius: 6px;
+    font-size: 14px;
+    background: white;
+    color: #374151;
+    cursor: pointer;
+    transition: border-color 0.2s ease;
+}
+
+.filtro-rango-fechas input[type="date"]:focus {
+    outline: none;
+    border-color: #3b82f6;
+    box-shadow: 0 0 0 3px rgba(59, 130, 246, 0.1);
+}
+
+/* Responsive */
+@media (max-width: 768px) {
+    .filtros-barra {
+        flex-direction: column;
+        align-items: stretch;
+    }
+
+    .filtro-busqueda {
+        min-width: auto;
+    }
+
+    .filtros-derecha {
+        flex-direction: column;
+        align-items: stretch;
+    }
+
+    .filtro-rango-fechas {
+        flex-direction: column;
+        align-items: stretch;
+        gap: 8px;
+    }
 }

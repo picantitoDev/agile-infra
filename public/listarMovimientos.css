@@ -277,3 +277,19 @@ body {
 
 /* Custom Font Import */
 @import url('https://fonts.googleapis.com/css2?family=Poppins:wght@300;400;500;600;700&display=swap');
+
+
+.filtros {
+  display: flex;
+  gap: 1rem;
+  margin: 1rem 0;
+  padding-left: 1rem;
+  width: 100%;
+  justify-content: space-between;
+}
+
+.filtros input,
+.filtros select {
+  padding: 0.5rem;
+  font-size: 1rem;
+}

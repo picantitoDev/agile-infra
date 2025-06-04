@@ -13,6 +13,7 @@ async function obtenerMovimientos(req, res) {
   try {
     const movimientos = await dbMovimientos.obtenerMovimientos()
     const usuarios = await dbUsuarios.obtenerUsuarios()
+    console.log(movimientos)
     res.render("movimientos", { movimientos, usuarios })
   } catch (error) {
     console.error("Error al obtener movimientos:", error)

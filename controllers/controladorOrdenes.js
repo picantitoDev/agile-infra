@@ -56,8 +56,6 @@ async function crearOrdenGet(req, res) {
   }
 }
 
-
-
 async function crearOrdenPost(req, res) {
   try {
     const proveedor = parseInt(req.body.proveedor);
@@ -80,7 +78,6 @@ async function crearOrdenPost(req, res) {
     res.status(500).send('Error al crear orden');
   }
 }
-
 
 async function obtenerOrdenPorId(req, res) {
   try {

@@ -1,326 +1,46 @@
-<!DOCTYPE html>
-<html lang="es">
 <head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Lista de Incidencias - Sistema de Gestión</title>
     <link rel="stylesheet" href="/listarIncidencias.css">
-    <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css" rel="stylesheet">
 </head>
-<body>
-    <div class="container">
-        <!-- Header -->
-        <header class="header">
-            <div class="header-content">
-                <h1><i class="fas fa-exclamation-triangle"></i> Gestión de Incidencias</h1>
-            </div>
-        </header>
+<div class="container mt-4">
+  <h2 class="mb-4">Listado de Incidencias</h2>
 
-        <!-- Filtros y búsqueda -->
-        <div class="filters-section">
-            <div class="search-container">
-                <div class="search-box">
-                    <i class="fas fa-search"></i>
-                    <input type="text" id="searchInput" placeholder="Buscar por descripción o ID...">
-                </div>
-                <div class="filter-group">
-                    <select id="filterMovimiento" class="filter-select">
-                        <option value="">Todos los movimientos</option>
-                        <!-- Aquí se cargarían dinámicamente los tipos de movimiento -->
-                    </select>
-                    <select id="filterFecha" class="filter-select">
-                        <option value="">Todas las fechas</option>
-                        <option value="today">Hoy</option>
-                        <option value="week">Esta semana</option>
-                        <option value="month">Este mes</option>
-                    </select>
-                </div>
-            </div>
-        </div>
+  <table class="table table-bordered table-hover">
+    <thead class="table-light">
+      <tr>
+        <th>ID</th>
+        <th>Fecha Registro</th>
+        <th>Movimiento</th>
+        <th>Orden   </th>
+        <th>Detalle Productos</th>
+        <th>Acciones</th>
+      </tr>
+    </thead>
+    <tbody>
+      <% if (incidencias.length === 0) { %>
+        <tr>
+          <td colspan="6" class="text-center">No hay incidencias registradas.</td>
+        </tr>
+      <% } else { %>
+        <% incidencias.forEach(inc => { %>
+          <tr>
+            <td><%= inc.id_incidencia %></td>
+            <td><%= new Date(inc.fecha_registro).toLocaleDateString('es-PE') %></td>
+            <td><%= inc.id_movimiento %></td>
+            <td><%= inc.id_orden || '—' %></td>
+            <td>
+            <ul class="mb-0">
+                <% inc.detalle_productos.forEach(p => { %>
+                <li><%= p.nombre %> (x<%= p.cantidad %>) <%= p.incidencia%></li>
+                <% }) %>
+            </ul>
+            </td>
+            <td>
+              <a href="/incidencias/<%= inc.id_incidencia %>" class="btn btn-sm btn-primary">Ver</a>
+            </td>
+          </tr>
+        <% }) %>
+      <% } %>
+    </tbody>
+  </table>
+</div>
 
-        <!-- Estadísticas rápidas -->
-        <div class="stats-grid">
-            <div class="stat-card">
-                <div class="stat-icon warning">
-                    <i class="fas fa-exclamation-circle"></i>
-                </div>
-                <div class="stat-info">
-                    <h3><%= incidencias ? incidencias.length : 0 %></h3>
-                    <p>Total Incidencias</p>
-                </div>
-            </div>
-            <div class="stat-card">
-                <div class="stat-icon success">
-                    <i class="fas fa-calendar-day"></i>
-                </div>
-                <div class="stat-info">
-                    <h3><%= incidencias ? incidencias.filter(inc => new Date(inc.fecha_registro).toDateString() === new Date().toDateString()).length : 0 %></h3>
-                    <p>Hoy</p>
-                </div>
-            </div>
-        </div>
-
-        <!-- Tabla de incidencias -->
-        <div class="table-container">
-            <div class="table-header">
-                <h2><i class="fas fa-list"></i> Lista de Incidencias</h2>
-                <div class="table-controls">
-                    <button class="btn btn-outline" onclick="exportarExcel()">
-                        <i class="fas fa-file-excel"></i> Exportar
-                    </button>
-                    <button class="btn btn-outline" onclick="actualizarLista()">
-                        <i class="fas fa-sync-alt"></i> Actualizar
-                    </button>
-                </div>
-            </div>
-
-            <% if (incidencias && incidencias.length > 0) { %>
-                <div class="table-wrapper">
-                    <table class="data-table" id="incidenciasTable">
-                        <thead>
-                            <tr>
-                                <th>ID</th>
-                                <th>Movimiento</th>
-                                <th>Descripción General</th>
-                                <th>Productos Afectados</th>
-                                <th>Fecha Registro</th>
-                                <th>Orden</th>
-                            </tr>
-                        </thead>
-                        <tbody>
-                            <% incidencias.forEach(function(incidencia) { %>
-                                <tr data-id="<%= incidencia.id_incidencia %>">
-                                    <td>
-                                        <span class="id-badge">#<%= incidencia.id_incidencia %></span>
-                                    </td>
-                                    <td>
-                                        <span class="movimiento-tag">
-                                            <i class="fas fa-arrow-right"></i>
-                                            MOV-<%= incidencia.id_movimiento %>
-                                        </span>
-                                    </td>
-                                    <td>
-                                        <div class="descripcion-cell">
-                                            <p class="descripcion-text">
-                                                <%= incidencia.descripcion_general || 'Sin descripción' %>
-                                            </p>
-                                        </div>
-                                    </td>
-                                    <td>
-                                        <div class="productos-cell">
-                                            <% if (incidencia.detalle_productos) { %>
-                                                <% try { %>
-                                                    <% var productos = typeof incidencia.detalle_productos === 'string' ? JSON.parse(incidencia.detalle_productos) : incidencia.detalle_productos; %>
-                                                    <% if (Array.isArray(productos) && productos.length > 0) { %>
-                                                        <span class="productos-count">
-                                                            <i class="fas fa-boxes"></i>
-                                                            <%= productos.length %> producto(s)
-                                                        </span>
-                                                        <div class="productos-preview">
-                                                            <% productos.slice(0, 2).forEach(function(prod) { %>
-                                                                <span class="producto-tag"><%= prod.nombre || prod.codigo || 'Producto' %></span>
-                                                            <% }); %>
-                                                            <% if (productos.length > 2) { %>
-                                                                <span class="more-productos">+<%= productos.length - 2 %> más</span>
-                                                            <% } %>
-                                                        </div>
-                                                    <% } else { %>
-                                                        <span class="no-productos">Sin productos</span>
-                                                    <% } %>
-                                                <% } catch(e) { %>
-                                                    <span class="error-productos">Error en datos</span>
-                                                <% } %>
-                                            <% } else { %>
-                                                <span class="no-productos">Sin productos</span>
-                                            <% } %>
-                                        </div>
-                                    </td>
-                                    <td>
-                                        <div class="fecha-cell">
-                                            <span class="fecha-principal">
-                                                <%= new Date(incidencia.fecha_registro).toLocaleDateString('es-ES') %>
-                                            </span>
-                                            <span class="hora-secundaria">
-                                                <%= new Date(incidencia.fecha_registro).toLocaleTimeString('es-ES', {hour: '2-digit', minute: '2-digit'}) %>
-                                            </span>
-                                        </div>
-                                    </td>
-                                    <td>
-                                        <% if (incidencia.id_orden) { %>
-                                            <span class="orden-link">
-                                                <i class="fas fa-clipboard-list"></i>
-                                                ORD-<%= incidencia.id_orden %>
-                                            </span>
-                                        <% } else { %>
-                                            <span class="sin-orden">Sin orden</span>
-                                        <% } %>
-                                    </td>
-                                </tr>
-                            <% }); %>
-                        </tbody>
-                    </table>
-                </div>
-
-                <!-- Paginación -->
-                <div class="pagination-container">
-                    <div class="pagination-info">
-                        Mostrando <%= incidencias.length %> incidencia(s)
-                    </div>
-                    <div class="pagination">
-                        <button class="btn-pagination" disabled>
-                            <i class="fas fa-chevron-left"></i> Anterior
-                        </button>
-                        <span class="pagination-current">Página 1 de 1</span>
-                        <button class="btn-pagination" disabled>
-                            Siguiente <i class="fas fa-chevron-right"></i>
-                        </button>
-                    </div>
-                </div>
-            <% } else { %>
-                <div class="empty-state">
-                    <div class="empty-icon">
-                        <i class="fas fa-inbox"></i>
-                    </div>
-                    <h3>No hay incidencias registradas</h3>
-                    <p>Comienza creando tu primera incidencia</p>
-                    <button class="btn btn-primary" onclick="window.location.href='/incidencias/nueva'">
-                        <i class="fas fa-plus"></i> Crear Primera Incidencia
-                    </button>
-                </div>
-            <% } %>
-        </div>
-    </div>
-
-    <!-- Modal para detalles de incidencia -->
-    <div id="modalDetalles" class="modal">
-        <div class="modal-content">
-            <div class="modal-header">
-                <h3><i class="fas fa-info-circle"></i> Detalles de Incidencia</h3>
-                <span class="close">&times;</span>
-            </div>
-            <div class="modal-body" id="modalBody">
-                <!-- Contenido dinámico -->
-            </div>
-        </div>
-    </div>
-
-    <script>
-        // Event delegation para botones de acción
-        document.addEventListener('DOMContentLoaded', function() {
-            document.querySelector('#incidenciasTable').addEventListener('click', function(e) {
-                const button = e.target.closest('.btn-action');
-                if (!button) return;
-                
-                const id = button.getAttribute('data-id');
-                const action = button.getAttribute('data-action');
-                
-                switch(action) {
-                    case 'view':
-                        verIncidencia(id);
-                        break;
-                    case 'edit':
-                        editarIncidencia(id);
-                        break;
-                    case 'delete':
-                        eliminarIncidencia(id);
-                        break;
-                }
-            });
-        });
-
-        // Funcionalidad de búsqueda
-        document.getElementById('searchInput').addEventListener('input', function() {
-            const searchTerm = this.value.toLowerCase();
-            const rows = document.querySelectorAll('#incidenciasTable tbody tr');
-            
-            rows.forEach(row => {
-                const text = row.textContent.toLowerCase();
-                row.style.display = text.includes(searchTerm) ? '' : 'none';
-            });
-        });
-
-        // Funciones para acciones
-        function verIncidencia(id) {
-            // Implementar vista de detalles
-            fetch(`/api/incidencias/${id}`)
-                .then(response => response.json())
-                .then(data => {
-                    mostrarModal(data);
-                })
-                .catch(error => {
-                    console.error('Error:', error);
-                    alert('Error al cargar los detalles');
-                });
-        }
-
-        function editarIncidencia(id) {
-            window.location.href = `/incidencias/editar/${id}`;
-        }
-
-        function eliminarIncidencia(id) {
-            if (confirm('¿Estás seguro de que quieres eliminar esta incidencia?')) {
-                fetch(`/api/incidencias/${id}`, {
-                    method: 'DELETE'
-                })
-                .then(response => {
-                    if (response.ok) {
-                        location.reload();
-                    } else {
-                        alert('Error al eliminar la incidencia');
-                    }
-                })
-                .catch(error => {
-                    console.error('Error:', error);
-                    alert('Error al eliminar la incidencia');
-                });
-            }
-        }
-
-        function mostrarModal(incidencia) {
-            const modal = document.getElementById('modalDetalles');
-            const modalBody = document.getElementById('modalBody');
-            
-            modalBody.innerHTML = `
-                <div class="detalle-item">
-                    <strong>ID:</strong> ${incidencia.id_incidencia}
-                </div>
-                <div class="detalle-item">
-                    <strong>Movimiento:</strong> ${incidencia.id_movimiento}
-                </div>
-                <div class="detalle-item">
-                    <strong>Descripción:</strong> ${incidencia.descripcion_general || 'Sin descripción'}
-                </div>
-                <div class="detalle-item">
-                    <strong>Fecha:</strong> ${new Date(incidencia.fecha_registro).toLocaleString('es-ES')}
-                </div>
-                <div class="detalle-item">
-                    <strong>Productos:</strong>
-                    <pre>${JSON.stringify(incidencia.detalle_productos, null, 2)}</pre>
-                </div>
-            `;
-            
-            modal.style.display = 'block';
-        }
-
-        // Cerrar modal
-        document.querySelector('.close').addEventListener('click', function() {
-            document.getElementById('modalDetalles').style.display = 'none';
-        });
-
-        window.addEventListener('click', function(event) {
-            const modal = document.getElementById('modalDetalles');
-            if (event.target === modal) {
-                modal.style.display = 'none';
-            }
-        });
-
-        function actualizarLista() {
-            location.reload();
-        }
-
-        function exportarExcel() {
-            window.location.href = '/api/incidencias/export/excel';
-        }
-    </script>
-</body>
-</html>

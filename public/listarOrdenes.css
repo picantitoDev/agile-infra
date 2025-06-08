@@ -30,14 +30,14 @@ body {
 }
 
 /* Main container */
-.main-content {
+.container {
   max-width: 100%;
   margin: 0 0;
   padding: 20px;
 }
 
 /* Page title */
-.main-content h1 {
+.container h1 {
   font-size: 28px;
   font-weight: 600;
   color: var(--text-color);

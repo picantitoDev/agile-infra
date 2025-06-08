@@ -14,15 +14,45 @@
     </div>   
   <% } %>     
 
-  <!-- BOTÓN "CREAR ORDEN" -->   
-  <div class="crear-orden-container">     
-    <a href="/ordenes/nueva" class="btn-crear-orden">       
-      <i class="fas fa-plus-circle"></i> Crear Orden       
-      <% if (productosBajoStock > 0) { %>         
-        <i class="fas fa-exclamation-circle icono-alerta"></i>       
-      <% } %>     
-    </a>   
-  </div>    
+    <div class="filtros-barra">
+    <!-- Barra de búsqueda a la izquierda -->
+    <!-- <div class="filtro-busqueda">
+        <input type="text" id="filtro-id" placeholder="Buscar orden por ID" />
+    </div> -->
+
+    <!-- Filtros alineados a la derecha -->
+    <div class="filtros-derecha">
+        <!-- <select id="filtro-tipo">
+            <option value="">Todos los tipos</option>
+            <option value="en_curso">En Curso</option>
+            <option value="finalizada">Finalizadas</option>
+        </select> -->
+
+        <!-- <select id="filtro-fecha">
+            <option value="">Todas las fechas</option>
+            <option value="7">Últimos 7 días</option>
+            <option value="30">Últimos 30 días</option>
+            <option value="90">Últimos 3 meses</option>
+        </select>
+
+        Agrupación con etiqueta -->
+        <!-- <div class="filtro-rango-fechas">
+            <label for="filtro-desde">Filtrar por rango:</label>
+            <input type="date" id="filtro-desde" />
+            <input type="date" id="filtro-hasta" />
+        </div> -->
+
+         <!-- BOTÓN "CREAR ORDEN" -->   
+      <div class="crear-orden-container">     
+        <a href="/ordenes/nueva" class="btn-crear-orden">       
+          <i class="fas fa-plus-circle"></i> Crear Orden       
+          <% if (productosBajoStock > 0) { %>         
+            <i class="fas fa-exclamation-circle icono-alerta"></i>       
+          <% } %>     
+        </a>   
+      </div>   
+    </div>
+</div> 
 
   <table class="tabla-ordenes">     
     <thead>       
@@ -59,39 +89,30 @@
             <%= fechaFormateada %>           
           </td>           
           <td data-label="Estado">             
-            <%               
-              let estadoClass = '';               
-              const estado = orden.estado ? orden.estado.toLowerCase() : '';               
-              if (estado.includes('pendiente')) estadoClass = 'estado-pendiente';               
-              else if (estado.includes('proceso')) estadoClass = 'estado-proceso';               
-              else if (estado.includes('completado')) estadoClass = 'estado-completado';               
-              else if (estado.includes('cancelado')) estadoClass = 'estado-cancelado';               
-              else estadoClass = 'estado-pendiente';             
-            %>             
-            <span class="estado-badge <%= estadoClass %>">               
-              <%= orden.estado || 'Pendiente' %>             
+            <span class="estado-badge">               
+              <%= orden.estado %>             
             </span>           
           </td>           
-<td data-label="Productos">
-  <% let productos = []; try {
-    productos = typeof orden.products === 'string'
-      ? JSON.parse(orden.products)
-      : (Array.isArray(orden.products) ? orden.products : []);
-  } catch (e) { productos = []; } %>
+            <td data-label="Productos">
+              <% let productos = []; try {
+                productos = typeof orden.products === 'string'
+                  ? JSON.parse(orden.products)
+                  : (Array.isArray(orden.products) ? orden.products : []);
+              } catch (e) { productos = []; } %>
 
-  <% if (productos.length > 0) { %>
-    <ul class="lista-productos">
-      <% productos.forEach(p => { %>
-        <li>
-          <span class="nombre-producto"><%= p.nombre %></span>
-          <span class="cantidad-producto">× <%= p.cantidad %> unidades</span>
-        </li>
-      <% }) %>
-    </ul>
-  <% } else { %>
-    <em>Sin productos</em>
-  <% } %>
-</td>
+              <% if (productos.length > 0) { %>
+                <ul class="lista-productos">
+                  <% productos.forEach(p => { %>
+                    <li>
+                      <span class="nombre-producto"><%= p.nombre %></span>
+                      <span class="cantidad-producto">× <%= p.cantidad %> unidades</span>
+                    </li>
+                  <% }) %>
+                </ul>
+              <% } else { %>
+                <em>Sin productos</em>
+              <% } %>
+            </td>
         </tr>       
       <% }) %>     
     </tbody>   

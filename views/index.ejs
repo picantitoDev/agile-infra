@@ -37,10 +37,26 @@
 </div>
 <% } else { %>
   <h1>Bienvenido, <%= user.username %> 👋</h1>
-  <p>Selecciona una opción del menú para comenzar.</p>
-  <p> PRIMER CUADRANTE</p>
-  <p> SEGUNDO CUADRANTE</p>
-  <p> TERCER CUADRANTE</p>
-  <p> CUARTO CUADRANTE</p>
+   <div style="display: grid; grid-template-columns: repeat(2, 1fr); gap: 20px; margin-top: 20px;">
+    <div style="background-color: #f0f0f0; padding: 20px; border-radius: 10px;">
+      <h2>Primer Cuadrante</h2>
+      <p>Resumen de actividad, gráficos o KPIs.</p>
+    </div>
+
+    <div style="background-color: #f0f0f0; padding: 20px; border-radius: 10px;">
+      <h2>Segundo Cuadrante</h2>
+      <p>Notificaciones o tareas pendientes.</p>
+    </div>
+
+    <div style="background-color: #f0f0f0; padding: 20px; border-radius: 10px;">
+      <h2>Tercer Cuadrante</h2>
+      <p>Mensajes o comunicación interna.</p>
+    </div>
+
+    <div style="background-color: #f0f0f0; padding: 20px; border-radius: 10px;">
+      <h2>Cuarto Cuadrante</h2>
+      <p>Accesos rápidos o enlaces frecuentes.</p>
+    </div>
+  </div>
 
   <% } %>

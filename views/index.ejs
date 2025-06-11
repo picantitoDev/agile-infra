@@ -195,6 +195,12 @@
             color: var(--primary-color);
         }
 
+        header{
+          display: flex;
+          justify-content: space-between;
+          padding-bottom: 14px;
+        }
+
         /* Responsive Design */
         @media (max-width: 1200px) {
             .dashboard-grid {
@@ -343,6 +349,14 @@
   <div class="container">
     <header>
       <h2>Bienvenido, <%= user.username %> 👋</h2>
+
+        <select id="timeRange" onchange="updateDashboard()" style="padding: 5px;">
+            <option value="7d">Últimos 7 días</option>
+            <option value="14d">Últimos 14 días</option>
+            <option value="30d">Últimos 30 días</option>
+            <option value="3m">Últimos 3 meses</option>
+            <option value="6m">Últimos 6 meses</option>
+       </select>
     </header>
     
     <div class="dashboard-grid">
@@ -643,6 +657,52 @@
             salesChart.resize();
             categoriesChart.resize();
         });
+
+        function updateDashboard() {
+    const selectedRange = document.getElementById("timeRange").value;
+
+    let newLabels = [];
+    let newData = [];
+
+    switch (selectedRange) {
+        case "7d":
+            newLabels = ['Día 1', 'Día 2', 'Día 3', 'Día 4', 'Día 5', 'Día 6', 'Día 7'];
+            newData = [12000, 15000, 10000, 13000, 17000, 9000, 11000];
+            break;
+        case "14d":
+            newLabels = Array.from({ length: 14 }, (_, i) => `Día ${i + 1}`);
+            newData = [11000, 10500, 11500, 12000, 10000, 13000, 9500, 11800, 12300, 14000, 12500, 11000, 13200, 9000];
+            break;
+        case "30d":
+            newLabels = Array.from({ length: 30 }, (_, i) => `Día ${i + 1}`);
+            newData = Array.from({ length: 30 }, () => Math.floor(8000 + Math.random() * 8000));
+            break;
+        case "3m":
+            newLabels = ['Abril', 'Mayo', 'Junio'];
+            newData = [78000, 85000, 92000];
+            break;
+        case "6m":
+            newLabels = ['Enero', 'Febrero', 'Marzo', 'Abril', 'Mayo', 'Junio'];
+            newData = [65000, 59000, 80000, 81000, 95000, 88000];
+            break;
+        case "ytd":
+            newLabels = ['Enero', 'Febrero', 'Marzo', 'Abril', 'Mayo', 'Junio'];
+            newData = [65000, 59000, 80000, 81000, 95000, 88000];
+            break;
+        case "custom":
+            newLabels = ['Semana 1', 'Semana 2', 'Semana 3', 'Semana 4'];
+            newData = [25000, 27000, 23000, 29000];
+            break;
+        default:
+            newLabels = ['Sin datos'];
+            newData = [0];
+    }
+
+    // Actualizar el gráfico
+    salesChart.data.labels = newLabels;
+    salesChart.data.datasets[0].data = newData;
+    salesChart.update();
+}
     </script>
 
   <% } %>

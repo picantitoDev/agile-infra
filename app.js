@@ -21,6 +21,7 @@ const rutaMovimientos = require("./routes/rutaMovimientos")
 const rutaOrdenes = require('./routes/rutaOrdenes');
 const rutaIncidencias = require("./routes/rutaIncidencias")
 const rutaRecovery = require("./routes/rutaRecovery")
+const rutaVentas = require("./routes/rutaVentas")
 
 // Middleware
 app.use(express.json())
@@ -63,6 +64,7 @@ app.get("/", (req, res) => {
   res.render("index", { user: req.user })
 })
 
+app.use('/api/ventas', rutaVentas);
 app.use("/productos", validarSesion, rutaProductos)
 app.use("/categorias", validarSesion, rutaCategorias)
 app.use("/proveedores", validarSesion, rutaProveedores)

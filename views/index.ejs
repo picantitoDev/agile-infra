@@ -306,6 +306,21 @@
                 font-size: 0.8rem;
             }
         }
+
+        .spinner {
+  border: 6px solid #f3f3f3;
+  border-top: 6px solid #3498db;
+  border-radius: 50%;
+  width: 40px;
+  height: 40px;
+  animation: spin 1s linear infinite;
+  margin: auto;
+}
+
+@keyframes spin {
+  0% { transform: rotate(0deg); }
+  100% { transform: rotate(360deg); }
+}
     </style>
 </head>
 <% if (!user) { %>
@@ -354,20 +369,25 @@
             <option value="7d">Últimos 7 días</option>
             <option value="14d">Últimos 14 días</option>
             <option value="30d">Últimos 30 días</option>
-            <option value="3m">Últimos 3 meses</option>
-            <option value="6m">Últimos 6 meses</option>
        </select>
     </header>
     
     <div class="dashboard-grid">
             <!-- Sales Bar Chart -->
-            <div class="dashboard-item sales-chart">
-                <h2 class="item-title">📊 Ventas Mensuales</h2>
-                <div class="chart-container">
-                    <canvas id="salesChart"></canvas>
-                </div>
-            </div>
+<div class="dashboard-item sales-chart">
+  <h2 class="item-title">📊 Ventas Mensuales</h2>
+  <div class="chart-container">
+    
+    <!-- Loader -->
+    <div id="chartLoader" style="display: none; text-align: center; padding: 40px;">
+      <div class="spinner"></div>
+      <div style="margin-top: 10px; font-size: 14px; color: #555;">Cargando gráfico de ventas...</div>
+    </div>
 
+    <!-- Canvas -->
+    <canvas id="salesChart"></canvas>
+  </div>
+</div>
             <!-- Products Leaderboard -->
             <div class="dashboard-item leaderboard">
                 <h2 class="item-title">🏆 Top Productos</h2>
@@ -449,6 +469,12 @@
             <!-- Categories Pie Chart -->
             <div class="dashboard-item categories-chart">
                 <h2 class="item-title">🥧 Categorías Vendidas</h2>
+                <div id="categoriesLoader" style="display: none; text-align: center; padding: 40px;">
+                  <div class="spinner"></div>
+                  <div style="margin-top: 10px; font-size: 14px; color: #555;">
+                    Cargando gráfico de categorías...
+                  </div>
+                </div>
                 <div class="chart-container">
                     <canvas id="categoriesChart"></canvas>
                 </div>
@@ -551,10 +577,7 @@
         const salesChart = new Chart(salesCtx, {
             type: 'bar',
             data: {
-                labels: ['Enero', 'Febrero', 'Marzo', 'Abril', 'Mayo', 'Junio'],
                 datasets: [{
-                    label: 'Ventas ($)',
-                    data: [65000, 59000, 80000, 81000, 95000, 88000],
                     backgroundColor: [
                 'rgba(100, 149, 237, 0.8)', // Cornflower Blue
                 'rgba(65, 105, 225, 0.8)',   // Royal Blue
@@ -644,7 +667,7 @@
                     tooltip: {
                         callbacks: {
                             label: function(context) {
-                                return context.label + ': ' + context.parsed + '%';
+                                return context.label + ': ' + context.parsed + '$';
                             }
                         }
                     }
@@ -658,51 +681,53 @@
             categoriesChart.resize();
         });
 
-        function updateDashboard() {
+      async function updateDashboard() {
     const selectedRange = document.getElementById("timeRange").value;
 
-    let newLabels = [];
-    let newData = [];
+    // Mostrar ambos loaders
+    document.getElementById("chartLoader").style.display = "block";
+    document.getElementById("salesChart").style.display = "none";
+    document.getElementById("categoriesLoader").style.display = "block";
+    document.getElementById("categoriesChart").style.display = "none";
 
-    switch (selectedRange) {
-        case "7d":
-            newLabels = ['Día 1', 'Día 2', 'Día 3', 'Día 4', 'Día 5', 'Día 6', 'Día 7'];
-            newData = [12000, 15000, 10000, 13000, 17000, 9000, 11000];
-            break;
-        case "14d":
-            newLabels = Array.from({ length: 14 }, (_, i) => `Día ${i + 1}`);
-            newData = [11000, 10500, 11500, 12000, 10000, 13000, 9500, 11800, 12300, 14000, 12500, 11000, 13200, 9000];
-            break;
-        case "30d":
-            newLabels = Array.from({ length: 30 }, (_, i) => `Día ${i + 1}`);
-            newData = Array.from({ length: 30 }, () => Math.floor(8000 + Math.random() * 8000));
-            break;
-        case "3m":
-            newLabels = ['Abril', 'Mayo', 'Junio'];
-            newData = [78000, 85000, 92000];
-            break;
-        case "6m":
-            newLabels = ['Enero', 'Febrero', 'Marzo', 'Abril', 'Mayo', 'Junio'];
-            newData = [65000, 59000, 80000, 81000, 95000, 88000];
-            break;
-        case "ytd":
-            newLabels = ['Enero', 'Febrero', 'Marzo', 'Abril', 'Mayo', 'Junio'];
-            newData = [65000, 59000, 80000, 81000, 95000, 88000];
-            break;
-        case "custom":
-            newLabels = ['Semana 1', 'Semana 2', 'Semana 3', 'Semana 4'];
-            newData = [25000, 27000, 23000, 29000];
-            break;
-        default:
-            newLabels = ['Sin datos'];
-            newData = [0];
+    try {
+        const res = await fetch(`/api/ventas?range=${selectedRange}`);
+        const json = await res.json();
+
+        // Ventas por día
+        const { labels, data } = json.ventas;
+
+        const formattedLabels = labels.map(label => {
+            const date = new Date(label);
+            return new Intl.DateTimeFormat('es-PE', {
+                weekday: 'short', day: 'numeric', month: 'short'
+            }).format(date);
+        });
+
+        salesChart.data.labels = formattedLabels;
+        salesChart.data.datasets[0].data = data;
+        salesChart.update();
+
+        // Ventas por categoría
+        const { labels: catLabels, data: catData } = json.categorias;
+        categoriesChart.data.labels = catLabels;
+        categoriesChart.data.datasets[0].data = catData;
+        categoriesChart.update();
+
+    } catch (error) {
+        console.error('Error al actualizar el dashboard:', error);
+    } finally {
+        document.getElementById("chartLoader").style.display = "none";
+        document.getElementById("salesChart").style.display = "block";
+        document.getElementById("categoriesLoader").style.display = "none";
+        document.getElementById("categoriesChart").style.display = "block";
     }
-
-    // Actualizar el gráfico
-    salesChart.data.labels = newLabels;
-    salesChart.data.datasets[0].data = newData;
-    salesChart.update();
 }
+
+
+window.addEventListener('DOMContentLoaded', () => {
+    updateDashboard(); // carga por defecto últimos 7 días
+});
     </script>
 
   <% } %>

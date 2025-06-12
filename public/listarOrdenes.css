@@ -339,3 +339,8 @@ td em {
 .lista-productos::-webkit-scrollbar-thumb:hover {
   background: var(--gray-dark);
 }
+
+.container{
+  padding-left: 1rem;
+  padding-right: 1rem;
+}

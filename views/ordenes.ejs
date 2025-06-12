@@ -1,5 +1,6 @@
 <head>
   <link rel="stylesheet" href="/listarOrdenes.css">
+  <style></style>
 </head>
 <div class="container">   
   <h1>Órdenes de Reabastecimiento</h1>
@@ -13,48 +14,16 @@
       ✅ No tienes órdenes pendientes :)     
     </div>   
   <% } %>     
-
-    <div class="filtros-barra">
-    <!-- Barra de búsqueda a la izquierda -->
-    <!-- <div class="filtro-busqueda">
-        <input type="text" id="filtro-id" placeholder="Buscar orden por ID" />
-    </div> -->
-
-    <!-- Filtros alineados a la derecha -->
-    <div class="filtros-derecha">
-        <!-- <select id="filtro-tipo">
-            <option value="">Todos los tipos</option>
-            <option value="en_curso">En Curso</option>
-            <option value="finalizada">Finalizadas</option>
-        </select> -->
-
-        <!-- <select id="filtro-fecha">
-            <option value="">Todas las fechas</option>
-            <option value="7">Últimos 7 días</option>
-            <option value="30">Últimos 30 días</option>
-            <option value="90">Últimos 3 meses</option>
-        </select>
-
-        Agrupación con etiqueta -->
-        <!-- <div class="filtro-rango-fechas">
-            <label for="filtro-desde">Filtrar por rango:</label>
-            <input type="date" id="filtro-desde" />
-            <input type="date" id="filtro-hasta" />
-        </div> -->
-
-         <!-- BOTÓN "CREAR ORDEN" -->   
-      <div class="crear-orden-container">     
-        <a href="/ordenes/nueva" class="btn-crear-orden">       
-          <i class="fas fa-plus-circle"></i> Crear Orden       
+ <!-- BOTÓN "CREAR ORDEN" -->   
+    <div class="crear-orden-container">     
+      <a href="/ordenes/nueva" class="btn-crear-orden">       
+        <i class="fas fa-plus-circle"></i> Crear Orden       
           <% if (productosBajoStock > 0) { %>         
             <i class="fas fa-exclamation-circle icono-alerta"></i>       
           <% } %>     
-        </a>   
-      </div>   
+      </a>   
     </div>
-</div> 
-
-  <table class="tabla-ordenes">     
+    <table class="tabla-ordenes">     
     <thead>       
       <tr>         
         <th>ID Orden</th>         
@@ -116,5 +85,28 @@
         </tr>       
       <% }) %>     
     </tbody>   
-  </table> 
+  </table>
 </div>
+  </div>
+</div>
+
+<script>
+  document.addEventListener("DOMContentLoaded", () => {
+    const botones = document.querySelectorAll('.btn-toggle-productos');
+
+    botones.forEach(boton => {
+      boton.addEventListener('click', () => {
+        const index = boton.dataset.index;
+        const filaProductos = document.getElementById(`productos-${index}`);
+
+        if (filaProductos.style.display === 'none') {
+          filaProductos.style.display = 'table-row';
+          boton.textContent = 'Ocultar productos';
+        } else {
+          filaProductos.style.display = 'none';
+          boton.textContent = 'Ver productos';
+        }
+      });
+    });
+  });
+</script>

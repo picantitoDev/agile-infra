@@ -308,19 +308,37 @@
         }
 
         .spinner {
-  border: 6px solid #f3f3f3;
-  border-top: 6px solid #3498db;
-  border-radius: 50%;
-  width: 40px;
-  height: 40px;
-  animation: spin 1s linear infinite;
-  margin: auto;
+        border: 6px solid #f3f3f3;
+        border-top: 6px solid #3498db;
+        border-radius: 50%;
+        width: 40px;
+        height: 40px;
+        animation: spin 1s linear infinite;
+        margin: auto;
+        }
+
+        @keyframes spin {
+        0% { transform: rotate(0deg); }
+        100% { transform: rotate(360deg); }
+        }
+        .dashboard-item.leaderboard {
+    position: relative;
 }
 
-@keyframes spin {
-  0% { transform: rotate(0deg); }
-  100% { transform: rotate(360deg); }
-}
+        .chart-container {
+            position: relative;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            min-height: 200px; /* Ajusta según necesidad */
+        }
+
+        .loader-container {
+        position: absolute;
+        top: 50%;
+        left: 50%;
+        transform: translate(-50%, -50%);
+        }
     </style>
 </head>
 <% if (!user) { %>
@@ -374,204 +392,73 @@
     
     <div class="dashboard-grid">
             <!-- Sales Bar Chart -->
-<div class="dashboard-item sales-chart">
-  <h2 class="item-title">📊 Ventas Mensuales</h2>
-  <div class="chart-container">
-    
-    <!-- Loader -->
-    <div id="chartLoader" style="display: none; text-align: center; padding: 40px;">
-      <div class="spinner"></div>
-      <div style="margin-top: 10px; font-size: 14px; color: #555;">Cargando gráfico de ventas...</div>
+        <div class="dashboard-item sales-chart">
+        <h2 class="item-title">📊 Ventas Mensuales</h2>
+        <div class="chart-container">
+            
+            <!-- Loader -->
+            <div id="chartLoader" class="loader-container" style="display: none;">
+            <div class="spinner"></div>
+            <div style="margin-top: 10px; font-size: 14px; color: #555;">Cargando gráfico de ventas...</div>
+            </div>
+
+            <!-- Canvas -->
+            <canvas id="salesChart"></canvas>
+         </div>
+        </div>
+
+      <div class="dashboard-item leaderboard ">
+    <h2 class="item-title">🏆 Top Productos</h2>
+
+    <!-- Loader del leaderboard -->
+    <div id="leaderboardLoader" class="loader-container" style="display: none;">
+        <div class="spinner"></div>
+        <div style="margin-top: 10px; font-size: 14px; color: #555;">
+            Cargando leaderboard...
+        </div>
     </div>
 
-    <!-- Canvas -->
-    <canvas id="salesChart"></canvas>
-  </div>
+    <!-- Tabla del leaderboard -->
+    <div class="table-container" id="leaderboardTable">
+        <table>
+            <thead>
+                <tr>
+                    <th>Rank</th>
+                    <th>Producto</th>
+                    <th>Ventas</th>
+                    <th>Ingresos</th>
+                </tr>
+            </thead>
+            <tbody>
+                <!-- Las filas se actualizarán dinámicamente -->
+            </tbody>
+        </table>
+    </div>
 </div>
-            <!-- Products Leaderboard -->
-            <div class="dashboard-item leaderboard">
-                <h2 class="item-title">🏆 Top Productos</h2>
-                <div class="table-container">
-                    <table>
-                        <thead>
-                            <tr>
-                                <th>Rank</th>
-                                <th>Producto</th>
-                                <th>Ventas</th>
-                                <th>Ingresos</th>
-                            </tr>
-                        </thead>
-                        <tbody>
-                            <tr>
-                                <td><div class="rank">1</div></td>
-                                <td>Smartphone Pro X</td>
-                                <td>1,250</td>
-                                <td class="amount">$125,000</td>
-                            </tr>
-                            <tr>
-                                <td><div class="rank">2</div></td>
-                                <td>Laptop Gaming Elite</td>
-                                <td>850</td>
-                                <td class="amount">$102,000</td>
-                            </tr>
-                            <tr>
-                                <td><div class="rank">3</div></td>
-                                <td>Auriculares Wireless</td>
-                                <td>2,100</td>
-                                <td class="amount">$84,000</td>
-                            </tr>
-                            <tr>
-                                <td><div class="rank">4</div></td>
-                                <td>Tablet Ultra HD</td>
-                                <td>950</td>
-                                <td class="amount">$57,000</td>
-                            </tr>
-                            <tr>
-                                <td><div class="rank">5</div></td>
-                                <td>Smartwatch Sport</td>
-                                <td>1,800</td>
-                                <td class="amount">$54,000</td>
-                            </tr>
-                            <tr>
-                                <td><div class="rank">6</div></td>
-                                <td>Cámara Digital 4K</td>
-                                <td>420</td>
-                                <td class="amount">$46,200</td>
-                            </tr>
-                            <tr>
-                                <td><div class="rank">7</div></td>
-                                <td>Teclado Mecánico RGB</td>
-                                <td>1,350</td>
-                                <td class="amount">$40,500</td>
-                            </tr>
-                            <tr>
-                                <td><div class="rank">8</div></td>
-                                <td>Monitor 4K Gaming</td>
-                                <td>320</td>
-                                <td class="amount">$38,400</td>
-                            </tr>
-                            <tr>
-                                <td><div class="rank">9</div></td>
-                                <td>Mouse Gaming Pro</td>
-                                <td>2,200</td>
-                                <td class="amount">$35,200</td>
-                            </tr>
-                            <tr>
-                                <td><div class="rank">10</div></td>
-                                <td>Altavoces Bluetooth</td>
-                                <td>1,100</td>
-                                <td class="amount">$33,000</td>
-                            </tr>
-                        </tbody>
-                    </table>
-                </div>
-            </div>
             <!-- Categories Pie Chart -->
-            <div class="dashboard-item categories-chart">
+        <div class="dashboard-item categories-chart">
                 <h2 class="item-title">🥧 Categorías Vendidas</h2>
-                <div id="categoriesLoader" style="display: none; text-align: center; padding: 40px;">
+                <div class="chart-container">
+
+                <div id="categoriesLoader" class="loader-container" style="display: none;">
                   <div class="spinner"></div>
                   <div style="margin-top: 10px; font-size: 14px; color: #555;">
                     Cargando gráfico de categorías...
                   </div>
                 </div>
-                <div class="chart-container">
                     <canvas id="categoriesChart"></canvas>
                 </div>
-            </div>
+        </div>
             <!-- Orders List -->
-            <div class="dashboard-item orders-list">
+        <div class="dashboard-item orders-list">
                 <h2 class="item-title">📦 Órdenes Recientes</h2>
-                <div class="table-container">
-                    <table>
-                        <thead>
-                            <tr>
-                                <th>ID</th>
-                                <th>Cliente</th>
-                                <th>Fecha</th>
-                                <th>Total</th>
-                                <th>Estado</th>
-                            </tr>
-                        </thead>
-                        <tbody>
-                            <tr>
-                                <td>#ORD-001</td>
-                                <td>María García</td>
-                                <td>2025-06-11</td>
-                                <td class="amount">$1,299</td>
-                                <td><span class="status completed">Completado</span></td>
-                            </tr>
-                            <tr>
-                                <td>#ORD-002</td>
-                                <td>Juan Pérez</td>
-                                <td>2025-06-11</td>
-                                <td class="amount">$849</td>
-                                <td><span class="status shipped">Enviado</span></td>
-                            </tr>
-                            <tr>
-                                <td>#ORD-003</td>
-                                <td>Ana López</td>
-                                <td>2025-06-10</td>
-                                <td class="amount">$299</td>
-                                <td><span class="status pending">Pendiente</span></td>
-                            </tr>
-                            <tr>
-                                <td>#ORD-004</td>
-                                <td>Carlos Ruiz</td>
-                                <td>2025-06-10</td>
-                                <td class="amount">$1,599</td>
-                                <td><span class="status completed">Completado</span></td>
-                            </tr>
-                            <tr>
-                                <td>#ORD-005</td>
-                                <td>Laura Martín</td>
-                                <td>2025-06-09</td>
-                                <td class="amount">$449</td>
-                                <td><span class="status shipped">Enviado</span></td>
-                            </tr>
-                            <tr>
-                                <td>#ORD-006</td>
-                                <td>Diego Silva</td>
-                                <td>2025-06-09</td>
-                                <td class="amount">$199</td>
-                                <td><span class="status pending">Pendiente</span></td>
-                            </tr>
-                            <tr>
-                                <td>#ORD-007</td>
-                                <td>Carmen Vega</td>
-                                <td>2025-06-08</td>
-                                <td class="amount">$2,299</td>
-                                <td><span class="status completed">Completado</span></td>
-                            </tr>
-                            <tr>
-                                <td>#ORD-008</td>
-                                <td>Roberto Díaz</td>
-                                <td>2025-06-08</td>
-                                <td class="amount">$699</td>
-                                <td><span class="status shipped">Enviado</span></td>
-                            </tr>
-                            <tr>
-                                <td>#ORD-009</td>
-                                <td>Isabel Torres</td>
-                                <td>2025-06-07</td>
-                                <td class="amount">$129</td>
-                                <td><span class="status pending">Pendiente</span></td>
-                            </tr>
-                            <tr>
-                                <td>#ORD-010</td>
-                                <td>Fernando Castro</td>
-                                <td>2025-06-07</td>
-                                <td class="amount">$899</td>
-                                <td><span class="status completed">Completado</span></td>
-                            </tr>
-                        </tbody>
-                    </table>
-                </div>
-            </div>
+                <div class="table-container"></div>
         </div>
     </div>
+    </div>
   </div>
-    <script>
+
+<script>
         // Sales Bar Chart
         const salesCtx = document.getElementById('salesChart').getContext('2d');
         const salesChart = new Chart(salesCtx, {
@@ -684,19 +571,23 @@
       async function updateDashboard() {
     const selectedRange = document.getElementById("timeRange").value;
 
-    // Mostrar ambos loaders
+    // Mostrar loaders y ocultar contenidos
     document.getElementById("chartLoader").style.display = "block";
     document.getElementById("salesChart").style.display = "none";
     document.getElementById("categoriesLoader").style.display = "block";
     document.getElementById("categoriesChart").style.display = "none";
 
+    document.getElementById("leaderboardLoader").style.display = "block";
+    document.getElementById("leaderboardTable").style.display = "none";
+
+    const leaderboardBody = document.querySelector(".leaderboard tbody");
+
     try {
         const res = await fetch(`/api/ventas?range=${selectedRange}`);
         const json = await res.json();
 
-        // Ventas por día
+        // 📈 Ventas por día
         const { labels, data } = json.ventas;
-
         const formattedLabels = labels.map(label => {
             const date = new Date(label);
             return new Intl.DateTimeFormat('es-PE', {
@@ -708,21 +599,42 @@
         salesChart.data.datasets[0].data = data;
         salesChart.update();
 
-        // Ventas por categoría
+        // 🥧 Ventas por categoría
         const { labels: catLabels, data: catData } = json.categorias;
         categoriesChart.data.labels = catLabels;
         categoriesChart.data.datasets[0].data = catData;
         categoriesChart.update();
 
+        // 🏆 Leaderboard
+        const topProductos = json.topProductos;
+        leaderboardBody.innerHTML = ""; // Limpiar
+
+        topProductos.forEach((prod, index) => {
+            const fila = document.createElement("tr");
+            fila.innerHTML = `
+                <td><div class="rank">${index + 1}</div></td>
+                <td>${prod.producto}</td>
+                <td>${prod.unidades}</td>
+                <td class="amount">S/.${Number(prod.ingresos).toLocaleString('es-PE', { minimumFractionDigits: 2 })}</td>
+            `;
+            leaderboardBody.appendChild(fila);
+        });
+
     } catch (error) {
         console.error('Error al actualizar el dashboard:', error);
+        leaderboardBody.innerHTML = `<tr><td colspan="4" style="text-align:center;color:red;">Error al cargar datos</td></tr>`;
     } finally {
+        // Ocultar loaders y mostrar contenidos
         document.getElementById("chartLoader").style.display = "none";
         document.getElementById("salesChart").style.display = "block";
         document.getElementById("categoriesLoader").style.display = "none";
         document.getElementById("categoriesChart").style.display = "block";
+
+        document.getElementById("leaderboardLoader").style.display = "none";
+        document.getElementById("leaderboardTable").style.display = "block";
     }
 }
+
 
 
 window.addEventListener('DOMContentLoaded', () => {

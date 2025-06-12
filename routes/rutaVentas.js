@@ -21,8 +21,8 @@ router.get('/', async (req, res) => {
     const startDate = getStartDate(range);
     console.log('startDate:', startDate);
 
-    try {
-        // Gráfico de línea: ventas por fecha
+        try {
+        // 📊 Gráfico de línea: Ventas por fecha
         const ventasPorFecha = await pool.query(`
             SELECT
                 DATE(m.fecha) AS fecha,
@@ -37,7 +37,7 @@ router.get('/', async (req, res) => {
         const labels = ventasPorFecha.rows.map(row => row.fecha);
         const data = ventasPorFecha.rows.map(row => Number(row.total));
 
-        // Gráfico de pastel: total por categoría
+        // 🥧 Gráfico de pastel: Ventas por categoría
         const categorias = await pool.query(`
             SELECT 
                 c.nombre AS categoria,
@@ -54,10 +54,26 @@ router.get('/', async (req, res) => {
         const categoriaLabels = categorias.rows.map(row => row.categoria);
         const categoriaData = categorias.rows.map(row => Number(row.total));
 
-        // Retornar ambos datasets
+        // 🏆 Leaderboard: Top 10 productos más vendidos
+        const topProductos = await pool.query(`
+            SELECT 
+                p.nombre AS producto,
+                SUM(pm.cantidad) AS unidades,
+                SUM(pm.subtotal) AS ingresos
+            FROM producto_movimiento pm
+            JOIN producto p ON pm.id_producto = p.id_producto
+            JOIN movimiento m ON pm.id_movimiento = m.id_movimiento
+            WHERE m.tipo = 'Venta' AND m.fecha >= $1
+            GROUP BY p.id_producto, p.nombre
+            ORDER BY unidades DESC
+            LIMIT 10;
+        `, [startDate]);
+
+        // 🎯 Enviar todo junto
         res.json({
             ventas: { labels, data },
-            categorias: { labels: categoriaLabels, data: categoriaData }
+            categorias: { labels: categoriaLabels, data: categoriaData },
+            topProductos: topProductos.rows // contiene producto, unidades, ingresos
         });
 
     } catch (error) {

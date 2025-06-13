@@ -1,6 +1,382 @@
 <head>
   <link rel="stylesheet" href="/listarOrdenes.css">
-  <style></style>
+ <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css">
+  <style>
+        /* Import the design system from your main CSS */
+    @import url('https://fonts.googleapis.com/css2?family=Poppins:wght@300;400;500;600;700&display=swap');
+
+    :root {
+      --primary-color: #3498db;
+      --primary-dark: #2980b9;
+      --accent-color: #2ecc71;
+      --accent-dark: #27ae60;
+      --danger-color: #e74c3c;
+      --warning-color: #f39c12;
+      --gray-light: #f5f5f5;
+      --gray-medium: #e0e0e0;
+      --gray-dark: #718093;
+      --text-color: #2d3436;
+      --shadow: 0 2px 10px rgba(0, 0, 0, 0.1);
+      --border-radius: 6px;
+      --transition: all 0.3s ease;
+    }
+
+    * {
+      margin: 0;
+      padding: 0;
+      box-sizing: border-box;
+      font-family: 'Poppins', 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+    }
+
+    body {
+      background-color: #f9fafb;
+      color: var(--text-color);
+      line-height: 1.6;
+    }
+
+    .container {
+      max-width: 100%;
+      margin: 0 auto;
+      padding: 20px 15px;
+    }
+
+    /* Page Header */
+    h1 {
+      font-size: 28px;
+      font-weight: 600;
+      color: var(--text-color);
+      margin-bottom: 24px;
+      text-align: center;
+    }
+
+    /* Alert Styles */
+    .alerta-stock {
+      background-color: rgba(231, 76, 60, 0.1);
+      border: 1px solid var(--danger-color);
+      color: var(--danger-color);
+      padding: 16px 20px;
+      border-radius: var(--border-radius);
+      margin-bottom: 20px;
+      font-weight: 500;
+      display: flex;
+      align-items: center;
+      gap: 12px;
+    }
+
+    .alerta-stock.alerta-ok {
+      background-color: rgba(46, 204, 113, 0.1);
+      border-color: var(--accent-color);
+      color: var(--accent-color);
+    }
+
+    /* Create Order Button */
+    .crear-orden-container {
+      display: flex;
+      justify-content: center;
+      margin-bottom: 30px;
+    }
+
+    .btn-crear-orden {
+      display: inline-flex;
+      align-items: center;
+      gap: 8px;
+      background-color: var(--primary-color);
+      color: white;
+      padding: 12px 24px;
+      border-radius: var(--border-radius);
+      text-decoration: none;
+      font-weight: 500;
+      transition: var(--transition);
+      box-shadow: var(--shadow);
+    }
+
+    .btn-crear-orden:hover {
+      background-color: var(--primary-dark);
+      transform: translateY(-2px);
+      box-shadow: 0 4px 15px rgba(52, 152, 219, 0.3);
+    }
+
+    .icono-alerta {
+      color: var(--warning-color);
+      animation: pulse 2s infinite;
+    }
+
+    @keyframes pulse {
+      0%, 100% { opacity: 1; }
+      50% { opacity: 0.6; }
+    }
+
+    /* Table Styles */
+    .tabla-ordenes {
+      width: 100%;
+      background-color: white;
+      border-radius: var(--border-radius);
+      box-shadow: var(--shadow);
+      overflow: hidden;
+      border-collapse: collapse;
+      table-layout: fixed; /* Fixed table layout prevents column shifting */
+    }
+
+/* Distribución ajustada para 6 columnas */
+.tabla-ordenes th:nth-child(1),
+.tabla-ordenes td:nth-child(1) {
+  width: 10%; /* ID Orden */
+}
+
+.tabla-ordenes th:nth-child(2),
+.tabla-ordenes td:nth-child(2) {
+  width: 24%; /* Proveedor */
+}
+
+.tabla-ordenes th:nth-child(3),
+.tabla-ordenes td:nth-child(3) {
+  width: 20%; /* Fecha */
+}
+
+.tabla-ordenes th:nth-child(4),
+.tabla-ordenes td:nth-child(4) {
+  width: 13%; /* Estado */
+}
+
+.tabla-ordenes th:nth-child(5),
+.tabla-ordenes td:nth-child(5) {
+  width: 23%; /* Productos */
+}
+
+.tabla-ordenes th:nth-child(6),
+.tabla-ordenes td:nth-child(6) {
+  width: 10%; /* Detalle */
+}
+
+.btn-detalle {
+  background-color: var(--accent-color);
+  color: white;
+  padding: 6px 12px;
+  border-radius: var(--border-radius);
+  text-decoration: none;
+  font-size: 14px;
+  transition: var(--transition);
+  display: inline-block;
+  text-align: center;
+}
+
+.btn-detalle:hover {
+  background-color: var(--accent-dark);
+}
+    .tabla-ordenes thead {
+      background-color: #f8f9fa;
+    }
+
+    .tabla-ordenes th {
+      padding: 16px;
+      font-weight: 600;
+      color: var(--gray-dark);
+      border-bottom: 1px solid var(--gray-medium);
+      font-size: 14px;
+      text-align: left;
+    }
+
+    .tabla-ordenes td {
+      padding: 14px 16px;
+      border-bottom: 1px solid var(--gray-light);
+      font-size: 14px;
+    }
+
+    .tabla-ordenes tbody tr:hover {
+      background-color: rgba(52, 152, 219, 0.05);
+    }
+
+    .tabla-ordenes tbody tr:last-child td {
+      border-bottom: none;
+    }
+
+    /* Order Status Badge */
+    .estado-badge {
+      display: inline-block;
+      padding: 4px 12px;
+      border-radius: 20px;
+      font-size: 12px;
+      font-weight: 500;
+      background-color: var(--gray-light);
+      color: var(--gray-dark);
+    }
+
+    /* Toggle Products Button */
+    .btn-toggle-productos {
+      display: inline-flex;
+      align-items: center;
+      gap: 8px;
+      background-color: rgba(52, 152, 219, 0.1);
+      color: var(--primary-color);
+      border: none;
+      padding: 8px 16px;
+      border-radius: var(--border-radius);
+      font-size: 14px;
+      cursor: pointer;
+      transition: var(--transition);
+    }
+
+    .btn-toggle-productos:hover {
+      background-color: rgba(52, 152, 219, 0.2);
+      transform: translateY(-1px);
+    }
+
+    .btn-icon {
+      transition: transform 0.3s ease;
+    }
+
+    /* Expandable Product Rows */
+    .fila-productos {
+      display: none; /* Completely hidden, takes no space */
+    }
+    
+    .fila-productos.show {
+      display: table-row; /* Show as table row when clicked */
+      animation: fadeIn 0.3s ease-in-out;
+    }
+    
+    .fila-productos td {
+      padding: 20px;
+      background-color: #f8f9fa;
+    }
+    
+    @keyframes fadeIn {
+      from {
+        opacity: 0;
+      }
+      to {
+        opacity: 1;
+      }
+    }
+
+    /* Product List */
+    .lista-productos {
+      list-style: none;
+      margin: 0;
+      padding: 0;
+    }
+    
+    .lista-productos li {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      padding: 12px 16px;
+      margin-bottom: 8px;
+      background-color: white;
+      border-radius: var(--border-radius);
+      box-shadow: 0 1px 3px rgba(0, 0, 0, 0.1);
+      opacity: 0;
+      animation: fadeInUp 0.3s ease-in-out forwards;
+      animation-delay: calc(var(--i, 0) * 0.1s);
+    }
+    
+    @keyframes fadeInUp {
+      from {
+        opacity: 0;
+        transform: translateY(10px);
+      }
+      to {
+        opacity: 1;
+        transform: translateY(0);
+      }
+    }
+
+    .nombre-producto {
+      font-weight: 500;
+      color: var(--text-color);
+    }
+
+    .cantidad-producto {
+      color: var(--gray-dark);
+      font-size: 13px;
+      background-color: var(--gray-light);
+      padding: 4px 8px;
+      border-radius: 12px;
+    }
+
+    /* Responsive Design */
+    @media (max-width: 768px) {
+      .container {
+        padding: 15px 10px;
+      }
+
+      h1 {
+        font-size: 24px;
+      }
+
+      .tabla-ordenes {
+        font-size: 13px;
+      }
+      
+      .tabla-ordenes th,
+      .tabla-ordenes td {
+        padding: 10px 8px;
+      }
+
+      .btn-crear-orden {
+        padding: 10px 20px;
+        font-size: 14px;
+      }
+
+      /* Stack product info vertically on mobile */
+      .lista-productos li {
+        flex-direction: column;
+        align-items: flex-start;
+        gap: 8px;
+      }
+
+      .cantidad-producto {
+        align-self: flex-end;
+      }
+    }
+
+    @media (max-width: 576px) {
+      .tabla-ordenes {
+        display: block;
+        overflow-x: auto;
+        white-space: nowrap;
+      }
+
+      .tabla-ordenes thead,
+      .tabla-ordenes tbody,
+      .tabla-ordenes th,
+      .tabla-ordenes td,
+      .tabla-ordenes tr {
+        display: block;
+      }
+
+      .tabla-ordenes thead tr {
+        position: absolute;
+        top: -9999px;
+        left: -9999px;
+      }
+
+      .tabla-ordenes tr {
+        border: 1px solid var(--gray-medium);
+        margin-bottom: 10px;
+        border-radius: var(--border-radius);
+        background-color: white;
+      }
+
+      .tabla-ordenes td {
+        border: none;
+        position: relative;
+        padding-left: 50% !important;
+        white-space: normal;
+      }
+
+      .tabla-ordenes td:before {
+        content: attr(data-label) ": ";
+        position: absolute;
+        left: 6px;
+        width: 45%;
+        padding-right: 10px;
+        white-space: nowrap;
+        font-weight: 600;
+        color: var(--gray-dark);
+      }
+    }
+  </style>
 </head>
 <div class="container">   
   <h1>Órdenes de Reabastecimiento</h1>
@@ -23,71 +399,80 @@
           <% } %>     
       </a>   
     </div>
-    <table class="tabla-ordenes">     
-    <thead>       
-      <tr>         
-        <th>ID Orden</th>         
-        <th>Proveedor</th>         
-        <th>Fecha</th>         
-        <th>Estado</th>         
-        <th>Productos</th>       
-      </tr>     
-    </thead>     
-    <tbody>       
-      <% ordenes.forEach((orden, index) => { %>         
-        <tr>           
-          <td data-label="ID Orden"><%= orden.id_order %></td>           
-          <td data-label="Proveedor"><%= orden.proveedor %></td>           
-          <td data-label="Fecha">             
-            <%                
-              // Validar y mostrar fecha formateada               
-              let fechaFormateada = 'Fecha inválida';               
-              if (orden.fecha) {                 
-                try {                   
-                  fechaFormateada = new Date(orden.fecha).toLocaleString('es-PE', { 
-                    timeZone: 'America/Lima',
-                    year: 'numeric',
-                    month: 'short',
-                    day: 'numeric',
-                    hour: '2-digit',
-                    minute: '2-digit'
-                  });                 
-                } catch {}               
-              }             
-            %>             
-            <%= fechaFormateada %>           
-          </td>           
-          <td data-label="Estado">             
-            <span class="estado-badge">               
-              <%= orden.estado %>             
-            </span>           
-          </td>           
-            <td data-label="Productos">
-              <% let productos = []; try {
-                productos = typeof orden.products === 'string'
-                  ? JSON.parse(orden.products)
-                  : (Array.isArray(orden.products) ? orden.products : []);
-              } catch (e) { productos = []; } %>
+   <table class="tabla-ordenes">     
+  <thead>
+    <tr>
+      <th>ID Orden</th>
+      <th>Proveedor</th>
+      <th>Fecha</th>
+      <th>Estado</th>
+      <th>Productos</th>
+      <th>Detalle</th> <!-- Nueva columna -->
+    </tr>
+  </thead>
+  <tbody>
+    <% ordenes.forEach((orden, index) => { %>
+      <tr class="fila-orden" data-index="<%= index %>">
+        <td data-label="ID Orden"><%= orden.id_order %></td>
+        <td data-label="Proveedor"><%= orden.proveedor %></td>
+        <td data-label="Fecha">
+          <% let fechaFormateada = 'Fecha inválida';
+            if (orden.fecha) {
+              try {
+                fechaFormateada = new Date(orden.fecha).toLocaleString('es-PE', {
+                  timeZone: 'America/Lima',
+                  year: 'numeric',
+                  month: 'short',
+                  day: 'numeric',
+                  hour: '2-digit',
+                  minute: '2-digit'
+                });
+              } catch {}
+            }
+          %>
+          <%= fechaFormateada %>
+        </td>
+        <td data-label="Estado">
+          <span class="estado-badge"><%= orden.estado %></span>
+        </td>
+        <td data-label="Productos">
+          <button class="btn-toggle-productos" data-index="<%= index %>">
+            <span class="btn-text">Ver productos</span>
+            <span class="btn-icon">▼</span>
+          </button>
+        </td>
+        <td data-label="Detalle">
+          <a href="/ordenes/<%= orden.id_order %>" class="btn-detalle">Ver detalle</a>
+        </td>
+      </tr>
 
-              <% if (productos.length > 0) { %>
-                <ul class="lista-productos">
-                  <% productos.forEach(p => { %>
-                    <li>
-                      <span class="nombre-producto"><%= p.nombre %></span>
-                      <span class="cantidad-producto">× <%= p.cantidad %> unidades</span>
-                    </li>
-                  <% }) %>
-                </ul>
-              <% } else { %>
-                <em>Sin productos</em>
-              <% } %>
-            </td>
-        </tr>       
-      <% }) %>     
-    </tbody>   
-  </table>
-</div>
-  </div>
+      <!-- Fila desplegable (oculta al inicio) -->
+      <tr class="fila-productos" id="productos-<%= index %>">
+        <td colspan="6"> <!-- Actualizado de 5 a 6 columnas -->
+          <% let productos = []; try {
+            productos = typeof orden.products === 'string'
+              ? JSON.parse(orden.products)
+              : (Array.isArray(orden.products) ? orden.products : []);
+          } catch (e) { productos = []; } %>
+
+          <% if (productos.length > 0) { %>
+            <ul class="lista-productos">
+              <% productos.forEach((p, i) => { %>
+                <li style="--i: <%= i %>">
+                  <span class="nombre-producto"><%= p.nombre %></span>
+                  <span class="cantidad-producto">× <%= p.cantidad %> unidades</span>
+                </li>
+              <% }) %>
+            </ul>
+          <% } else { %>
+            <em>Sin productos</em>
+          <% } %>
+        </td>
+      </tr>
+    <% }) %>
+  </tbody>
+</table>
+
 </div>
 
 <script>
@@ -98,13 +483,21 @@
       boton.addEventListener('click', () => {
         const index = boton.dataset.index;
         const filaProductos = document.getElementById(`productos-${index}`);
-
-        if (filaProductos.style.display === 'none') {
-          filaProductos.style.display = 'table-row';
-          boton.textContent = 'Ocultar productos';
+        const btnText = boton.querySelector('.btn-text');
+        const btnIcon = boton.querySelector('.btn-icon');
+        // Toggle the show class for smooth transition
+        if (filaProductos.classList.contains('show')) {
+          // Hide products
+          filaProductos.classList.remove('show');
+          btnText.textContent = 'Ver productos';
+          btnIcon.style.transform = 'rotate(0deg)';
+          btnIcon.textContent = '▼';
         } else {
-          filaProductos.style.display = 'none';
-          boton.textContent = 'Ver productos';
+          // Show products
+          filaProductos.classList.add('show');
+          btnText.textContent = 'Ocultar productos';
+          btnIcon.style.transform = 'rotate(180deg)';
+          btnIcon.textContent = '▲';
         }
       });
     });

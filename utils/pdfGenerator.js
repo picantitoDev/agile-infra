@@ -1,4 +1,5 @@
 const PDFLib = require("pdf-lib")
+const { PDFDocument, rgb, StandardFonts } = require('pdf-lib');
 const fs = require("fs")
 const { DateTime } = require("luxon")
 
@@ -679,7 +680,104 @@ function formatoFechaGeneracion(fecha = DateTime.now().minus({ hours: 5 })) {
   return `Generado: ${diaSemana}, ${diaMes} de ${mes} de ${anio}`
 }
 
+async function generarOrdenPDF(orderData) {
+  try {
+    // Create a new PDF document
+    const pdfDoc = await PDFDocument.create();
+    const page = pdfDoc.addPage([595, 842]); // A4 size in points (210mm x 297mm)
+    const font = await pdfDoc.embedFont(StandardFonts.Helvetica);
+    
+    // Document layout constants
+    const MARGIN_LEFT = 50;
+    const LINE_HEIGHT_LARGE = 30;
+    const LINE_HEIGHT_MEDIUM = 20;
+    const LINE_HEIGHT_SMALL = 15;
+    const TITLE_FONT_SIZE = 18;
+    const HEADER_FONT_SIZE = 14;
+    const BODY_FONT_SIZE = 12;
+    const DETAIL_FONT_SIZE = 11;
+    
+    // Initialize cursor position
+    let cursorY = 800;
+
+    // Add order header information
+    page.drawText(`Orden No. ${orderData.id_order}`, { 
+      x: MARGIN_LEFT, 
+      y: cursorY, 
+      size: TITLE_FONT_SIZE, 
+      font, 
+      color: rgb(0, 0, 0) 
+    });
+    cursorY -= LINE_HEIGHT_LARGE;
+
+    // Add supplier information
+    page.drawText(`Proveedor: ${orderData.proveedor}`, { 
+      x: MARGIN_LEFT, 
+      y: cursorY, 
+      size: BODY_FONT_SIZE, 
+      font 
+    });
+    cursorY -= LINE_HEIGHT_MEDIUM;
+
+    // Add formatted date
+    const formattedDate = new Date(orderData.fecha).toLocaleDateString();
+    page.drawText(`Fecha: ${formattedDate}`, { 
+      x: MARGIN_LEFT, 
+      y: cursorY, 
+      size: BODY_FONT_SIZE, 
+      font 
+    });
+    cursorY -= LINE_HEIGHT_MEDIUM;
+
+    // Add order status
+    let str = ""
+    if(orderData.estado === "en_curso"){
+      str = "En Curso"
+    }else if(orderData.estado === "finalizada"){
+      str = "Finalizada"
+    }
+
+    page.drawText(`Estado: ${str}`, { 
+      x: MARGIN_LEFT, 
+      y: cursorY, 
+      size: BODY_FONT_SIZE, 
+      font 
+    });
+    cursorY -= LINE_HEIGHT_LARGE; // Extra space before products
+
+    // Add products section header
+    page.drawText(`Productos:`, { 
+      x: MARGIN_LEFT, 
+      y: cursorY, 
+      size: HEADER_FONT_SIZE, 
+      font 
+    });
+    cursorY -= LINE_HEIGHT_MEDIUM;
+
+    // Add product list with indentation
+    orderData.products.forEach(product => {
+      const productText = `- ${product.nombre} (${product.categoria}) x${product.cantidad}`;
+      page.drawText(productText, {
+        x: MARGIN_LEFT + 10, // Indented from main margin
+        y: cursorY, 
+        size: DETAIL_FONT_SIZE, 
+        font
+      });
+      cursorY -= LINE_HEIGHT_SMALL;
+    });
+
+    // Finalize and return the PDF
+    return await pdfDoc.save();
+    
+  } catch (error) {
+    console.error('Failed to generate order PDF:', error);
+    throw new Error('PDF generation failed');
+  }
+}
+
+
 module.exports = {
   generarComprobantePDF,
   crearOrdenReposicionPDF,
+  generarOrdenPDF,
 }

@@ -2,6 +2,7 @@ const dbOrdenes = require('../model/queriesOrdenes');
 const dbProductos = require("../model/queriesProductos")
 const dbProveedores = require("../model/queriesProveedores")
 const dbIncidencias = require('../model/queriesIncidencias'); 
+const pdfUtil = require("../utils/pdfGenerator")
 
 async function listarOrdenes(req, res) {
   try {
@@ -120,10 +121,35 @@ async function detalleOrden(req, res){
   }
 }
 
+async function generarOrdenPDF(req, res) {
+  try {
+    const id_order = req.params.id;
+
+    const orden = await dbOrdenes.obtenerOrdenPorId(id_order);
+
+    if (!orden) {
+      return res.status(404).send("Orden no encontrada");
+    }
+
+    // Llamar a la función que genera el PDF
+    const pdfBuffer = await pdfUtil.generarOrdenPDF(orden);
+
+    // Configurar encabezados y enviar el PDF al navegador
+    res.setHeader("Content-Type", "application/pdf");
+    res.setHeader("Content-Disposition", `attachment; filename=orden_${id_order}.pdf`);
+    res.send(pdfBuffer);
+
+  } catch (err) {
+    console.error("Error al generar PDF de orden:", err);
+    res.status(500).send("Error al generar el PDF");
+  }
+}
+
 module.exports = {
     listarOrdenes,
     crearOrdenGet,
     crearOrdenPost,
     obtenerOrdenPorId,
-    detalleOrden
+    detalleOrden,
+    generarOrdenPDF
 }

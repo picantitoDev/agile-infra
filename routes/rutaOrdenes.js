@@ -8,4 +8,5 @@ router.get("/nueva", controladorOrdenes.crearOrdenGet);
 router.post("/nueva", controladorOrdenes.crearOrdenPost)
 router.get('/:id', controladorOrdenes.obtenerOrdenPorId);
 router.get('/detalle/:id', controladorOrdenes.detalleOrden)
+router.get("/detalle/pdf/:id", controladorOrdenes.generarOrdenPDF)
 module.exports = router;

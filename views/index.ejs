@@ -30,12 +30,16 @@
             background-color: #f9fafb;
             color: var(--text-color);
             line-height: 1.6;
+            height: 100vh;
         }
 
         .container {
             max-width: 100%;
             margin: 0 auto;
-            padding: 20px;
+            padding: 10px;
+            height: 100vh;
+            display: flex;
+            flex-direction: column;
         }
 
         h1 {
@@ -46,19 +50,31 @@
             font-weight: 600;
         }
 
+        header {
+            display: flex;
+            justify-content: space-between;
+            padding-bottom: 8px;
+            margin-bottom: 10px;
+        }
+
+        header h2 {
+            margin: 0;
+            font-size: 1.5rem;
+        }
+
         .dashboard-grid {
             display: grid;
             grid-template-columns: repeat(4, 1fr);
-            grid-template-rows: repeat(4, 1fr);
-            gap: 20px;
-            height: calc(100vh - 150px);
-            min-height: 800px;
+            grid-template-rows: repeat(2, 1fr);
+            gap: 15px;
+            flex: 1;
+            height: calc(100vh - 120px);
         }
 
         .dashboard-item {
             background: white;
             border-radius: var(--border-radius);
-            padding: 20px;
+            padding: 15px;
             box-shadow: var(--shadow);
             display: flex;
             flex-direction: column;
@@ -73,32 +89,33 @@
 
         .sales-chart {
             grid-column: 1 / 3;
-            grid-row: 1 / 3;
+            grid-row: 1 / 2;
         }
 
         .categories-chart {
             grid-column: 1 / 3;
-            grid-row: 3 / 5;
+            grid-row: 2 / 3;
         }
 
-        .leaderboard {            grid-column: 3 / 5;
-            grid-row: 1 / 3;
-
+        .leaderboard {            
+            grid-column: 3 / 5;
+            grid-row: 1 / 2;
+            position: relative;
         }
 
         .orders-list {
             grid-column: 3 / 5;
-            grid-row: 3 / 5;
+            grid-row: 2 / 3;
         }
 
         .item-title {
             color: var(--text-color);
-            font-size: 1.2rem;
+            font-size: 1.1rem;
             font-weight: 600;
-            margin-bottom: 15px;
+            margin-bottom: 10px;
             text-align: center;
             border-bottom: 2px solid var(--primary-color);
-            padding-bottom: 10px;
+            padding-bottom: 8px;
         }
 
         .chart-container {
@@ -107,6 +124,7 @@
             display: flex;
             align-items: center;
             justify-content: center;
+            min-height: 200px;
         }
 
         .chart-container canvas {
@@ -195,18 +213,34 @@
             color: var(--primary-color);
         }
 
-        header{
-          display: flex;
-          justify-content: space-between;
-          padding-bottom: 14px;
+        .spinner {
+            border: 6px solid #f3f3f3;
+            border-top: 6px solid #3498db;
+            border-radius: 50%;
+            width: 40px;
+            height: 40px;
+            animation: spin 1s linear infinite;
+            margin: auto;
+        }
+
+        @keyframes spin {
+            0% { transform: rotate(0deg); }
+            100% { transform: rotate(360deg); }
+        }
+
+        .loader-container {
+            position: absolute;
+            top: 50%;
+            left: 50%;
+            transform: translate(-50%, -50%);
         }
 
         /* Responsive Design */
         @media (max-width: 1200px) {
             .dashboard-grid {
                 grid-template-columns: repeat(2, 1fr);
-                grid-template-rows: repeat(4, 1fr);
-                min-height: 1200px;
+                grid-template-rows: repeat(2, 1fr);
+                height: calc(100vh - 120px);
             }
 
             .sales-chart {
@@ -221,31 +255,33 @@
 
             .leaderboard {
                 grid-column: 1 / 2;
-                grid-row: 2 / 4;
+                grid-row: 2 / 3;
             }
 
             .orders-list {
                 grid-column: 2 / 3;
-                grid-row: 2 / 4;
+                grid-row: 2 / 3;
             }
         }
 
         @media (max-width: 768px) {
             body {
+                padding: 5px;
+            }
+            
+            .container {
                 padding: 10px;
             }
 
-            h1 {
-                font-size: 2rem;
-                margin-bottom: 20px;
+            header h2 {
+                font-size: 1.3rem;
             }
 
             .dashboard-grid {
                 grid-template-columns: 1fr;
-                grid-template-rows: repeat(4, 300px);
-                gap: 15px;
-                min-height: auto;
-                height: auto;
+                grid-template-rows: repeat(4, 1fr);
+                gap: 10px;
+                height: calc(100vh - 100px);
             }
 
             .sales-chart,
@@ -272,12 +308,12 @@
             }
 
             .dashboard-item {
-                padding: 15px;
+                padding: 12px;
             }
 
             .item-title {
-                font-size: 1.2rem;
-                margin-bottom: 10px;
+                font-size: 1rem;
+                margin-bottom: 8px;
             }
 
             th, td {
@@ -287,12 +323,12 @@
         }
 
         @media (max-width: 480px) {
-            h1 {
-                font-size: 1.5rem;
+            header h2 {
+                font-size: 1.1rem;
             }
 
             .dashboard-grid {
-                grid-template-rows: repeat(4, 250px);
+                height: calc(100vh - 90px);
             }
 
             th, td {
@@ -305,39 +341,10 @@
                 height: 25px;
                 font-size: 0.8rem;
             }
-        }
 
-        .spinner {
-        border: 6px solid #f3f3f3;
-        border-top: 6px solid #3498db;
-        border-radius: 50%;
-        width: 40px;
-        height: 40px;
-        animation: spin 1s linear infinite;
-        margin: auto;
-        }
-
-        @keyframes spin {
-        0% { transform: rotate(0deg); }
-        100% { transform: rotate(360deg); }
-        }
-        .dashboard-item.leaderboard {
-    position: relative;
-}
-
-        .chart-container {
-            position: relative;
-            display: flex;
-            align-items: center;
-            justify-content: center;
-            min-height: 200px; /* Ajusta según necesidad */
-        }
-
-        .loader-container {
-        position: absolute;
-        top: 50%;
-        left: 50%;
-        transform: translate(-50%, -50%);
+            .item-title {
+                font-size: 0.9rem;
+            }
         }
     </style>
 </head>

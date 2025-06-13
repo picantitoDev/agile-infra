@@ -7,4 +7,5 @@ router.get('/', controladorOrdenes.listarOrdenes);
 router.get("/nueva", controladorOrdenes.crearOrdenGet);
 router.post("/nueva", controladorOrdenes.crearOrdenPost)
 router.get('/:id', controladorOrdenes.obtenerOrdenPorId);
+router.get('/detalle/:id', controladorOrdenes.detalleOrden)
 module.exports = router;

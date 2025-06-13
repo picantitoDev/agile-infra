@@ -8,7 +8,6 @@ async function listarOrdenes(req, res) {
     const ordenes = await dbOrdenes.obtenerOrdenes();
 
     const productosBajoStock = await dbProductos.obtenerProductosCriticos();
-    console.log(ordenes)
     res.render('ordenes', { ordenes, productosBajoStock, user: req.user });
   } catch (error) {
     console.error('Error al obtener órdenes:', error);
@@ -101,9 +100,30 @@ async function obtenerOrdenPorId(req, res) {
   }
 }
 
+async function detalleOrden(req, res){
+    try {
+    const id_order = req.params.id;
+    const orden = await dbOrdenes.obtenerOrdenPorId(id_order);
+
+    if (!orden) {
+      return res.status(404).json({ mensaje: 'Orden no encontrada' });
+    }
+    const incidencias = await dbIncidencias.obtenerIncidenciasPorOrden(id_order);
+    console.log(orden.productos)
+    console.log(incidencias.detalle_productos)
+
+    res.render('detalleOrden', { orden, incidencias});
+
+  } catch (error) {
+    console.error('Error al obtener la orden por ID:', error);
+    res.status(500).json({ mensaje: 'Error interno del servidor' });
+  }
+}
+
 module.exports = {
     listarOrdenes,
     crearOrdenGet,
     crearOrdenPost,
-    obtenerOrdenPorId
+    obtenerOrdenPorId,
+    detalleOrden
 }

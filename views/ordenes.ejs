@@ -69,38 +69,6 @@
       color: var(--accent-color);
     }
 
-    /* Create Order Button */
-    .crear-orden-container {
-      display: flex;
-      justify-content: center;
-      margin-bottom: 30px;
-    }
-
-    .btn-crear-orden {
-      display: inline-flex;
-      align-items: center;
-      gap: 8px;
-      background-color: var(--primary-color);
-      color: white;
-      padding: 12px 24px;
-      border-radius: var(--border-radius);
-      text-decoration: none;
-      font-weight: 500;
-      transition: var(--transition);
-      box-shadow: var(--shadow);
-    }
-
-    .btn-crear-orden:hover {
-      background-color: var(--primary-dark);
-      transform: translateY(-2px);
-      box-shadow: 0 4px 15px rgba(52, 152, 219, 0.3);
-    }
-
-    .icono-alerta {
-      color: var(--warning-color);
-      animation: pulse 2s infinite;
-    }
-
     @keyframes pulse {
       0%, 100% { opacity: 1; }
       50% { opacity: 0.6; }
@@ -376,11 +344,185 @@
         color: var(--gray-dark);
       }
     }
+    /* Contenedor principal de filtros */
+.filtros-barra {
+  display: flex;
+  flex-direction: column;
+  gap: 15px;
+  margin-bottom: 20px;
+}
+
+/* Barra de búsqueda - ocupa 100% del ancho */
+.barra {
+  width: 100%;
+}
+
+.barra #filtro-busqueda {
+  width: 100%;
+  padding: 12px 16px;
+  border: 1px solid #ddd;
+  border-radius: 6px;
+  font-size: 14px;
+  background-color: #fff;
+  transition: border-color 0.3s ease;
+}
+
+.barra #filtro-busqueda:focus {
+  outline: none;
+  border-color: var(--primary-color);
+  box-shadow: 0 0 0 2px rgba(52, 152, 219, 0.25);
+}
+
+/* Contenedor de filtros y acciones */
+.filtros-acciones {
+  display: flex;
+  justify-content: space-between;
+  align-items: flex-start; /* Cambio de center a flex-start */
+  gap: 20px;
+}
+
+/* Filtros a la izquierda - en una sola línea */
+.m-i {
+  display: flex;
+  align-items: center;
+  gap: 15px;
+  flex-wrap: wrap;
+}
+
+/* Estilos para los selects */
+.filtro-select {
+  padding: 8px 12px;
+  border: 1px solid #ddd;
+  border-radius: 4px;
+  background-color: #fff;
+  font-size: 14px;
+  min-width: 150px;
+  cursor: pointer;
+}
+
+.filtro-select:focus {
+  outline: none;
+  border-color: var(--primary-color);
+}
+
+/* Contenedor del filtro de rango de fechas */
+.filtro-rango {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  background-color: #f8f9fa;
+  padding: 8px 12px;
+  border-radius: 4px;
+  border: 1px solid #ddd;
+}
+
+.filtro-rango label {
+  font-size: 12px;
+  color: #666;
+  font-weight: 500;
+  white-space: nowrap;
+}
+
+.filtro-rango .filtro-input {
+  padding: 4px 8px;
+  border: 1px solid #ccc;
+  border-radius: 3px;
+  font-size: 12px;
+  width: 130px;
+}
+
+/* Botón crear orden a la derecha */
+.m-d {
+  margin-left: auto;
+  margin-top: 12px; /* Espacio hacia abajo */
+}
+
+/* Limpiar estilos duplicados del botón crear orden - usar solo los de las variables CSS */
+.filtros-barra .crear-orden-container {
+  display: flex;
+  align-items: center;
+  justify-content: flex-end;
+}
+
+.filtros-barra .btn-crear-orden {
+  display: inline-flex;
+  align-items: center;
+  gap: 8px;
+  background-color: rgb(45, 154, 226);
+  color: white;
+  padding: 12px 24px;
+  border-radius: var(--border-radius);
+  text-decoration: none;
+  font-weight: 500;
+  transition: var(--transition);
+  box-shadow: var(--shadow);
+  border: none;
+  cursor: pointer;
+}
+
+.filtros-barra .btn-crear-orden:hover {
+  transform: translateY(-2px);
+  box-shadow: 0 4px 15px rgba(97, 111, 175, 0.3);
+}
+
+.filtros-barra .btn-crear-orden i {
+  font-size: 16px;
+}
+
+.filtros-barra .icono-alerta {
+  color: var(--warning-color) !important;
+  animation: pulse 2s infinite;
+}
+
+@keyframes pulse {
+  0% { transform: scale(1); }
+  50% { transform: scale(1.1); }
+  100% { transform: scale(1); }
+}
+
+/* Responsive design */
+@media (max-width: 768px) {
+  .filtros-acciones {
+    flex-direction: column;
+    align-items: stretch;
+    gap: 15px;
+  }
+  
+  .m-i {
+    flex-direction: column;
+    align-items: stretch;
+    gap: 10px;
+  }
+  
+  .filtro-select {
+    min-width: auto;
+    width: 100%;
+  }
+  
+  .filtro-rango {
+    flex-direction: column;
+    gap: 5px;
+  }
+  
+  .filtro-rango .filtro-input {
+    width: 100%;
+  }
+  
+  .m-d {
+    margin-left: 0;
+    margin-top: 0;
+  }
+  
+  .filtros-barra .btn-crear-orden {
+    justify-content: center;
+    width: 100%;
+  }
+}
   </style>
 </head>
 <div class="container">   
   <h1>Órdenes de Reabastecimiento</h1>
-     
+
   <% if (productosBajoStock > 0) { %>     
     <div class="alerta-stock">       
       🚨 Tienes <strong><%= productosBajoStock %></strong> producto(s) con stock bajo. ¡Necesitas crear una orden!     
@@ -390,15 +532,48 @@
       ✅ No tienes órdenes pendientes :)     
     </div>   
   <% } %>     
- <!-- BOTÓN "CREAR ORDEN" -->   
-    <div class="crear-orden-container">     
-      <a href="/ordenes/nueva" class="btn-crear-orden">       
-        <i class="fas fa-plus-circle"></i> Crear Orden       
-          <% if (productosBajoStock > 0) { %>         
-            <i class="fas fa-exclamation-circle icono-alerta"></i>       
-          <% } %>     
-      </a>   
+    
+<div class="filtros-barra">
+  <div class="barra">
+    <input type="text" id="filtro-busqueda" placeholder="Buscar por ID o producto" class="filtro-input"/>
+  </div>
+
+  <div class="filtros-acciones">
+    <div class="m-i">
+      <select id="filtro-estado" class="filtro-select">
+        <option value="">Todos los estados</option>
+        <option value="en_curso">En curso</option>
+        <option value="finalizada">Finalizada</option>
+      </select>
+
+      <select id="filtro-fecha" class="filtro-select">
+        <option value="">Todas las fechas</option>
+        <option value="7">Últimos 7 días</option>
+        <option value="30">Últimos 30 días</option>
+        <option value="90">Últimos 3 meses</option>
+      </select>
+
+      <div class="filtro-rango">
+        <label for="filtro-desde">Desde:</label>
+        <input type="date" id="filtro-desde" class="filtro-input">
+        <label for="filtro-hasta">Hasta:</label>
+        <input type="date" id="filtro-hasta" class="filtro-input">
+      </div>
     </div>
+
+    <div class="m-d">
+      <div class="crear-orden-container">
+        <a href="/ordenes/nueva" class="btn-crear-orden">
+          <i class="fas fa-plus-circle"></i> Crear Orden
+          <% if (productosBajoStock > 0) { %>
+            <i class="fas fa-exclamation-circle icono-alerta"></i>
+          <% } %>
+        </a>
+      </div>
+    </div>
+  </div>
+</div>
+
    <table class="tabla-ordenes">     
   <thead>
     <tr>
@@ -476,30 +651,126 @@
 </div>
 
 <script>
-  document.addEventListener("DOMContentLoaded", () => {
-    const botones = document.querySelectorAll('.btn-toggle-productos');
+  document.addEventListener("click", (e) => {
+  if (e.target.closest('.btn-toggle-productos')) {
+    const boton = e.target.closest('.btn-toggle-productos');
+    const index = boton.dataset.index;
+    const filaProductos = document.getElementById(`productos-${index}`);
+    const btnText = boton.querySelector('.btn-text');
+    const btnIcon = boton.querySelector('.btn-icon');
+    
+    if (filaProductos.classList.contains('show')) {
+      filaProductos.classList.remove('show');
+      filaProductos.style.display = 'none';
+      btnText.textContent = 'Ver productos';
+      btnIcon.style.transform = 'rotate(0deg)';
+      btnIcon.textContent = '▼';
+    } else {
+      filaProductos.classList.add('show');
+      filaProductos.style.display = 'table-row';
+      btnText.textContent = 'Ocultar productos';
+      btnIcon.style.transform = 'rotate(180deg)';
+      btnIcon.textContent = '▲';
+    }
+  }
+});
+</script>
 
-    botones.forEach(boton => {
-      boton.addEventListener('click', () => {
-        const index = boton.dataset.index;
+<script>
+  document.addEventListener("DOMContentLoaded", () => {
+    const filtroBusqueda = document.getElementById("filtro-busqueda");
+    const filtroFecha = document.getElementById("filtro-fecha");
+    const filtroDesde = document.getElementById("filtro-desde");
+    const filtroHasta = document.getElementById("filtro-hasta");
+    const filtroEstado = document.getElementById("filtro-estado");
+
+    const filas = document.querySelectorAll("table tbody tr.fila-orden");
+
+    const parseFechaTexto = (texto) => {
+      const meses = {
+        'ene': 0, 'feb': 1, 'mar': 2, 'abr': 3, 'may': 4, 'jun': 5,
+        'jul': 6, 'ago': 7, 'sep': 8, 'oct': 9, 'nov': 10, 'dic': 11
+      };
+
+      // Quitar punto del mes y la coma entre fecha y hora
+      texto = texto.replace(/\./g, "").replace(",", "");
+
+      const partes = texto.split(" "); // ["12", "jun", "2025", "14:30"]
+      if (partes.length < 4) return null;
+
+      const dia = parseInt(partes[0]);
+      const mes = meses[partes[1].toLowerCase()];
+      const anio = parseInt(partes[2]);
+
+      const [hora, minuto] = partes[3].split(":").map(Number);
+
+      if (isNaN(dia) || isNaN(mes) || isNaN(anio) || isNaN(hora) || isNaN(minuto)) return null;
+
+      return new Date(anio, mes, dia, hora, minuto);
+    };
+
+    const filtrarOrdenes = () => {
+      const termino = filtroBusqueda.value.trim().toLowerCase();
+      const diasFiltro = parseInt(filtroFecha.value);
+      const desde = filtroDesde.value ? new Date(filtroDesde.value) : null;
+      const hasta = filtroHasta.value ? new Date(filtroHasta.value) : null;
+      if (hasta) hasta.setHours(23, 59, 59, 999);
+
+      const estadoSeleccionado = filtroEstado.value;
+
+      filas.forEach(fila => {
+        const index = fila.dataset.index;
         const filaProductos = document.getElementById(`productos-${index}`);
-        const btnText = boton.querySelector('.btn-text');
-        const btnIcon = boton.querySelector('.btn-icon');
-        // Toggle the show class for smooth transition
-        if (filaProductos.classList.contains('show')) {
-          // Hide products
-          filaProductos.classList.remove('show');
-          btnText.textContent = 'Ver productos';
-          btnIcon.style.transform = 'rotate(0deg)';
-          btnIcon.textContent = '▼';
-        } else {
-          // Show products
-          filaProductos.classList.add('show');
-          btnText.textContent = 'Ocultar productos';
-          btnIcon.style.transform = 'rotate(180deg)';
-          btnIcon.textContent = '▲';
+        const idOrden = fila.querySelector("td:nth-child(1)").textContent.trim().toLowerCase();
+        const textoEstado = fila.querySelector("td:nth-child(4)").textContent.trim().toLowerCase();
+        const productosText = filaProductos.textContent.trim().toLowerCase();
+
+        const fechaTexto = fila.querySelector("td:nth-child(3)").textContent.trim();
+        const fecha = parseFechaTexto(fechaTexto);
+
+        let mostrar = true;
+
+        if (termino !== "") {
+          if (!isNaN(termino[0])) {
+            if (!idOrden.includes(termino)) mostrar = false;
+          } else {
+            if (!productosText.includes(termino)) mostrar = false;
+          }
         }
+
+        if (!isNaN(diasFiltro) && fecha) {
+          const hoy = new Date();
+          const diasMs = diasFiltro * 24 * 60 * 60 * 1000;
+          if ((hoy - fecha) > diasMs) mostrar = false;
+        }
+
+        if (desde && fecha < desde) mostrar = false;
+        if (hasta && fecha > hasta) mostrar = false;
+
+        if (estadoSeleccionado && textoEstado !== estadoSeleccionado) {
+          mostrar = false;
+        }
+
+        // Mostrar u ocultar la fila principal
+        fila.style.display = mostrar ? "table-row" : "none";
+
+        // Mostrar productos solo si ya estaban desplegados
+        if (mostrar) {
+      fila.style.display = "table-row";
+      // Mantener el estado de los productos desplegables
+      const filaProductos = document.getElementById(`productos-${index}`);
+      filaProductos.style.display = filaProductos.classList.contains("show") ? "table-row" : "none";
+    } else {
+      fila.style.display = "none";
+      document.getElementById(`productos-${index}`).style.display = "none";
+    }
       });
-    });
+    };
+
+    filtroBusqueda.addEventListener("input", filtrarOrdenes);
+    filtroFecha.addEventListener("change", filtrarOrdenes);
+    filtroDesde.addEventListener("change", filtrarOrdenes);
+    filtroHasta.addEventListener("change", filtrarOrdenes);
+    filtroEstado.addEventListener("change", filtrarOrdenes);
   });
 </script>

@@ -5,6 +5,41 @@
   .stock-bajo {
   color: red;
 }
+
+.modal-orden {
+  position: fixed;
+  top: 0;
+  left: 0;
+  width: 100%;
+  height: 100%;
+  background-color: rgba(0, 0, 0, 0.5);
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  z-index: 999;
+}
+
+.modal-content {
+  background: #fff;
+  padding: 2rem;
+  border-radius: 8px;
+  width: 400px;
+  max-width: 90%;
+  position: relative;
+}
+
+.close-button {
+  position: absolute;
+  top: 10px;
+  right: 15px;
+  font-size: 1.5rem;
+  cursor: pointer;
+}
+
+.hidden {
+  display: none;
+}
+
 </style>
 </head>
 
@@ -253,8 +288,13 @@
           : prod.stock;
 
         const boton = enOrden
-      ? `<span style="color: gray; font-style: italic;">Orden en curso <a href="/ordenes"> Ver </a> </span>`
-      : `<button type="button" onclick="agregarProducto(${prod.id_producto})">Agregar</button>`;
+        ? `<span style="color: gray; font-style: italic;">Orden en curso 
+            <button type="button" onclick="mostrarModalOrden(${prod.id_producto})" style="background: none; border: none; color: blue; text-decoration: underline; cursor: pointer;">
+              Ver
+            </button> 
+          </span>`
+        : `<button type="button" onclick="agregarProducto(${prod.id_producto})">Agregar</button>`;
+
 
         row.innerHTML = `
           <td>${prod.nombre}</td>
@@ -385,4 +425,17 @@
         submitButton.textContent = "Registrando..."
         submitButton.disabled = true
       })
+
+      function mostrarModalOrden(idProducto) {
+  // Aquí puedes reemplazar con una búsqueda real de datos por producto si lo deseas.
+  console.log("Ver detalles de orden en curso para producto ID:", idProducto);
+  const modal = document.getElementById("modalOrden");
+  modal.classList.remove("hidden");
+}
+
+function cerrarModalOrden() {
+  const modal = document.getElementById("modalOrden");
+  modal.classList.add("hidden");
+}
+
     </script>

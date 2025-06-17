@@ -121,6 +121,24 @@
       </form>
     </div>
 
+    <!-- Modal de Detalle de Orden -->
+<div id="modalOrden" class="modal-orden hidden">
+  <div class="modal-content">
+    <span class="close-button" onclick="cerrarModalOrden()">&times;</span>
+    <h2>Detalle de Orden en Curso</h2>
+    <p><strong>Número de Orden:</strong> #123456</p>
+    <p><strong>Proveedor:</strong> Distribuidora Lima SAC</p>
+    <p><strong>Fecha:</strong> 2025-06-17</p>
+    <p><strong>Productos:</strong></p>
+    <ul>
+      <li>Alcohol 70% - 10 unidades</li>
+      <li>Guantes de látex - 50 unidades</li>
+    </ul>
+    <p><strong>Total:</strong> S/. 355.00</p>
+  </div>
+</div>
+
+
     <!-- Productos disponibles en JSON -->
     <script id="productos-data" type="application/json">
       <%- JSON.stringify(productos) %>

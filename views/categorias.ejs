@@ -138,7 +138,22 @@
       </div>
     </div>
     </div>
-    <script id="categorias-data" type="application/json">
+
+<div id="modalConfirmacion" style="display: none; position: fixed; z-index: 999; top: 0; left: 0; width: 100%; height: 100%; background-color: rgba(0,0,0,0.6);">
+  <div style="background: white; padding: 30px; border-radius: 12px; width: 500px; max-width: 90%; margin: 12% auto; text-align: center; box-shadow: 0 4px 12px rgba(0,0,0,0.2); font-family: 'Segoe UI', sans-serif;">
+    <p id="modalMensaje" style="font-size: 18px; margin-bottom: 30px;">¿Estás seguro de que deseas desactivar esta categoría?</p>
+    <div id="modalBotonesConfirmacion" style="display: flex; justify-content: center; gap: 15px;">
+      <button id="confirmarDesactivacion" style="padding: 10px 20px; border: none; border-radius: 8px; background-color: #dc3545; color: white; font-size: 16px; cursor: pointer;">Sí, desactivar</button>
+      <button id="cancelarDesactivacion" style="padding: 10px 20px; border: none; border-radius: 8px; background-color: #6c757d; color: white; font-size: 16px; cursor: pointer;">Cancelar</button>
+    </div>
+    <div id="modalBotonesError" style="display: none; justify-content: center; gap: 15px;">
+      <button id="volverModal" style="padding: 10px 20px; border: none; border-radius: 8px; background-color: #007bff; color: white; font-size: 16px; cursor: pointer;">Volver</button>
+    </div>
+  </div>
+</div>
+
+
+  <script id="categorias-data" type="application/json">
       <%- JSON.stringify(categorias.map(cat => cat.nombre.toLowerCase().trim())) %>
     </script>
 
@@ -183,6 +198,9 @@
         })
     </script>
 <script>
+  let categoriaIdSeleccionada = null;
+  let trSeleccionada = null;
+
   document.querySelectorAll('.btn-editar').forEach((btn) => {
     btn.addEventListener('click', function () {
       const tr = btn.closest('tr')
@@ -221,15 +239,13 @@
       try {
         const res = await fetch(`/categorias/${id}`, {
           method: "PUT",
-          headers: {
-            "Content-Type": "application/json"
-          },
+          headers: { "Content-Type": "application/json" },
           body: JSON.stringify({ nombre: nuevoNombre })
         })
 
         if (!res.ok) throw new Error("Error al actualizar")
 
-        // Si fue exitoso
+        // Actualizar lista local
         if (nuevoNombre !== nombreOriginal) {
           const index = existingCategories.indexOf(nombreOriginal)
           if (index !== -1) existingCategories[index] = nuevoNombre
@@ -250,36 +266,86 @@
     })
   })
 
-  // Desactivar categoría
+  // Botón desactivar con modal
   document.querySelectorAll('.btn-desactivar').forEach((btn) => {
-    btn.addEventListener('click', async function () {
+    btn.addEventListener('click', function () {
       const tr = btn.closest('tr')
       const id = tr.getAttribute('data-id')
-      const btnActivar = tr.querySelector('.btn-activar')
+      const nombre = tr.querySelector('.nombre-texto').textContent
 
-      try {
-        const res = await fetch(`/categorias/${id}/estado`, {
-          method: "PATCH",
-          headers: {
-            "Content-Type": "application/json"
-          },
-          body: JSON.stringify({ estado: "inactiva" })
-        })
+      categoriaIdSeleccionada = id
+      trSeleccionada = tr
 
-        if (!res.ok) throw new Error("Error al desactivar")
-
-        tr.classList.add('inactiva')
-        tr.style.opacity = '0.5'
-        btn.style.display = 'none'
-        btnActivar.style.display = 'inline-block'
-        console.log(`❌ Desactivada categoría ID ${id}`)
-        reordenarFilasPorEstadoYId()
-      } catch (err) {
-        console.error(err)
-        alert("No se pudo desactivar la categoría.")
-      }
+      document.getElementById('modalMensaje').textContent = `¿Estás seguro de que quieres desactivar la categoría "${nombre}"?`
+      document.getElementById('modalConfirmacion').style.display = 'block'
     })
   })
+
+  document.getElementById('cancelarDesactivacion').addEventListener('click', function () {
+    document.getElementById('modalConfirmacion').style.display = 'none'
+    categoriaIdSeleccionada = null
+    trSeleccionada = null
+  })
+
+document.getElementById('confirmarDesactivacion').addEventListener('click', async function () {
+  const btn = this;
+  btn.disabled = true;
+  btn.textContent = "Procesando...";
+  btn.style.opacity = "0.6";
+  btn.style.cursor = "not-allowed";
+
+  if (!categoriaIdSeleccionada || !trSeleccionada) return;
+
+  try {
+    const res = await fetch(`/categorias/${categoriaIdSeleccionada}/estado`, {
+      method: "PATCH",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify({ estado: "inactiva" })
+    });
+
+    if (res.status === 400) {
+      const data = await res.json();
+      mostrarErrorEnModal(data.message || "No se pudo desactivar la categoría.");
+      return;
+    }
+
+    if (!res.ok) throw new Error("Error al desactivar");
+
+    trSeleccionada.classList.add('inactiva');
+    trSeleccionada.style.opacity = '0.5';
+    trSeleccionada.querySelector('.btn-desactivar').style.display = 'none';
+    trSeleccionada.querySelector('.btn-activar').style.display = 'inline-block';
+    reordenarFilasPorEstadoYId();
+
+      document.getElementById('modalConfirmacion').style.display = 'none';
+  categoriaIdSeleccionada = null;
+  trSeleccionada = null;
+  } catch (err) {
+    mostrarErrorEnModal("No se pudo desactivar la categoría.");
+    console.error(err);
+  } finally {
+    // Restaurar botón
+    btn.disabled = false;
+    btn.textContent = "Sí, desactivar";
+    btn.style.opacity = "1";
+    btn.style.cursor = "pointer";
+  }
+});
+
+function mostrarErrorEnModal(mensaje) {
+  document.getElementById("modalMensaje").textContent = mensaje;
+  document.getElementById("modalBotonesConfirmacion").style.display = "none";
+  document.getElementById("modalBotonesError").style.display = "flex";
+}
+
+document.getElementById('volverModal').addEventListener('click', function () {
+  document.getElementById('modalConfirmacion').style.display = 'none';
+  document.getElementById("modalBotonesError").style.display = "none";
+  document.getElementById("modalBotonesConfirmacion").style.display = "flex";
+  document.getElementById("modalMensaje").textContent = "";
+  categoriaIdSeleccionada = null;
+  trSeleccionada = null;
+});
 
   // Activar categoría
   document.querySelectorAll('.btn-activar').forEach((btn) => {
@@ -291,9 +357,7 @@
       try {
         const res = await fetch(`/categorias/${id}/estado`, {
           method: "PATCH",
-          headers: {
-            "Content-Type": "application/json"
-          },
+          headers: { "Content-Type": "application/json" },
           body: JSON.stringify({ estado: "activa" })
         })
 
@@ -313,30 +377,25 @@
   })
 
   function reordenarFilasPorEstadoYId() {
-  const tbody = document.querySelector('tbody')
-  const filas = Array.from(tbody.querySelectorAll('tr'))
+    const tbody = document.querySelector('tbody')
+    const filas = Array.from(tbody.querySelectorAll('tr'))
 
-  const filasOrdenadas = filas.sort((a, b) => {
-    const aInactiva = a.classList.contains('inactiva')
-    const bInactiva = b.classList.contains('inactiva')
-    const idA = parseInt(a.getAttribute('data-id'), 10)
-    const idB = parseInt(b.getAttribute('data-id'), 10)
+    const filasOrdenadas = filas.sort((a, b) => {
+      const aInactiva = a.classList.contains('inactiva')
+      const bInactiva = b.classList.contains('inactiva')
+      const idA = parseInt(a.getAttribute('data-id'), 10)
+      const idB = parseInt(b.getAttribute('data-id'), 10)
 
-    // Primero activas, luego inactivas
-    if (aInactiva !== bInactiva) {
-      return aInactiva ? 1 : -1
-    }
+      if (aInactiva !== bInactiva) {
+        return aInactiva ? 1 : -1
+      }
 
-    // Si tienen el mismo estado, ordenar por ID creciente
-    return idA - idB
-  })
+      return idA - idB
+    })
 
-  // Vuelve a añadir las filas ordenadas
-  filasOrdenadas.forEach(fila => tbody.appendChild(fila))
-}
-
+    filasOrdenadas.forEach(fila => tbody.appendChild(fila))
+  }
 </script>
-
 
   </body>
 </html>

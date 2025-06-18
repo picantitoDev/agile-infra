@@ -51,7 +51,12 @@ async function cambiarEstadoCategoria(req, res) {
     res.sendStatus(200)
   } catch (error) {
     console.error("Error al cambiar estado de categoría:", error)
-    res.status(500).send("Error al cambiar el estado de la categoría")
+    
+    if (error.message.includes("producto(s) activos con stock")) {
+      return res.status(400).json({ message: error.message })
+    }
+
+    res.status(500).send("Error al cambiar el estado de la categoría.")
   }
 }
 

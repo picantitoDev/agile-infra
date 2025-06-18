@@ -9,7 +9,7 @@ const { DateTime } = require("luxon")
 async function obtenerProductos(req, res) {
   try {
     const productos = await dbProductos.obtenerProductos()
-    const categorias = await dbCategorias.obtenerCategorias()
+    const categorias = await dbCategorias.obtenerCategoriasActivas()
 
     res.render("productos", {
       productos,

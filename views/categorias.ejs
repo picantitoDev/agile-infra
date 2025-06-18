@@ -196,9 +196,12 @@
             button.disabled = true
           }
         })
-    </script>
-<script>
-  let categoriaIdSeleccionada = null;
+
+
+
+        // AYUDAME DIOSITO
+
+       let categoriaIdSeleccionada = null;
   let trSeleccionada = null;
 
   document.querySelectorAll('.btn-editar').forEach((btn) => {
@@ -216,55 +219,61 @@
   })
 
   document.querySelectorAll('.btn-guardar').forEach((btn) => {
-    btn.addEventListener('click', async function () {
-      const tr = btn.closest('tr')
-      const input = tr.querySelector('.nombre-input')
-      const span = tr.querySelector('.nombre-texto')
-      const id = tr.getAttribute('data-id')
-      const nuevoNombre = input.value.trim()
-      const nombreOriginal = span.textContent.toLowerCase().trim()
+  btn.addEventListener('click', async function () {
+    const tr = btn.closest('tr');
+    const input = tr.querySelector('.nombre-input');
+    const span = tr.querySelector('.nombre-texto');
+    const id = tr.getAttribute('data-id');
+    const nuevoNombre = input.value.trim();
+    const nombreOriginal = span.textContent.trim();
+    
+    const nuevoNombreNormalizado = nuevoNombre.toLowerCase();
+    const nombreOriginalNormalizado = nombreOriginal.toLowerCase();
 
-      if (nuevoNombre === "") {
-        input.classList.add("input-error")
-        alert("El nombre no puede estar vacío.")
-        return
+    if (nuevoNombre === "") {
+      input.classList.add("input-error");
+      alert("El nombre no puede estar vacío.");
+      return;
+    }
+
+    const nombresNormalizados = existingCategories.map(n => n.toLowerCase().trim());
+
+    if (nuevoNombreNormalizado !== nombreOriginalNormalizado && nombresNormalizados.includes(nuevoNombreNormalizado)) {
+      input.classList.add("input-error");
+      alert("Ya existe una categoría con ese nombre.");
+      return;
+    }
+
+    try {
+      const res = await fetch(`/categorias/${id}`, {
+        method: "PUT",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ nombre: nuevoNombre })
+      });
+
+      if (!res.ok) throw new Error("Error al actualizar");
+
+      // Actualizar texto en la tabla
+      span.textContent = nuevoNombre;
+      span.style.display = 'inline-block';
+      input.style.display = 'none';
+      btn.style.display = 'none';
+      tr.querySelector('.btn-editar').style.display = 'inline-block';
+      input.classList.remove("input-error");
+
+      // Actualizar array local existingCategories correctamente
+      const index = existingCategories.findIndex(nombre => nombre.toLowerCase().trim() === nombreOriginalNormalizado);
+      if (index !== -1) {
+        existingCategories[index] = nuevoNombre;
       }
 
-      if (nuevoNombre !== nombreOriginal && existingCategories.includes(nuevoNombre)) {
-        input.classList.add("input-error")
-        alert("Ya existe una categoría con ese nombre.")
-        return
-      }
-
-      try {
-        const res = await fetch(`/categorias/${id}`, {
-          method: "PUT",
-          headers: { "Content-Type": "application/json" },
-          body: JSON.stringify({ nombre: nuevoNombre })
-        })
-
-        if (!res.ok) throw new Error("Error al actualizar")
-
-        // Actualizar lista local
-        if (nuevoNombre !== nombreOriginal) {
-          const index = existingCategories.indexOf(nombreOriginal)
-          if (index !== -1) existingCategories[index] = nuevoNombre
-        }
-
-        span.textContent = input.value
-        span.style.display = 'inline-block'
-        input.style.display = 'none'
-        btn.style.display = 'none'
-        tr.querySelector('.btn-editar').style.display = 'inline-block'
-        input.classList.remove("input-error")
-
-        console.log(`✅ Guardado: categoría ID ${id} con nuevo nombre: ${nuevoNombre}`)
-      } catch (err) {
-        console.error(err)
-        alert("Ocurrió un error al guardar los cambios.")
-      }
-    })
-  })
+      console.log(`✅ Guardado: categoría ID ${id} con nuevo nombre: ${nuevoNombre}`);
+    } catch (err) {
+      console.error(err);
+      alert("Ocurrió un error al guardar los cambios.");
+    }
+  });
+});
 
   // Botón desactivar con modal
   document.querySelectorAll('.btn-desactivar').forEach((btn) => {
@@ -395,7 +404,8 @@ document.getElementById('volverModal').addEventListener('click', function () {
 
     filasOrdenadas.forEach(fila => tbody.appendChild(fila))
   }
-</script>
+    </script>
+
 
   </body>
 </html>

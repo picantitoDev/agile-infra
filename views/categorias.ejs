@@ -51,6 +51,11 @@
         margin-top: 0;
         padding-top: 0;
       }
+
+      td button {
+      margin: 0 3px;
+      cursor: pointer;
+    }
     </style>
   </head>
   <body>
@@ -75,16 +80,60 @@
             <tr>
               <th>ID</th>
               <th>Nombre</th>
+              <th>Acciones</th>
             </tr>
           </thead>
-          <tbody>
-            <% categorias.forEach((cat) => { %>
-            <tr>
-              <td><%= cat.id_categoria %></td>
-              <td><%= cat.nombre %></td>
-            </tr>
-            <% }) %>
-          </tbody>
+                <tbody>
+  <!-- Categorías activas primero -->
+  <% categorias.filter(cat => cat.estado === 'activa').forEach((cat) => { %>
+    <tr data-id="<%= cat.id_categoria %>" class="">
+      <td><%= cat.id_categoria %></td>
+      <td>
+        <span class="nombre-texto"><%= cat.nombre %></span>
+        <input class="nombre-input" type="text" value="<%= cat.nombre %>" style="display: none;" />
+      </td>
+      <td>
+        <button class="btn-editar" title="Editar" style="background: none; border: none; cursor: pointer;">
+          <i class="fas fa-pen-to-square" style="color: #007bff; font-size: 18px;"></i>
+        </button>
+        <button class="btn-guardar" title="Guardar" style="display: none; background: none; border: none; cursor: pointer;">
+          <i class="fas fa-check" style="color: #28a745; font-size: 18px;"></i>
+        </button>
+        <button class="btn-desactivar" title="Desactivar" style="background: none; border: none; cursor: pointer;">
+          <i class="fas fa-ban" style="color: #dc3545; font-size: 18px;"></i>
+        </button>
+        <button class="btn-activar" title="Activar" style="display: none; background: none; border: none; cursor: pointer;">
+          <i class="fas fa-circle-check" style="color: #17a2b8; font-size: 18px;"></i>
+        </button>
+      </td>
+    </tr>
+  <% }) %>
+
+  <!-- Categorías inactivas después -->
+  <% categorias.filter(cat => cat.estado === 'inactiva').forEach((cat) => { %>
+    <tr data-id="<%= cat.id_categoria %>" class="inactiva" style="opacity: 0.5;">
+      <td><%= cat.id_categoria %></td>
+      <td>
+        <span class="nombre-texto"><%= cat.nombre %></span>
+        <input class="nombre-input" type="text" value="<%= cat.nombre %>" style="display: none;" />
+      </td>
+      <td>
+        <button class="btn-editar" title="Editar" style="background: none; border: none; cursor: pointer;">
+          <i class="fas fa-pen-to-square" style="color: #007bff; font-size: 18px;"></i>
+        </button>
+        <button class="btn-guardar" title="Guardar" style="display: none; background: none; border: none; cursor: pointer;">
+          <i class="fas fa-check" style="color: #28a745; font-size: 18px;"></i>
+        </button>
+        <button class="btn-desactivar" title="Desactivar" style="display: none; background: none; border: none; cursor: pointer;">
+          <i class="fas fa-ban" style="color: #dc3545; font-size: 18px;"></i>
+        </button>
+        <button class="btn-activar" title="Activar" style="background: none; border: none; cursor: pointer;">
+          <i class="fas fa-circle-check" style="color: #17a2b8; font-size: 18px;"></i>
+        </button>
+      </td>
+    </tr>
+  <% }) %>
+</tbody>
         </table>
       </div>
     </div>
@@ -133,5 +182,161 @@
           }
         })
     </script>
+<script>
+  document.querySelectorAll('.btn-editar').forEach((btn) => {
+    btn.addEventListener('click', function () {
+      const tr = btn.closest('tr')
+      const span = tr.querySelector('.nombre-texto')
+      const input = tr.querySelector('.nombre-input')
+      const btnGuardar = tr.querySelector('.btn-guardar')
+
+      span.style.display = 'none'
+      input.style.display = 'inline-block'
+      btn.style.display = 'none'
+      btnGuardar.style.display = 'inline-block'
+    })
+  })
+
+  document.querySelectorAll('.btn-guardar').forEach((btn) => {
+    btn.addEventListener('click', async function () {
+      const tr = btn.closest('tr')
+      const input = tr.querySelector('.nombre-input')
+      const span = tr.querySelector('.nombre-texto')
+      const id = tr.getAttribute('data-id')
+      const nuevoNombre = input.value.trim()
+      const nombreOriginal = span.textContent.toLowerCase().trim()
+
+      if (nuevoNombre === "") {
+        input.classList.add("input-error")
+        alert("El nombre no puede estar vacío.")
+        return
+      }
+
+      if (nuevoNombre !== nombreOriginal && existingCategories.includes(nuevoNombre)) {
+        input.classList.add("input-error")
+        alert("Ya existe una categoría con ese nombre.")
+        return
+      }
+
+      try {
+        const res = await fetch(`/categorias/${id}`, {
+          method: "PUT",
+          headers: {
+            "Content-Type": "application/json"
+          },
+          body: JSON.stringify({ nombre: nuevoNombre })
+        })
+
+        if (!res.ok) throw new Error("Error al actualizar")
+
+        // Si fue exitoso
+        if (nuevoNombre !== nombreOriginal) {
+          const index = existingCategories.indexOf(nombreOriginal)
+          if (index !== -1) existingCategories[index] = nuevoNombre
+        }
+
+        span.textContent = input.value
+        span.style.display = 'inline-block'
+        input.style.display = 'none'
+        btn.style.display = 'none'
+        tr.querySelector('.btn-editar').style.display = 'inline-block'
+        input.classList.remove("input-error")
+
+        console.log(`✅ Guardado: categoría ID ${id} con nuevo nombre: ${nuevoNombre}`)
+      } catch (err) {
+        console.error(err)
+        alert("Ocurrió un error al guardar los cambios.")
+      }
+    })
+  })
+
+  // Desactivar categoría
+  document.querySelectorAll('.btn-desactivar').forEach((btn) => {
+    btn.addEventListener('click', async function () {
+      const tr = btn.closest('tr')
+      const id = tr.getAttribute('data-id')
+      const btnActivar = tr.querySelector('.btn-activar')
+
+      try {
+        const res = await fetch(`/categorias/${id}/estado`, {
+          method: "PATCH",
+          headers: {
+            "Content-Type": "application/json"
+          },
+          body: JSON.stringify({ estado: "inactiva" })
+        })
+
+        if (!res.ok) throw new Error("Error al desactivar")
+
+        tr.classList.add('inactiva')
+        tr.style.opacity = '0.5'
+        btn.style.display = 'none'
+        btnActivar.style.display = 'inline-block'
+        console.log(`❌ Desactivada categoría ID ${id}`)
+        reordenarFilasPorEstadoYId()
+      } catch (err) {
+        console.error(err)
+        alert("No se pudo desactivar la categoría.")
+      }
+    })
+  })
+
+  // Activar categoría
+  document.querySelectorAll('.btn-activar').forEach((btn) => {
+    btn.addEventListener('click', async function () {
+      const tr = btn.closest('tr')
+      const id = tr.getAttribute('data-id')
+      const btnDesactivar = tr.querySelector('.btn-desactivar')
+
+      try {
+        const res = await fetch(`/categorias/${id}/estado`, {
+          method: "PATCH",
+          headers: {
+            "Content-Type": "application/json"
+          },
+          body: JSON.stringify({ estado: "activa" })
+        })
+
+        if (!res.ok) throw new Error("Error al activar")
+
+        tr.classList.remove('inactiva')
+        tr.style.opacity = '1'
+        btn.style.display = 'none'
+        btnDesactivar.style.display = 'inline-block'
+        console.log(`✅ Activada categoría ID ${id}`)
+        reordenarFilasPorEstadoYId()
+      } catch (err) {
+        console.error(err)
+        alert("No se pudo activar la categoría.")
+      }
+    })
+  })
+
+  function reordenarFilasPorEstadoYId() {
+  const tbody = document.querySelector('tbody')
+  const filas = Array.from(tbody.querySelectorAll('tr'))
+
+  const filasOrdenadas = filas.sort((a, b) => {
+    const aInactiva = a.classList.contains('inactiva')
+    const bInactiva = b.classList.contains('inactiva')
+    const idA = parseInt(a.getAttribute('data-id'), 10)
+    const idB = parseInt(b.getAttribute('data-id'), 10)
+
+    // Primero activas, luego inactivas
+    if (aInactiva !== bInactiva) {
+      return aInactiva ? 1 : -1
+    }
+
+    // Si tienen el mismo estado, ordenar por ID creciente
+    return idA - idB
+  })
+
+  // Vuelve a añadir las filas ordenadas
+  filasOrdenadas.forEach(fila => tbody.appendChild(fila))
+}
+
+</script>
+
+
   </body>
 </html>

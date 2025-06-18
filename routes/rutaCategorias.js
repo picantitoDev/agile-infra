@@ -8,4 +8,10 @@ router.get("/", controladorCategorias.obtenerCategorias)
 // Crear una nueva categoría (POST)
 router.post("/", controladorCategorias.crearCategoria)
 
+// Renombrar una categoría (PUT)
+router.put("/:id", controladorCategorias.renombrarCategoria)
+
+// Cambiar el estado de una categoría (PATCH)
+router.patch("/:id/estado", controladorCategorias.cambiarEstadoCategoria)
+
 module.exports = router

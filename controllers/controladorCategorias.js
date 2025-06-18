@@ -21,7 +21,43 @@ async function crearCategoria(req, res) {
   }
 }
 
+async function renombrarCategoria(req, res) {
+  const { id } = req.params
+  const { nombre } = req.body
+
+  if (!nombre || !nombre.trim()) {
+    return res.status(400).send("El nombre no puede estar vacío.")
+  }
+
+  try {
+    await dbCategorias.renombrarCategoria(id, nombre.trim())
+    res.sendStatus(200)
+  } catch (error) {
+    console.error("Error al renombrar categoría:", error)
+    res.status(500).send("Error al renombrar la categoría")
+  }
+}
+
+async function cambiarEstadoCategoria(req, res) {
+  const { id } = req.params
+  const { estado } = req.body
+
+  if (!["activa", "inactiva"].includes(estado)) {
+    return res.status(400).send("Estado inválido.")
+  }
+
+  try {
+    await dbCategorias.cambiarEstadoCategoria(id, estado)
+    res.sendStatus(200)
+  } catch (error) {
+    console.error("Error al cambiar estado de categoría:", error)
+    res.status(500).send("Error al cambiar el estado de la categoría")
+  }
+}
+
 module.exports = {
   obtenerCategorias,
   crearCategoria,
+  renombrarCategoria,
+  cambiarEstadoCategoria,
 }

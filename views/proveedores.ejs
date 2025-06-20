@@ -50,7 +50,7 @@
               <th>Teléfono</th>
               <th>Correo</th>
               <th>Dirección</th>
-              <!-- <th>Acciones</th> -->
+              <th>Acciones</th>
             </tr>
           </thead>
           <tbody>
@@ -67,20 +67,22 @@
               </td>
               <td><%= proveedor.direccion %></td>
               <td>
-                <!-- <div class="acciones">
-                  <a
-                    href="/proveedores/editar/<%= proveedor.id %>"
-                    class="btn-icon editar"
-                  >
-                    <i class="fas fa-edit"></i>
-                  </a>
-                  <a
-                    href="/proveedores/eliminar/<%= proveedor.id %>"
-                    class="btn-icon eliminar"
-                  >
-                    <i class="fas fa-trash-alt"></i>
-                  </a>
-                </div> -->
+                  <div class="acciones">
+                    <a
+                      href="/proveedores/editar/<%= proveedor.id_proveedor %>"
+                      class="btn-icon editar"
+                    >
+                      <i class="fas fa-edit"></i>
+                    </a>
+                    <!-- eliminar -->
+                    <!--
+                    <form action="/proveedores/<%= proveedor.id_proveedor %>?_method=DELETE" method="POST" style="display:inline;">
+                      <button class="btn-icon eliminar" onclick="return confirm('¿Eliminar este proveedor?')">
+                        <i class="fas fa-trash-alt"></i>
+                      </button>
+                    </form>
+                    -->
+                  </div>
               </td>
             </tr>
             <% }); %>

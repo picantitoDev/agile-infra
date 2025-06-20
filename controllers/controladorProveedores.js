@@ -38,8 +38,23 @@ async function nuevoProveedorPost(req, res) {
   }
 }
 
+async function editarProveedorGet(req, res){
+  const id = req.params.id;
+  const proveedor = await dbProveedores.obtenerProveedorPorId(id); // función en queries
+  res.render('detalleProveedor', { proveedor });
+};
+
+async function editarProveedorPut(req, res){
+  const id = req.params.id;
+  const datos = req.body;
+  await dbProveedores.actualizarProveedor(id, datos);
+  res.redirect('/proveedores');
+};
+
 module.exports = {
   obtenerProveedores,
   nuevoProveedorGet,
   nuevoProveedorPost,
+  editarProveedorGet,
+  editarProveedorPut
 }

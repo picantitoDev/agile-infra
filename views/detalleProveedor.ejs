@@ -1,0 +1,149 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Editar Proveedor</title>
+    <link rel="stylesheet" href="/detalleProveedor.css">
+</head>
+<body>
+    <div class="container">
+        <!-- Form Container -->
+        <div class="form-container">
+                            <a href="/proveedores" class="back-btn">
+                <span class="back-arrow">← Atrás</span>
+                </a>
+            <div class="form-header">
+                <h2 class="form-title">Editar Proveedor</h2>
+                <p class="form-subtitle">Actualiza la información del proveedor seleccionado</p>
+            </div>
+
+            <form action="/proveedores/<%= proveedor.id_proveedor %>?_method=PUT" method="POST" id="supplierForm">
+                <div class="form-group">
+                    <label for="razon_social" class="form-label required">Razón Social</label>
+                    <div class="input-group">
+                        <input 
+                            type="text" 
+                            id="razon_social"
+                            name="razon_social" 
+                            class="form-input"
+                            value="<%= proveedor.razon_social %>" 
+                            required 
+                            placeholder="Ingrese la razón social"
+                        />
+                    </div>
+                </div>
+
+                <div class="form-group">
+                    <label for="ruc" class="form-label required">RUC</label>
+                    <div class="input-group">
+                        <input 
+                            type="text" 
+                            id="ruc"
+                            name="ruc" 
+                            class="form-input"
+                            value="<%= proveedor.ruc %>" 
+                            required 
+                            placeholder="Ingrese el RUC"
+                            pattern="[0-9]{11}"
+                            title="El RUC debe tener 11 dígitos"
+                        />
+                    </div>
+                </div>
+
+                <div class="form-group">
+                    <label for="numero_telefono" class="form-label required">Teléfono</label>
+                    <div class="input-group">
+                        <input 
+                            type="tel" 
+                            id="numero_telefono"
+                            name="numero_telefono" 
+                            class="form-input"
+                            value="<%= proveedor.numero_telefono %>" 
+                            required 
+                            placeholder="Ingrese el número de teléfono"
+                        />
+                    </div>
+                </div>
+
+                <div class="form-group">
+                    <label for="correo" class="form-label required">Correo Electrónico</label>
+                    <div class="input-group">
+                        <input 
+                            type="email" 
+                            id="correo"
+                            name="correo" 
+                            class="form-input"
+                            value="<%= proveedor.correo %>" 
+                            required 
+                            placeholder="Ingrese el correo electrónico"
+                        />
+                    </div>
+                </div>
+
+                <div class="form-group">
+                    <label for="direccion" class="form-label required">Dirección</label>
+                    <div class="input-group">
+                        <input 
+                            type="text" 
+                            id="direccion"
+                            name="direccion" 
+                            class="form-input"
+                            value="<%= proveedor.direccion %>" 
+                            required 
+                            placeholder="Ingrese la dirección completa"
+                        />
+                    </div>
+                </div>
+
+                <div class="btn-container">
+                    <button type="submit" class="btn btn-primary" id="submitBtn">
+                        Guardar Cambios
+                    </button>
+                </div>
+            </form>
+        </div>
+    </div>
+
+    <script>
+        // Form enhancement
+        const form = document.getElementById('supplierForm');
+        const submitBtn = document.getElementById('submitBtn');
+        const formContainer = document.querySelector('.form-container');
+
+        // Add loading state on form submission
+        form.addEventListener('submit', function(e) {
+            submitBtn.classList.add('loading');
+            submitBtn.textContent = 'Guardando...';
+            
+            // Prevent double submission
+            submitBtn.disabled = true;
+        });
+
+        // Add focus enhancement for better UX
+        const inputs = document.querySelectorAll('.form-input');
+        inputs.forEach(input => {
+            input.addEventListener('focus', function() {
+                this.parentElement.style.transform = 'scale(1.01)';
+            });
+            
+            input.addEventListener('blur', function() {
+                this.parentElement.style.transform = 'scale(1)';
+            });
+        });
+
+        // RUC validation
+        const rucInput = document.getElementById('ruc');
+        rucInput.addEventListener('input', function() {
+            this.value = this.value.replace(/\D/g, '').slice(0, 11);
+        });
+
+        // Phone number formatting
+        const phoneInput = document.getElementById('numero_telefono');
+        phoneInput.addEventListener('input', function() {
+            let value = this.value.replace(/\D/g, '');
+            this.value = value;
+        });
+    </script>
+</body>
+</html>

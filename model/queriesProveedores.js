@@ -21,7 +21,27 @@ async function insertarProveedor({
   )
 }
 
+const obtenerProveedorPorId = async (id) => {
+  const result = await pool.query('SELECT * FROM proveedor WHERE id_proveedor = $1', [id]);
+  return result.rows[0];
+};
+
+const actualizarProveedor = async (id, datos) => {
+  const { razon_social, ruc, numero_telefono, correo, direccion } = datos;
+  await pool.query(`
+    UPDATE proveedor SET 
+      razon_social = $1,
+      ruc = $2,
+      numero_telefono = $3,
+      correo = $4,
+      direccion = $5
+    WHERE id_proveedor = $6
+  `, [razon_social, ruc, numero_telefono, correo, direccion, id]);
+};
+
 module.exports = {
   obtenerProveedores,
   insertarProveedor,
+  obtenerProveedorPorId,
+  actualizarProveedor
 }

@@ -185,11 +185,30 @@ async function generarOrdenPDF(req, res) {
   }
 }
 
+async function obtenerOrdenPorProducto(req, res) {
+  const idProducto = parseInt(req.params.idProducto);
+  console.log("🧪 Producto recibido:", idProducto);
+
+  try {
+    const orden = await dbOrdenes.buscarOrdenPorProductoEnCurso(idProducto);
+
+    if (orden) {
+      res.json(orden);
+    } else {
+      res.status(404).json({ error: 'Orden no encontrada para este producto' });
+    }
+  } catch (error) {
+    console.error('Error al buscar orden por producto:', error);
+    res.status(500).json({ error: 'Error interno del servidor' });
+  }
+}
+
 module.exports = {
     listarOrdenes,
     crearOrdenGet,
     crearOrdenPost,
     obtenerOrdenPorId,
     detalleOrden,
-    generarOrdenPDF
+    generarOrdenPDF,
+    obtenerOrdenPorProducto
 }

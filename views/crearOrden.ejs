@@ -160,16 +160,11 @@
 <div id="modalOrden" class="modal-orden hidden">
   <div class="modal-content">
     <span class="close-button" onclick="cerrarModalOrden()">&times;</span>
-    <h2>Detalle de Orden en Curso</h2>
-    <p><strong>Número de Orden:</strong> #123456</p>
-    <p><strong>Proveedor:</strong> Distribuidora Lima SAC</p>
-    <p><strong>Fecha:</strong> 2025-06-17</p>
+    <h2></h2>
+    <p class="proveedor"></p>
+    <p class="fecha"></p>
     <p><strong>Productos:</strong></p>
-    <ul>
-      <li>Alcohol 70% - 10 unidades</li>
-      <li>Guantes de látex - 50 unidades</li>
-    </ul>
-    <p><strong>Total:</strong> S/. 355.00</p>
+    <ul class="lista-productos"></ul>
   </div>
 </div>
 
@@ -426,16 +421,51 @@
         submitButton.disabled = true
       })
 
-      function mostrarModalOrden(idProducto) {
-  // Aquí puedes reemplazar con una búsqueda real de datos por producto si lo deseas.
-  console.log("Ver detalles de orden en curso para producto ID:", idProducto);
-  const modal = document.getElementById("modalOrden");
-  modal.classList.remove("hidden");
+async function mostrarModalOrden(idProducto) {
+  try {
+    const res = await fetch(`/ordenes/producto/${idProducto}`);
+    if (!res.ok) throw new Error("No se encontró la orden");
+
+    const datos = await res.json();
+    console.log(datos)
+    const fechaFormateada = new Date(datos.fecha).toLocaleDateString("es-PE", {
+      year: "numeric",
+      month: "long",
+      day: "numeric"
+    });
+
+    // Llenar los elementos del modal
+    document.querySelector("#modalOrden .modal-content h2").textContent =
+      `Detalle de Orden N.º ${datos.id_orden}`;
+    document.querySelector("#modalOrden .modal-content .proveedor").textContent =
+      `Proveedor: ${datos.proveedor}`;
+    document.querySelector("#modalOrden .modal-content .fecha").textContent =
+      `Fecha: ${fechaFormateada}`;
+
+
+    // Lista de productos
+    const lista = document.querySelector("#modalOrden .modal-content .lista-productos");
+    lista.innerHTML = "";
+    datos.productos.forEach(p => {
+      const li = document.createElement("li");
+      li.textContent = `${p.nombre} - ${p.cantidad} unidades`;
+      lista.appendChild(li);
+    });
+
+    // Mostrar el modal
+    document.getElementById("modalOrden").classList.remove("hidden");
+
+  } catch (error) {
+    console.error("Error al obtener orden:", error);
+    alert("No se pudo obtener la orden en curso para este producto.");
+  }
 }
+
 
 function cerrarModalOrden() {
   const modal = document.getElementById("modalOrden");
   modal.classList.add("hidden");
 }
+window.mostrarModalOrden = mostrarModalOrden;
 
     </script>

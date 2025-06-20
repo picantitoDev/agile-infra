@@ -75,11 +75,48 @@ async function actualizarProductosOrden(id_order, nuevosProductos) {
   await pool.query(query, [JSON.stringify(nuevosProductos), id_order]);
 }
 
+async function buscarOrdenPorProductoEnCurso(idProducto) {
+  const query = `
+    SELECT
+      o.id_order,
+      o.fecha,
+      o.estado,
+      o.id_proveedor,
+      p.razon_social AS proveedor,
+      o.products
+    FROM orden_reabastecimiento o
+    JOIN proveedor p ON p.id_proveedor = o.id_proveedor
+    WHERE o.estado = 'en_curso'
+  `;
+
+  try {
+    const { rows } = await pool.query(query);
+
+    for (const orden of rows) {
+      const productos = orden.products;
+      const contiene = productos.find(p => Number(p.id_producto) === idProducto);
+      if (contiene) {
+        return {
+          id_orden: orden.id_order,
+          fecha: orden.fecha,
+          total: orden.total,
+          proveedor: orden.proveedor,
+          productos: productos
+        };
+      }
+    }
+
+    return null; // No encontrada
+  } catch (error) {
+    throw error;
+  }
+}
 
 module.exports = {
     obtenerOrdenes,
     crearOrden,
     obtenerOrdenPorId,
     actualizarEstadoOrden,
-    actualizarProductosOrden
+    actualizarProductosOrden,
+    buscarOrdenPorProductoEnCurso
 }

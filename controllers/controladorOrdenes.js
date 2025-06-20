@@ -3,6 +3,7 @@ const dbProductos = require("../model/queriesProductos")
 const dbProveedores = require("../model/queriesProveedores")
 const dbIncidencias = require('../model/queriesIncidencias'); 
 const pdfUtil = require("../utils/pdfGenerator")
+const nodemailer = require("nodemailer");
 
 async function listarOrdenes(req, res) {
   try {
@@ -56,25 +57,64 @@ async function crearOrdenGet(req, res) {
   }
 }
 
+
 async function crearOrdenPost(req, res) {
   try {
-    const proveedor = parseInt(req.body.proveedor);
+    const proveedorId = parseInt(req.body.proveedor);
     let productos = JSON.parse(req.body.productos);
 
-    // Agregar el campo 'ingresado' a cada producto
     productos = productos.map(p => ({
       ...p,
-      ingresado: 0
+      ingresado: 0,
     }));
 
     const ahora = new Date();
     const fechaConOffset = new Date(ahora.getTime() + 5 * 60 * 60 * 1000);
 
-    await dbOrdenes.crearOrden(proveedor, productos, fechaConOffset, 'en_curso');
+    // Crear orden y obtener ID
+    const idOrden = await dbOrdenes.crearOrden(proveedorId, productos, fechaConOffset, 'en_curso');
+
+    // Obtener datos completos para generar PDF
+    const orden = await dbOrdenes.obtenerOrdenPorId(idOrden);
+
+    // Generar PDF
+    const pdfBuffer = await pdfUtil.generarOrdenPDF(orden);
+
+    // Obtener datos del proveedor (correo)
+    const proveedor = await dbProveedores.obtenerProveedorPorId(proveedorId);
+    const correoDestino = proveedor.correo;
+
+    // Configurar transporte (misma config que recuperación)
+    const transporter = nodemailer.createTransport({
+      service: 'gmail',
+      auth: {
+        user: 'stockcloud.soporte@gmail.com',
+        pass: 'ktte cwnu eojo eaxt', // contraseña de aplicación
+      },
+    });
+
+    // Enviar correo con PDF adjunto
+    await transporter.sendMail({
+      from: 'stockcloud.soporte@gmail.com',
+      to: correoDestino,
+      subject: `Nueva Orden de Reabastecimiento N.º ${idOrden}`,
+      html: `
+        <p>Estimado proveedor,</p>
+        <p>Adjunto encontrará los detalles de la orden de reabastecimiento número <strong>${idOrden}</strong>.</p>
+        <p>Saludos,<br>Equipo de StockCloud</p>
+      `,
+      attachments: [
+        {
+          filename: `orden_${idOrden}.pdf`,
+          content: pdfBuffer,
+          contentType: 'application/pdf',
+        },
+      ],
+    });
 
     res.redirect("/ordenes");
   } catch (error) {
-    console.error('Error al crear orden:', error);
+    console.error('Error al crear orden y enviar PDF:', error);
     res.status(500).send('Error al crear orden');
   }
 }

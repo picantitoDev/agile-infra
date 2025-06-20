@@ -17,7 +17,6 @@ async function obtenerOrdenes(){
 };
 
 
-
 async function crearOrden(id_proveedor, productos, fecha, estado = 'en_curso') {
   const client = await pool.connect();
   try {
@@ -26,8 +25,12 @@ async function crearOrden(id_proveedor, productos, fecha, estado = 'en_curso') {
     const query = `
       INSERT INTO orden_reabastecimiento (id_proveedor, products, fecha, estado)
       VALUES ($1, $2::json, $3, $4)
+      RETURNING id_order
     `;
-    await client.query(query, [id_proveedor, productosJson, fecha, estado]);
+
+    const result = await client.query(query, [id_proveedor, productosJson, fecha, estado]);
+    return result.rows[0].id_order;
+
   } finally {
     client.release();
   }

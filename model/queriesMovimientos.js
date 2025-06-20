@@ -2,7 +2,7 @@ const pool = require("./pool")
 
 async function obtenerMovimientos() {
   const { rows } = await pool.query(`
-      SELECT * FROM movimiento ORDER BY fecha DESC`)
+      SELECT * FROM movimiento ORDER BY id_movimiento DESC`)
   return rows
 }
 

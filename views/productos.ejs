@@ -72,7 +72,6 @@
               <th>Categoría</th>
               <th>Proveedor</th>
               <th>Detalle</th>
-              <th>Orden</th>
             </tr>
           </thead>
           <tbody id="productTableBody">
@@ -105,22 +104,6 @@
                 >
                   <i class="fa-solid fa-eye"></i>
                 </a>
-              </td>
-              <td>
-                <% if (producto.stock > producto.cantidad_minima ||
-                producto.estado === "Desactivado") { %>
-                <span class="icon-btn disabled" title="Stock suficiente">
-                  <i class="fa-solid fa-file"></i>
-                </span>
-                <% } else { %>
-                <a
-                  class="icon-btn"
-                  href="/productos/<%= producto.id_producto %>/generar-orden"
-                  title="Generar Orden"
-                >
-                  <i class="fa-solid fa-file"></i>
-                </a>
-                <% } %>
               </td>
             </tr>
             <% }) %>

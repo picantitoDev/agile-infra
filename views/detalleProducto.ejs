@@ -20,9 +20,18 @@
       <form action="/productos/detalle/<%= producto.id_producto %>?_method=PUT" method="POST">
         <!-- Nombre -->
         <div>
-          <label>Nombre:</label>
-          <input type="text" name="nombre" value="<%= producto.nombre %>" required />
-        </div>
+  <label>Nombre:</label>
+  <input 
+    type="text" 
+    name="nombre" 
+    value="<%= producto.nombre %>" 
+    required 
+    <%= usuario.rol === 'Usuario' ? 'disabled' : '' %>
+  />
+  <% if (usuario.rol === 'Usuario') { %>
+    <input type="hidden" name="nombre" value="<%= producto.nombre %>">
+  <% } %>
+</div>
 
         <!-- Stock -->
         <div>
@@ -31,10 +40,21 @@
         </div>
 
         <!-- Precio Unitario -->
-        <div>
-          <label>Precio Unitario (S/.):</label>
-          <input type="number" min="1" step="0.10" name="precio_unitario" value="<%= producto.precio_unitario %>" required />
-        </div>
+<div>
+  <label>Precio Unitario (S/.):</label>
+  <input 
+    type="number" 
+    min="1" 
+    step="0.10" 
+    name="precio_unitario" 
+    value="<%= producto.precio_unitario %>" 
+    required 
+    <%= usuario.rol === 'Usuario' ? 'disabled' : '' %>
+  />
+  <% if (usuario.rol === 'Usuario') { %>
+    <input type="hidden" name="precio_unitario" value="<%= producto.precio_unitario %>">
+  <% } %>
+</div>
 
         <!-- Categoría (Dropdown with categorias) -->
         <div>

@@ -40,6 +40,7 @@ async function obtenerProductoPorId(req, res) {
       producto,
       categorias,
       proveedores,
+      usuario: req.user
     })
   } catch (error) {
     console.error("Error al obtener producto por ID:", error)

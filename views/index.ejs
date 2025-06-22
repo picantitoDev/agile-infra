@@ -1,4 +1,11 @@
 <head>
+      <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+  <link
+    href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css"
+    rel="stylesheet"
+  >
+  <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
+
   <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
     <style>
  @import url('https://fonts.googleapis.com/css2?family=Poppins:wght@300;400;500;600;700&display=swap');
@@ -42,310 +49,17 @@
             flex-direction: column;
         }
 
-        h1 {
-            color: var(--text-color);
-            text-align: center;
-            margin-bottom: 30px;
-            font-size: 2.5rem;
-            font-weight: 600;
+         .cuadrante {
+        border: 1px solid #ddd;
+        padding: 15px;
+        height: 100%;
+        background-color: #fafafa;
+        border-radius: 10px;
         }
-
-        header {
-            display: flex;
-            justify-content: space-between;
-            padding-bottom: 8px;
-            margin-bottom: 10px;
-        }
-
-        header h2 {
-            margin: 0;
-            font-size: 1.5rem;
-        }
-
-        .dashboard-grid {
-            display: grid;
-            grid-template-columns: repeat(4, 1fr);
-            grid-template-rows: repeat(2, 1fr);
-            gap: 15px;
-            flex: 1;
-            height: calc(100vh - 120px);
-        }
-
-        .dashboard-item {
-            background: white;
-            border-radius: var(--border-radius);
-            padding: 15px;
-            box-shadow: var(--shadow);
-            display: flex;
-            flex-direction: column;
-            overflow: hidden;
-            transition: var(--transition);
-        }
-
-        .dashboard-item:hover {
-            transform: translateY(-2px);
-            box-shadow: 0 4px 20px rgba(0, 0, 0, 0.15);
-        }
-
-        .sales-chart {
-            grid-column: 1 / 3;
-            grid-row: 1 / 2;
-        }
-
-        .categories-chart {
-            grid-column: 1 / 3;
-            grid-row: 2 / 3;
-        }
-
-        .leaderboard {            
-            grid-column: 3 / 5;
-            grid-row: 1 / 2;
-            position: relative;
-        }
-
-        .orders-list {
-            grid-column: 3 / 5;
-            grid-row: 2 / 3;
-        }
-
-        .item-title {
-            color: var(--text-color);
-            font-size: 1.1rem;
-            font-weight: 600;
-            margin-bottom: 10px;
-            text-align: center;
-            border-bottom: 2px solid var(--primary-color);
-            padding-bottom: 8px;
-        }
-
         .chart-container {
-            flex: 1;
-            position: relative;
-            display: flex;
-            align-items: center;
-            justify-content: center;
-            min-height: 200px;
-        }
-
-        .chart-container canvas {
-            max-height: 100% !important;
-            max-width: 100% !important;
-        }
-
-        .table-container {
-            flex: 1;
-            overflow-y: auto;
-        }
-
-        table {
-            width: 100%;
-            border-collapse: collapse;
-            font-size: 0.9rem;
-        }
-
-        th, td {
-            padding: 12px 8px;
-            text-align: left;
-            border-bottom: 1px solid #e0e0e0;
-        }
-
-        th {
-            background-color: #f8f9fa;
-            color: var(--gray-dark);
-            font-weight: 600;
-            position: sticky;
-            top: 0;
-            z-index: 1;
-            border-bottom: 1px solid var(--gray-medium);
-        }
-
-        tr:nth-child(even) {
-            background-color: var(--gray-light);
-        }
-
-        tr:hover {
-            background-color: rgba(52, 152, 219, 0.05);
-            transition: var(--transition);
-        }
-
-        .rank {
-            background: var(--primary-color);
-            color: white;
-            border-radius: 50%;
-            width: 30px;
-            height: 30px;
-            display: flex;
-            align-items: center;
-            justify-content: center;
-            font-weight: 600;
-            margin: 0 auto;
-            font-size: 0.9rem;
-        }
-
-        .status {
-            padding: 4px 12px;
-            border-radius: 20px;
-            font-size: 0.8rem;
-            font-weight: 600;
-            text-transform: uppercase;
-        }
-
-        .status.pending {
-            background-color: rgba(243, 156, 18, 0.1);
-            color: var(--warning-color);
-            border: 1px solid rgba(243, 156, 18, 0.3);
-        }
-
-        .status.completed {
-            background-color: rgba(46, 204, 113, 0.1);
-            color: var(--accent-color);
-            border: 1px solid rgba(46, 204, 113, 0.3);
-        }
-
-        .status.shipped {
-            background-color: rgba(52, 152, 219, 0.1);
-            color: var(--primary-color);
-            border: 1px solid rgba(52, 152, 219, 0.3);
-        }
-
-        .amount {
-            font-weight: 600;
-            color: var(--primary-color);
-        }
-
-        .spinner {
-            border: 6px solid #f3f3f3;
-            border-top: 6px solid #3498db;
-            border-radius: 50%;
-            width: 40px;
-            height: 40px;
-            animation: spin 1s linear infinite;
-            margin: auto;
-        }
-
-        @keyframes spin {
-            0% { transform: rotate(0deg); }
-            100% { transform: rotate(360deg); }
-        }
-
-        .loader-container {
-            position: absolute;
-            top: 50%;
-            left: 50%;
-            transform: translate(-50%, -50%);
-        }
-
-        /* Responsive Design */
-        @media (max-width: 1200px) {
-            .dashboard-grid {
-                grid-template-columns: repeat(2, 1fr);
-                grid-template-rows: repeat(2, 1fr);
-                height: calc(100vh - 120px);
-            }
-
-            .sales-chart {
-                grid-column: 1 / 2;
-                grid-row: 1 / 2;
-            }
-
-            .categories-chart {
-                grid-column: 2 / 3;
-                grid-row: 1 / 2;
-            }
-
-            .leaderboard {
-                grid-column: 1 / 2;
-                grid-row: 2 / 3;
-            }
-
-            .orders-list {
-                grid-column: 2 / 3;
-                grid-row: 2 / 3;
-            }
-        }
-
-        @media (max-width: 768px) {
-            body {
-                padding: 5px;
-            }
-            
-            .container {
-                padding: 10px;
-            }
-
-            header h2 {
-                font-size: 1.3rem;
-            }
-
-            .dashboard-grid {
-                grid-template-columns: 1fr;
-                grid-template-rows: repeat(4, 1fr);
-                gap: 10px;
-                height: calc(100vh - 100px);
-            }
-
-            .sales-chart,
-            .categories-chart,
-            .leaderboard,
-            .orders-list {
-                grid-column: 1 / 2;
-            }
-
-            .sales-chart {
-                grid-row: 1 / 2;
-            }
-
-            .categories-chart {
-                grid-row: 2 / 3;
-            }
-
-            .leaderboard {
-                grid-row: 3 / 4;
-            }
-
-            .orders-list {
-                grid-row: 4 / 5;
-            }
-
-            .dashboard-item {
-                padding: 12px;
-            }
-
-            .item-title {
-                font-size: 1rem;
-                margin-bottom: 8px;
-            }
-
-            th, td {
-                padding: 8px 4px;
-                font-size: 0.8rem;
-            }
-        }
-
-        @media (max-width: 480px) {
-            header h2 {
-                font-size: 1.1rem;
-            }
-
-            .dashboard-grid {
-                height: calc(100vh - 90px);
-            }
-
-            th, td {
-                padding: 6px 3px;
-                font-size: 0.75rem;
-            }
-
-            .rank {
-                width: 25px;
-                height: 25px;
-                font-size: 0.8rem;
-            }
-
-            .item-title {
-                font-size: 0.9rem;
-            }
-        }
+  height: 400px;
+  width: 100%;
+}
     </style>
 </head>
 <% if (!user) { %>
@@ -386,9 +100,166 @@
   </div>
 </div>
 <% } else { %>
-  <div class="container">
-    
-<img src="/images/Deer_Sings_Creed.gif" style="height: 800px; width: 950px; margin: auto;" alt="Cargando..." />
+ <!-- Vista para usuarios autenticados -->
+  <div class="container-fluid">
+    <div class="row mb-4">
+      <div class="col-md-6">
+        <!-- Cuadrante 1: Ventas -->
+        <div class="cuadrante">
+          <h5 class="mb-3">Ventas por Día (Últimos 30 días)</h5>
+          <div class="chart-container">
+            <canvas id="ventasChart"></canvas>
+          </div>
+        </div>
+      </div>
+      <div class="col-md-6">
+        <!-- Cuadrante 2 -->
+        <div class="cuadrante">
+          <h5>Cuadrante 2</h5>
+          <p>Contenido futuro...</p>
+        </div>
+      </div>
+    </div>
+    <div class="row">
+      <div class="col-md-6">
+        <!-- Cuadrante 3 -->
+        <div class="cuadrante">
+          <h5>Cuadrante 3</h5>
+          <p>Contenido futuro...</p>
+        </div>
+      </div>
+      <div class="col-md-6">
+        <!-- Cuadrante 4 -->
+        <div class="cuadrante">
+          <h5>Cuadrante 4</h5>
+          <p>Contenido futuro...</p>
+        </div>
+      </div>
+    </div>
   </div>
+
+  <!-- Modal detalle de ventas -->
+  <div class="modal fade" id="modalDetalle" tabindex="-1" aria-hidden="true">
+    <div class="modal-dialog modal-lg modal-dialog-centered">
+      <div class="modal-content">
+        <div class="modal-header bg-primary text-white">
+          <h5 class="modal-title">Detalle de ventas - <span id="modalFecha"></span></h5>
+          <button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal" aria-label="Cerrar"></button>
+        </div>
+        <div class="modal-body">
+          <table class="table table-striped">
+            <thead>
+              <tr>
+                <th>Producto</th>
+                <th>Cantidad</th>
+                <th>Subtotal (S/.)</th>
+              </tr>
+            </thead>
+            <tbody id="detalleBody"></tbody>
+          </table>
+        </div>
+      </div>
+    </div>
+  </div>
+
+<script id="fechas-data" type="application/json">
+    <%- JSON.stringify(fechas) %>
+</script>
+
+<script id="montos-data" type="application/json">
+    <%- JSON.stringify(montos) %>
+</script>
+
+  <!-- Script de gráfico y modal -->
+  <script>
+const fechasCrudas = JSON.parse(
+  document.getElementById("fechas-data").textContent
+);
+const montos = JSON.parse(
+  document.getElementById("montos-data").textContent
+);
+
+const datosFiltrados = fechasCrudas
+  .map((fecha, index) => ({ fecha, monto: montos[index] }))
+  .filter(d => d.monto > 0);
+
+const fechasFiltradas = datosFiltrados.map(d => d.fecha);
+const montosFiltrados = datosFiltrados.map(d => d.monto);
+
+const fechasFormateadas = fechasFiltradas.map(f => {
+  const d = new Date(f);
+  return d.toLocaleDateString('es-PE', { month: 'short', day: 'numeric' });
+});
+
+const ctx = document.getElementById('ventasChart').getContext('2d');
+const ventasChart = new Chart(ctx, {
+  type: 'bar',
+  data: {
+    labels: fechasFormateadas,
+    datasets: [{
+      label: 'Monto total (S/)',
+      data: montosFiltrados,
+      backgroundColor: 'rgba(108, 52, 131, 0.6)',
+      borderColor: 'rgba(108, 52, 131, 1)',
+      borderWidth: 1
+    }]
+  },
+  options: {
+    onClick: async (event, elements) => {
+      if (elements.length > 0) {
+        const index = elements[0].index;
+        const fechaISO = fechasFiltradas[index]; // ⚠️ fecha ya filtrada
+        const fechaMostrada = fechasFormateadas[index];
+        await mostrarModalDetalle(fechaISO, fechaMostrada);
+      }
+    },
+    onHover: (event, chartElement) => {
+      event.native.target.style.cursor = chartElement.length ? 'pointer' : 'default';
+    },
+    scales: {
+      y: { beginAtZero: true },
+      x: {
+        ticks: {
+          maxRotation: 45,
+          minRotation: 30,
+          autoSkip: false
+        }
+      }
+    }
+  }
+});
+
+
+    async function mostrarModalDetalle(fechaISO, fechaMostrada) {
+  const res = await fetch(`/ventas/detalle/${fechaISO}`);
+  const productos = await res.json();
+
+  document.getElementById('modalFecha').textContent = fechaMostrada;
+
+  const body = document.getElementById('detalleBody');
+  body.innerHTML = '';
+
+  // ✅ Filtrar productos con subtotal > 0
+  const productosValidos = productos.filter(p => parseFloat(p.subtotal) > 0);
+
+  if (productosValidos.length === 0) {
+    body.innerHTML = `<tr><td colspan="3" class="text-center text-muted">No se registraron ventas válidas este día.</td></tr>`;
+  } else {
+    productosValidos.forEach(p => {
+      body.innerHTML += `
+        <tr>
+          <td>${p.nombre}</td>
+          <td>${p.cantidad}</td>
+          <td>S/ ${parseFloat(p.subtotal).toFixed(2)}</td>
+        </tr>
+      `;
+    });
+  }
+
+  const modal = new bootstrap.Modal(document.getElementById('modalDetalle'));
+  modal.show();
+}
+
+  </script>
 
   <% } %>

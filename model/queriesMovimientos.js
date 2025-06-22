@@ -323,6 +323,38 @@ async function registrarProductoMovimiento({
   }
 }
 
+
+async function obtenerResumenVentas30Dias() {
+  const { rows } = await pool.query(`
+    SELECT 
+      TO_CHAR(m.fecha, 'YYYY-MM-DD') AS fecha,
+      SUM(mv.total) AS total
+    FROM movimiento_venta mv
+    JOIN movimiento m ON mv.id_movimiento = m.id_movimiento
+    WHERE m.tipo = 'Venta'
+      AND m.fecha >= CURRENT_DATE - INTERVAL '30 days'
+    GROUP BY m.fecha
+    ORDER BY m.fecha;
+  `);
+  return rows;
+}
+
+async function obtenerDetalleVentaPorFecha(fecha) {
+  const { rows } = await pool.query(`
+    SELECT 
+      p.nombre,
+      pm.cantidad,
+      pm.subtotal
+    FROM producto_movimiento pm
+    JOIN producto p ON p.id_producto = pm.id_producto
+    JOIN movimiento m ON m.id_movimiento = pm.id_movimiento
+    WHERE m.tipo = 'Venta'
+      AND TO_CHAR(m.fecha, 'YYYY-MM-DD') = $1
+  `, [fecha]);
+  return rows;
+}
+
+
 module.exports = {
   obtenerMovimientos,
   obtenerDetalleMovimiento,
@@ -334,5 +366,7 @@ module.exports = {
   obtenerMovimientosVentas,
   obtenerMovimientosEntradas,
   obtenerMovimientosMermas,
-  obtenerMovimientosSobrantes
+  obtenerMovimientosSobrantes,
+  obtenerResumenVentas30Dias,
+  obtenerDetalleVentaPorFecha
 }

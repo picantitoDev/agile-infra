@@ -60,11 +60,20 @@ app.use((req, res, next) => {
 })
 
 // Rutas principales
-app.get("/", (req, res) => {
-  res.render("index", { user: req.user })
-})
+const { obtenerResumenVentas30Dias } = require('./model/queriesMovimientos');
 
-app.use('/api/ventas', rutaVentas);
+app.get("/", async (req, res) => {
+  const resumen = await obtenerResumenVentas30Dias();
+  const fechas = resumen.map(r => r.fecha);
+  const montos = resumen.map(r => parseFloat(r.total));
+  res.render("index", {
+    user: req.user,
+    fechas,
+    montos
+  });
+});
+
+app.use('/ventas', rutaVentas);
 app.use("/productos", validarSesion, rutaProductos)
 app.use("/categorias", validarSesion, rutaCategorias)
 app.use("/proveedores", validarSesion, rutaProveedores)

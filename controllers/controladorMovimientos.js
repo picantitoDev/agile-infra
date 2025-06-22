@@ -199,34 +199,6 @@ async function registrarVentaPost(req, res) {
   }
 }
 
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
 async function registrarEntradaGet(req, res) {
   try {
     const productosTotales = await dbProductos.obtenerProductos()
@@ -341,25 +313,6 @@ async function registrarEntradaPost(req, res) {
     res.status(500).send("Error al registrar entrada")
   }
 }
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
 
 async function registrarSobranteGet(req, res) {
   try {
@@ -503,6 +456,8 @@ async function generarComprobantePDF(req, res) {
   // Send PDF
   res.send(Buffer.from(pdfBytes))
 }
+
+
 
 module.exports = {
   obtenerMovimientos,

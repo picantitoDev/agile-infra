@@ -323,23 +323,26 @@ async function registrarProductoMovimiento({
   }
 }
 
-
 async function obtenerResumenVentas30Dias() {
-  const { rows } = await pool.query(`
+  const result = await pool.query(`
     SELECT 
-      TO_CHAR(m.fecha, 'YYYY-MM-DD') AS fecha,
-      SUM(mv.total) AS total
-    FROM movimiento_venta mv
-    JOIN movimiento m ON mv.id_movimiento = m.id_movimiento
+      (m.fecha AT TIME ZONE 'UTC' AT TIME ZONE 'America/Lima')::DATE AS fecha,
+      SUM(v.total) AS total
+    FROM movimiento m
+    JOIN movimiento_venta v ON m.id_movimiento = v.id_movimiento
     WHERE m.tipo = 'Venta'
-      AND m.fecha >= CURRENT_DATE - INTERVAL '30 days'
-    GROUP BY m.fecha
-    ORDER BY m.fecha;
+      AND m.fecha >= NOW() - INTERVAL '30 days'
+    GROUP BY 1
+    ORDER BY 1;
   `);
-  return rows;
+  console.log('FECHAS DE VENTAS:', result.rows);
+  return result.rows;
 }
 
 async function obtenerDetalleVentaPorFecha(fecha) {
+  const fechaInicio = `${fecha}T00:00:00.000Z`;
+  const fechaFin = `${fecha}T23:59:59.999Z`;
+
   const { rows } = await pool.query(`
     SELECT 
       p.nombre,
@@ -349,11 +352,11 @@ async function obtenerDetalleVentaPorFecha(fecha) {
     JOIN producto p ON p.id_producto = pm.id_producto
     JOIN movimiento m ON m.id_movimiento = pm.id_movimiento
     WHERE m.tipo = 'Venta'
-      AND TO_CHAR(m.fecha, 'YYYY-MM-DD') = $1
-  `, [fecha]);
+      AND m.fecha BETWEEN $1 AND $2
+  `, [fechaInicio, fechaFin]);
+
   return rows;
 }
-
 
 module.exports = {
   obtenerMovimientos,

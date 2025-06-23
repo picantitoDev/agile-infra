@@ -20,7 +20,27 @@ async function obtenerIncidencias(req, res) {
   }
 }
 
+async function descargarPDFIncidencia(req, res){
+  const id = req.params.id_incidencia;
+  try {
+    const incidencia = await dbIncidencias.obtenerIncidenciaPorId(id);
+
+    if (!incidencia) {
+      return res.status(404).send('Incidencia no encontrada');
+    }
+
+    const pdfBytes = await dbIncidencias.generarPDFIncidencia(incidencia);
+
+    res.setHeader('Content-Type', 'application/pdf');
+    res.setHeader('Content-Disposition', `attachment; filename=incidencia_${id}.pdf`);
+    res.send(pdfBytes);
+  } catch (err) {
+    console.error('Error al generar PDF:', err);
+    res.status(500).send('Error al generar el PDF');
+  }
+}
 
 module.exports = {
-obtenerIncidencias
+obtenerIncidencias,
+descargarPDFIncidencia
 }

@@ -776,8 +776,152 @@ async function generarOrdenPDF(orderData) {
 }
 
 
+async function generarPDFIncidencia(incidencia){
+  const pdfDoc = await PDFDocument.create();
+  const page = pdfDoc.addPage([595, 842]);
+  const font = await pdfDoc.embedFont(StandardFonts.Helvetica);
+
+  const MARGIN_LEFT = 50;
+  const LINE_HEIGHT_LARGE = 30;
+  const LINE_HEIGHT_MEDIUM = 20;
+  const LINE_HEIGHT_SMALL = 15;
+  const TITLE_FONT_SIZE = 18;
+  const HEADER_FONT_SIZE = 14;
+  const BODY_FONT_SIZE = 12;
+  const DETAIL_FONT_SIZE = 11;
+
+  let cursorY = 800;
+
+  // Título
+  page.drawText(`Incidencia No. ${incidencia.id_incidencia}`, {
+    x: MARGIN_LEFT,
+    y: cursorY,
+    size: TITLE_FONT_SIZE,
+    font,
+    color: rgb(0, 0, 0),
+  });
+  cursorY -= LINE_HEIGHT_LARGE;
+
+  // Fechas
+  const fechaRegistro = new Date(incidencia.fecha_registro).toLocaleDateString('es-PE');
+  const fecha = new Date(incidencia.fecha).toLocaleDateString('es-PE');
+  page.drawText(`Fecha de registro: ${fechaRegistro}`, {
+    x: MARGIN_LEFT,
+    y: cursorY,
+    size: BODY_FONT_SIZE,
+    font,
+  });
+  cursorY -= LINE_HEIGHT_MEDIUM;
+
+  page.drawText(`Fecha del movimiento: ${fecha}`, {
+    x: MARGIN_LEFT,
+    y: cursorY,
+    size: BODY_FONT_SIZE,
+    font,
+  });
+  cursorY -= LINE_HEIGHT_MEDIUM;
+
+  // Movimiento y Orden
+  page.drawText(`Movimiento asociado: ${incidencia.id_movimiento}`, {
+    x: MARGIN_LEFT,
+    y: cursorY,
+    size: BODY_FONT_SIZE,
+    font,
+  });
+  cursorY -= LINE_HEIGHT_MEDIUM;
+
+  if (incidencia.id_orden) {
+    page.drawText(`Orden asociada: ${incidencia.id_orden}`, {
+      x: MARGIN_LEFT,
+      y: cursorY,
+      size: BODY_FONT_SIZE,
+      font,
+    });
+    cursorY -= LINE_HEIGHT_MEDIUM;
+  }
+
+  // Descripción general
+  if (incidencia.descripcion_general) {
+    cursorY -= LINE_HEIGHT_MEDIUM;
+    page.drawText(`Descripción General:`, {
+      x: MARGIN_LEFT,
+      y: cursorY,
+      size: HEADER_FONT_SIZE,
+      font,
+    });
+    cursorY -= LINE_HEIGHT_SMALL;
+    
+    const texto = incidencia.descripcion_general;
+    const palabras = texto.split(' ');
+    let linea = '';
+    const maxCharsPerLine = 90;
+
+    palabras.forEach(palabra => {
+      if ((linea + palabra).length < maxCharsPerLine) {
+        linea += palabra + ' ';
+      } else {
+        page.drawText(linea.trim(), {
+          x: MARGIN_LEFT + 10,
+          y: cursorY,
+          size: DETAIL_FONT_SIZE,
+          font,
+        });
+        cursorY -= LINE_HEIGHT_SMALL;
+        linea = palabra + ' ';
+      }
+    });
+    if (linea.trim()) {
+      page.drawText(linea.trim(), {
+        x: MARGIN_LEFT + 10,
+        y: cursorY,
+        size: DETAIL_FONT_SIZE,
+        font,
+      });
+      cursorY -= LINE_HEIGHT_SMALL;
+    }
+  }
+
+  // Detalles de productos
+  if (incidencia.detalle_productos && incidencia.detalle_productos.length > 0) {
+    cursorY -= LINE_HEIGHT_MEDIUM;
+    page.drawText(`Detalle de productos con incidencia:`, {
+      x: MARGIN_LEFT,
+      y: cursorY,
+      size: HEADER_FONT_SIZE,
+      font,
+    });
+    cursorY -= LINE_HEIGHT_MEDIUM;
+
+    incidencia.detalle_productos.forEach(prod => {
+      const nombre = prod.nombre || 'Producto';
+      const cantidad = prod.cantidad || '-';
+      const textoIncidencia = prod.incidencia || 'Sin descripción';
+
+      page.drawText(`- ${nombre} x${cantidad}`, {
+        x: MARGIN_LEFT + 10,
+        y: cursorY,
+        size: DETAIL_FONT_SIZE,
+        font,
+      });
+      cursorY -= LINE_HEIGHT_SMALL;
+
+      page.drawText(`Incidencia: ${textoIncidencia}`, {
+      x: MARGIN_LEFT + 20,
+      y: cursorY,
+      size: DETAIL_FONT_SIZE,
+      font,
+      color: rgb(1, 0, 0),
+    });
+      cursorY -= LINE_HEIGHT_SMALL;
+    });
+  }
+
+  return await pdfDoc.save();
+}
+
 module.exports = {
   generarComprobantePDF,
   crearOrdenReposicionPDF,
   generarOrdenPDF,
+  generarPDFIncidencia
 }

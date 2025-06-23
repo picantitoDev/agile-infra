@@ -1,4 +1,5 @@
 const dbIncidencias = require("../model/queriesIncidencias")
+const { generarPDFIncidencia } = require('../utils/pdfGenerator');
 
 async function obtenerIncidencias(req, res) {
   try {
@@ -29,7 +30,7 @@ async function descargarPDFIncidencia(req, res){
       return res.status(404).send('Incidencia no encontrada');
     }
 
-    const pdfBytes = await dbIncidencias.generarPDFIncidencia(incidencia);
+    const pdfBytes = await generarPDFIncidencia(incidencia);
 
     res.setHeader('Content-Type', 'application/pdf');
     res.setHeader('Content-Disposition', `attachment; filename=incidencia_${id}.pdf`);

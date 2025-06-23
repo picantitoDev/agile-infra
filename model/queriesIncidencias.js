@@ -75,9 +75,33 @@ async function obtenerIncidenciasPorOrden(id_orden) {
   }));
 }
 
+async function obtenerIncidenciaPorId(id_incidencia){
+  const query = `
+    SELECT 
+      id_incidencia, 
+      id_movimiento, 
+      descripcion_general, 
+      detalle_productos, 
+      fecha_registro, 
+      id_orden,
+      fecha
+    FROM incidencia
+    WHERE id_incidencia = $1
+  `;
+
+  const result = await pool.query(query, [id_incidencia]);
+  if (result.rows.length === 0) return null;
+
+  const row = result.rows[0];
+  // Asegurarse que detalle_productos sea un array (si no lo es)
+  row.detalle_productos = Array.isArray(row.detalle_productos) ? row.detalle_productos : [];
+  return row;
+}
+
 
 module.exports = {
   registrarIncidencia,
   obtenerIncidencias,
-  obtenerIncidenciasPorOrden
+  obtenerIncidenciasPorOrden,
+  obtenerIncidenciaPorId
 }

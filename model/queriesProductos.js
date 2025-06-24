@@ -170,6 +170,33 @@ async function obtenerProductosEnOrdenesEnCurso() {
   return rows.map(row => row.id_producto);
 }
 
+const obtenerRankingPorCantidad = async () => {
+  const result = await pool.query(`
+    SELECT p.id_producto, p.nombre, SUM(pm.cantidad) AS total_vendido
+    FROM producto_movimiento pm
+    JOIN movimiento m ON m.id_movimiento = pm.id_movimiento
+    JOIN producto p ON p.id_producto = pm.id_producto
+    WHERE m.tipo = 'Venta'
+    GROUP BY p.id_producto
+    ORDER BY total_vendido DESC
+  `);
+  return result.rows;
+};
+
+const obtenerRankingPorIngresos = async () => {
+  const result = await pool.query(`
+    SELECT p.id_producto, p.nombre, SUM(pm.subtotal) AS total_ingresos
+    FROM producto_movimiento pm
+    JOIN movimiento m ON m.id_movimiento = pm.id_movimiento
+    JOIN producto p ON p.id_producto = pm.id_producto
+    WHERE m.tipo = 'Venta'
+    GROUP BY p.id_producto
+    ORDER BY total_ingresos DESC
+  `);
+  return result.rows;
+};
+
+
 module.exports = {
   obtenerProductos,
   crearProducto,
@@ -180,5 +207,7 @@ module.exports = {
   disminuirStock,
   obtenerProductosCriticos,
   obtenerProductosParaOrden,
-  obtenerProductosEnOrdenesEnCurso
+  obtenerProductosEnOrdenesEnCurso,
+  obtenerRankingPorCantidad,
+  obtenerRankingPorIngresos
 }

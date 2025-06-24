@@ -195,6 +195,31 @@ async function generarOrdenReposicion(req, res) {
   res.send(Buffer.from(pdfBytes))
 }
 
+async function obtenerResumenProductos() {
+  const rankingCantidad = await dbProductos.obtenerRankingPorCantidad();
+  const rankingIngresos = await dbProductos.obtenerRankingPorIngresos();
+
+  const masVendido = rankingCantidad[0] || { nombre: 'N/A', total_vendido: 0 };
+  const menosVendido = [...rankingCantidad].reverse().find(p => p.total_vendido > 0) || { nombre: 'N/A', total_vendido: 0 };
+
+  const masIngresos = rankingIngresos[0] || { nombre: 'N/A', total_ingresos: 0 };
+  const menosIngresos = [...rankingIngresos].reverse().find(p => p.total_ingresos > 0) || { nombre: 'N/A', total_ingresos: 0 };
+
+  return { masVendido, menosVendido, masIngresos, menosIngresos };
+}
+
+
+// Esta función SÍ es para endpoint API (si la quieres mantener)
+async function resumenProductosDestacados(req, res){
+  try {
+    const resumen = await obtenerResumenProductos();
+    res.json(resumen);
+  } catch (error) {
+    console.error("Error al obtener resumen de productos:", error);
+    res.status(500).json({ error: 'Error interno del servidor' });
+  }
+};
+
 module.exports = {
   obtenerProductos,
   crearProductoGet,
@@ -202,4 +227,6 @@ module.exports = {
   obtenerProductoPorId,
   actualizarProducto,
   generarOrdenReposicion,
+  obtenerResumenProductos,
+  resumenProductosDestacados
 }

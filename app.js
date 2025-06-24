@@ -62,6 +62,7 @@ app.use((req, res, next) => {
 // Rutas principales
 const { obtenerResumenVentas30Dias } = require('./model/queriesMovimientos');
 const { obtenerResumenOrdenes30Dias } = require('./model/queriesOrdenes');
+const { obtenerResumenProductos } = require("./controllers/controladorProductos");
 
 app.get("/", async (req, res) => {
   const resumenVentas = await obtenerResumenVentas30Dias();
@@ -72,12 +73,15 @@ app.get("/", async (req, res) => {
   const fechasOrdenes = resumenOrdenes.map(r => r.fecha);
   const montosOrdenes = resumenOrdenes.map(r => parseInt(r.total_ordenes));
 
+  const rankingProductos = await obtenerResumenProductos();
+
   res.render("index", {
     user: req.user,
     fechasVentas,
     montosVentas,
     fechasOrdenes,
-    montosOrdenes
+    montosOrdenes,
+    rankingProductos
   });
 });
 

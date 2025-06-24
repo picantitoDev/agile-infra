@@ -298,7 +298,12 @@
             <% incidencias.forEach(inc => { %>
               <tr>
                 <td><%= inc.id_incidencia %></td>
-                <td><%= new Date(inc.fecha).toLocaleDateString('es-PE') %></td>
+                <td>        <% let fechaFormateada = 'Fecha inválida';
+          if (orden.fecha instanceof Date) {
+            fechaFormateada = inc.fecha.toISOString().slice(0, 10);
+          }
+        %>
+        <%= fechaFormateada %></td>
                 <td><%= inc.id_movimiento %></td>
                 <td style="text-align: left;">
                   <ul style="padding-left: 16px; margin: 0;">

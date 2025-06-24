@@ -376,25 +376,31 @@ async function mostrarModalOrdenDetalle(fechaISO, fechaMostrada) {
   document.getElementById('modalFechaOrden').textContent = fechaMostrada;
 
   if (!ordenes.length) {
-    body.innerHTML = `<tr><td colspan="4" class="text-center text-muted">No se registraron órdenes este día.</td></tr>`;
+    body.innerHTML = `<tr><td colspan="3" class="text-center text-muted">No se registraron órdenes este día.</td></tr>`;
   } else {
     ordenes.forEach(o => {
-  const productos = o.products || [];
+      const productos = o.products || [];
+
+      // Construye una lista de productos en HTML
+      let listaProductos = '<ul style="margin-bottom: 0;">';
       productos.forEach(prod => {
-        body.innerHTML += `
-          <tr>
-            <td>${o.proveedor}</td>
-            <td>${prod.nombre}</td>
-            <td>${prod.cantidad}</td>
-          </tr>
-        `;
+        listaProductos += `<li>${prod.nombre} (x${prod.cantidad})</li>`;
       });
+      listaProductos += '</ul>';
+
+      body.innerHTML += `
+        <tr>
+          <td>${o.proveedor}</td>
+          <td colspan="2">${listaProductos}</td>
+        </tr>
+      `;
     });
   }
 
   const modal = new bootstrap.Modal(document.getElementById('modalOrden'));
   modal.show();
 }
+
 </script>
 
 

@@ -114,10 +114,12 @@
       </div>
       <div class="col-md-6">
         <!-- Cuadrante 2 -->
-        <div class="cuadrante">
-          <h5>Cuadrante 2</h5>
-          <p>Contenido futuro...</p>
-        </div>
+<div class="cuadrante">
+  <h5 class="mb-3">Órdenes de Reabastecimiento (Últimos 30 días)</h5>
+  <div class="chart-container">
+    <canvas id="ordenesChart"></canvas>
+  </div>
+</div>
       </div>
     </div>
     <div class="row">
@@ -161,6 +163,31 @@
       </div>
     </div>
   </div>
+
+  <div class="modal fade" id="modalOrden" tabindex="-1" aria-hidden="true">
+  <div class="modal-dialog modal-lg modal-dialog-centered">
+    <div class="modal-content">
+      <div class="modal-header bg-success text-white">
+        <h5 class="modal-title">Detalle de órdenes - <span id="modalFechaOrden"></span></h5>
+        <button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal"></button>
+      </div>
+      <div class="modal-body">
+        <table class="table table-striped">
+          <thead>
+            <tr>
+              <th>Proveedor</th>
+              <th>Producto</th>
+              <th>Cantidad</th>
+              <th>Subtotal</th>
+            </tr>
+          </thead>
+          <tbody id="detalleOrdenBody"></tbody>
+        </table>
+      </div>
+    </div>
+  </div>
+</div>
+
 
 <script id="fechas-data" type="application/json">
     <%- JSON.stringify(fechas) %>

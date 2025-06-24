@@ -150,8 +150,6 @@ async function detalleOrden(req, res){
       return res.status(404).json({ mensaje: 'Orden no encontrada' });
     }
     const incidencias = await dbIncidencias.obtenerIncidenciasPorOrden(id_order);
-    console.log(orden.productos)
-    console.log(incidencias.detalle_productos)
 
     res.render('detalleOrden', { orden, incidencias});
 

@@ -315,13 +315,10 @@ const ventasChart = new Chart(ctx, {
 <script>
 const fechasOrdenesRaw = JSON.parse(document.getElementById("fechas-orden-data").textContent);
 const totalesOrdenes = JSON.parse(document.getElementById("totales-orden-data").textContent);
-console.log("RAW fechas:", fechasOrdenesRaw);
-console.log("RAW totales:", totalesOrdenes);
-
 const resumenOrdenes = {};
 fechasOrdenesRaw.forEach((fecha, index) => {
-  const f = new Date(fecha).toISOString().slice(0, 10);
-  resumenOrdenes[f] = (resumenOrdenes[f] || 0) + totalesOrdenes[index];
+  const fechaStr = fecha.slice(0, 10); // evita el desfase de zona horaria
+  resumenOrdenes[fechaStr] = (resumenOrdenes[fechaStr] || 0) + parseInt(totalesOrdenes[index] || 0);
 });
 
 const fechasOrdenes = Object.keys(resumenOrdenes);

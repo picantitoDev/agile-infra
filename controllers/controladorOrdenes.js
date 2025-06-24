@@ -203,6 +203,17 @@ async function obtenerOrdenPorProducto(req, res) {
   }
 }
 
+async function detalleOrdenPorFecha(req, res){
+  try {
+    const { fecha } = req.params;
+    const detalle = await dbOrdenes.obtenerDetalleOrdenesPorFecha(fecha);
+    res.json(detalle);
+  } catch (error) {
+    console.error('Error al obtener detalle de órdenes por fecha:', error);
+    res.status(500).json({ error: 'Error interno al obtener detalle de órdenes' });
+  }
+};
+
 module.exports = {
     listarOrdenes,
     crearOrdenGet,
@@ -210,5 +221,6 @@ module.exports = {
     obtenerOrdenPorId,
     detalleOrden,
     generarOrdenPDF,
-    obtenerOrdenPorProducto
+    obtenerOrdenPorProducto,
+    detalleOrdenPorFecha
 }

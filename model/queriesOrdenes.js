@@ -112,11 +112,47 @@ async function buscarOrdenPorProductoEnCurso(idProducto) {
   }
 }
 
+async function obtenerResumenOrdenes30Dias() {
+  const result = await pool.query(`
+    SELECT 
+      (fecha AT TIME ZONE 'UTC' AT TIME ZONE 'America/Lima')::DATE AS fecha,
+      COUNT(*) AS total_ordenes
+    FROM orden_reabastecimiento
+    WHERE fecha >= NOW() - INTERVAL '30 days'
+    GROUP BY 1
+    ORDER BY 1;
+  `);
+
+  console.log('FECHAS DE ÓRDENES:', result.rows);
+  return result.rows;
+}
+
+async function obtenerDetalleOrdenesPorFecha(fecha) {
+  const fechaInicio = `${fecha}T00:00:00.000Z`;
+  const fechaFin = `${fecha}T23:59:59.999Z`;
+
+  const { rows } = await pool.query(`
+    SELECT 
+      o.id_order,
+      o.fecha,
+      o.estado,
+      o.products,
+      pr.razon_social AS proveedor
+    FROM orden_reabastecimiento o
+    JOIN proveedor pr ON pr.id_proveedor = o.id_proveedor
+    WHERE o.fecha BETWEEN $1 AND $2
+  `, [fechaInicio, fechaFin]);
+
+  return rows;
+}
+
 module.exports = {
     obtenerOrdenes,
     crearOrden,
     obtenerOrdenPorId,
     actualizarEstadoOrden,
     actualizarProductosOrden,
-    buscarOrdenPorProductoEnCurso
+    buscarOrdenPorProductoEnCurso,
+    obtenerResumenOrdenes30Dias,
+    obtenerDetalleOrdenesPorFecha
 }

@@ -178,7 +178,6 @@
               <th>Proveedor</th>
               <th>Producto</th>
               <th>Cantidad</th>
-              <th>Subtotal</th>
             </tr>
           </thead>
           <tbody id="detalleOrdenBody"></tbody>
@@ -190,11 +189,11 @@
 
 
 <script id="fechas-data" type="application/json">
-    <%- JSON.stringify(fechas) %>
+    <%- JSON.stringify(fechasVentas) %>
 </script>
 
 <script id="montos-data" type="application/json">
-    <%- JSON.stringify(montos) %>
+    <%- JSON.stringify(montosVentas) %>
 </script>
 
   <!-- Script de gráfico y modal -->
@@ -305,5 +304,101 @@ const ventasChart = new Chart(ctx, {
     modal.show();
     }
   </script>
+
+<script id="fechas-orden-data" type="application/json">
+  <%- JSON.stringify(fechasOrdenes) %>
+</script>
+<script id="totales-orden-data" type="application/json">
+  <%- JSON.stringify(montosOrdenes) %>
+</script>
+
+<script>
+const fechasOrdenesRaw = JSON.parse(document.getElementById("fechas-orden-data").textContent);
+const totalesOrdenes = JSON.parse(document.getElementById("totales-orden-data").textContent);
+console.log("RAW fechas:", fechasOrdenesRaw);
+console.log("RAW totales:", totalesOrdenes);
+
+const resumenOrdenes = {};
+fechasOrdenesRaw.forEach((fecha, index) => {
+  const f = new Date(fecha).toISOString().slice(0, 10);
+  resumenOrdenes[f] = (resumenOrdenes[f] || 0) + totalesOrdenes[index];
+});
+
+const fechasOrdenes = Object.keys(resumenOrdenes);
+const cantidadesOrdenes = Object.values(resumenOrdenes);
+const etiquetasOrdenes = fechasOrdenes.map(f => {
+  const [y, m, d] = f.split("-");
+  const meses = ["ene", "feb", "mar", "abr", "may", "jun", "jul", "ago", "sep", "oct", "nov", "dic"];
+  return `${parseInt(d)} de ${meses[parseInt(m) - 1]}`;
+});
+
+const ctxOrden = document.getElementById('ordenesChart').getContext('2d');
+const ordenesChart = new Chart(ctxOrden, {
+  type: 'bar',
+  data: {
+    labels: etiquetasOrdenes,
+    datasets: [{
+      label: 'Órdenes realizadas',
+      data: cantidadesOrdenes,
+      backgroundColor: 'rgba(46, 204, 113, 0.6)',
+      borderColor: 'rgba(39, 174, 96, 1)',
+      borderWidth: 1
+    }]
+  },
+  options: {
+    onClick: async (event, elements) => {
+      if (elements.length > 0) {
+        const index = elements[0].index;
+        const fechaISO = fechasOrdenes[index];
+        const fechaMostrada = etiquetasOrdenes[index];
+        await mostrarModalOrdenDetalle(fechaISO, fechaMostrada);
+      }
+    },
+    onHover: (event, chartElement) => {
+      event.native.target.style.cursor = chartElement.length ? 'pointer' : 'default';
+    },
+    scales: {
+      y: { beginAtZero: true },
+      x: {
+        ticks: {
+          maxRotation: 45,
+          minRotation: 30,
+          autoSkip: false
+        }
+      }
+    }
+  }
+});
+
+async function mostrarModalOrdenDetalle(fechaISO, fechaMostrada) {
+  const res = await fetch(`/ordenes/detalle-fecha/${fechaISO}`);
+  const ordenes = await res.json();
+
+  const body = document.getElementById('detalleOrdenBody');
+  body.innerHTML = '';
+  document.getElementById('modalFechaOrden').textContent = fechaMostrada;
+
+  if (!ordenes.length) {
+    body.innerHTML = `<tr><td colspan="4" class="text-center text-muted">No se registraron órdenes este día.</td></tr>`;
+  } else {
+    ordenes.forEach(o => {
+  const productos = o.products || [];
+      productos.forEach(prod => {
+        body.innerHTML += `
+          <tr>
+            <td>${o.proveedor}</td>
+            <td>${prod.nombre}</td>
+            <td>${prod.cantidad}</td>
+          </tr>
+        `;
+      });
+    });
+  }
+
+  const modal = new bootstrap.Modal(document.getElementById('modalOrden'));
+  modal.show();
+}
+</script>
+
 
   <% } %>

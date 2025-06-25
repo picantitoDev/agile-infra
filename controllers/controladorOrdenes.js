@@ -68,11 +68,11 @@ async function crearOrdenPost(req, res) {
       ingresado: 0,
     }));
 
-    const ahora = new Date();
-    const fechaConOffset = new Date(ahora.getTime() + 5 * 60 * 60 * 1000);
+const fechaLima = new Date().toLocaleString("en-US", { timeZone: "America/Lima" });
+const fechaFinal = new Date(fechaLima);
 
     // Crear orden y obtener ID
-    const idOrden = await dbOrdenes.crearOrden(proveedorId, productos, fechaConOffset, 'en_curso');
+    const idOrden = await dbOrdenes.crearOrden(proveedorId, productos, fechaFinal, 'en_curso');
 
     // Obtener datos completos para generar PDF
     const orden = await dbOrdenes.obtenerOrdenPorId(idOrden);

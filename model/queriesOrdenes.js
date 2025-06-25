@@ -1,4 +1,5 @@
 const pool = require("./pool")
+const { DateTime } = require('luxon');
 
 async function obtenerOrdenes(){
   const query = `
@@ -122,22 +123,33 @@ async function obtenerOrdenesUltimos30Dias() {
 }
 
 
-async function obtenerDetalleOrdenesPorFecha(fechaLimaStr) {
-  const result = await pool.query(`
-    SELECT o.*, p.nombre AS proveedor, json_agg(json_build_object(
-      'nombre', pr.nombre,
-      'cantidad', po.cantidad
-    )) AS products
-    FROM orden_reabastecimiento o
-    JOIN proveedor p ON o.id_proveedor = p.id_proveedor
-    JOIN producto_orden po ON po.id_orden = o.id_order
-    JOIN producto pr ON po.id_producto = pr.id_producto
-    WHERE (o.fecha AT TIME ZONE 'UTC' AT TIME ZONE 'America/Lima')::DATE = $1
-    GROUP BY o.id_order, p.nombre
-    ORDER BY o.fecha;
-  `, [fechaLimaStr]);
+async function obtenerDetalleOrdenesPorFecha(fechaLimaString) {
+  // fecha = "2025-06-24"
+  const inicioUTC = DateTime
+    .fromISO(fechaLimaString, { zone: 'America/Lima' })
+    .startOf('day')
+    .toUTC()
+    .toISO();
 
-  return result.rows;
+  const finUTC = DateTime
+    .fromISO(fechaLimaString, { zone: 'America/Lima' })
+    .endOf('day')
+    .toUTC()
+    .toISO();
+
+  const { rows } = await pool.query(`
+    SELECT 
+      o.id_order,
+      o.fecha,
+      o.estado,
+      o.products,
+      pr.razon_social AS proveedor
+    FROM orden_reabastecimiento o
+    JOIN proveedor pr ON pr.id_proveedor = o.id_proveedor
+    WHERE o.fecha BETWEEN $1 AND $2
+  `, [inicioUTC, finUTC]);
+
+  return rows;
 }
 
 module.exports = {

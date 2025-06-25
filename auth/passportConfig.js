@@ -12,6 +12,10 @@ passport.use(
       if (!user)
         return done(null, false, { message: "Usuario o correo incorrecto" })
 
+      if (user.estado && user.estado.toLowerCase() !== "activado") {
+        return done(null, false, { message: "Este usuario está desactivado" });
+      }
+
       const match = await bcrypt.compare(password, user.password)
       //const match = password === user.password
       if (!match) return done(null, false, { message: "Contraseña incorrecta" })

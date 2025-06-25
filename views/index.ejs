@@ -727,7 +727,14 @@ const fechasOrdenesRaw = JSON.parse(document.getElementById("fechas-orden-data")
 const totalesOrdenes = JSON.parse(document.getElementById("totales-orden-data").textContent);
 const resumenOrdenes = {};
 fechasOrdenesRaw.forEach((fecha, index) => {
-    const fechaStr = fecha.slice(0, 10);
+    const date = new Date(fecha);
+    const fechaStr = date.toLocaleDateString("es-PE", {
+        timeZone: "America/Lima",
+        year: "numeric",
+        month: "2-digit",
+        day: "2-digit"
+    }).split("/").reverse().join("-"); // formato YYYY-MM-DD
+
     resumenOrdenes[fechaStr] = (resumenOrdenes[fechaStr] || 0) + parseInt(totalesOrdenes[index] || 0);
 });
 

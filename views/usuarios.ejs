@@ -44,17 +44,39 @@
             <th>Acciones</th>
           </tr>
         </thead>
-        <tbody>
-          <% usuarios.forEach(usuario => { %>
-          <tr>
-            <td><%= usuario.id %></td>
-            <td><%= usuario.username %></td>
-            <td><%= usuario.email || '—' %></td>
-            <td><%= usuario.rol %></td>
-            <td><a href="/usuarios/editar/<%= usuario.id %>">Editar</a></td>
-          </tr>
-          <% }) %>
-        </tbody>
+<tbody>
+  <% usuarios.forEach(usuario => { %>
+    <tr>
+      <td><%= usuario.id %></td>
+      <td><%= usuario.username %></td>
+      <td><%= usuario.email || '—' %></td>
+      <td><%= usuario.rol %></td>
+      <td>
+        <% 
+          const actual = user;
+          const objetivo = usuario;
+
+          const esSuperadmin = actual.nivel_acceso === 'superadmin';
+          const esAdmin = actual.rol === 'Admin' && actual.nivel_acceso !== 'superadmin';
+
+          const objetivoEsSuperadmin = objetivo.nivel_acceso === 'superadmin';
+          const objetivoEsAdmin = objetivo.rol === 'Admin';
+
+          const puedeEditar = (
+            esSuperadmin ||
+            (esAdmin && !objetivoEsAdmin && !objetivoEsSuperadmin)
+          );
+        %>
+        <% if (puedeEditar) { %>
+          <a href="/usuarios/editar/<%= usuario.id %>">Editar</a>
+        <% } else { %>
+          <span class="text-muted" style="color: gray;">—</span>
+        <% } %>
+      </td>
+    </tr>
+  <% }) %>
+</tbody>
+
       </table>
       </div>
       <h2 class="subtitle">Auditoría de productos</h2>

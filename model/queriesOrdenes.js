@@ -118,7 +118,7 @@ async function obtenerResumenOrdenes30Dias() {
       (fecha AT TIME ZONE 'UTC' AT TIME ZONE 'America/Lima')::DATE AS fecha,
       COUNT(*) AS total_ordenes
     FROM orden_reabastecimiento
-    WHERE fecha >= NOW() - INTERVAL '30 days'
+    WHERE (fecha AT TIME ZONE 'UTC' AT TIME ZONE 'America/Lima')::DATE >= (CURRENT_DATE - INTERVAL '30 days')
     GROUP BY 1
     ORDER BY 1;
   `);

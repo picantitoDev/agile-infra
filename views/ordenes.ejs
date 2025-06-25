@@ -591,8 +591,16 @@
         <td data-label="ID Orden"><%= orden.id_order %></td>
         <td data-label="Proveedor"><%= orden.proveedor %></td>
 <td data-label="Fecha">
-  <%= new Date(orden.fecha).toString() %><br>
-  <%= new Date(orden.fecha).toLocaleString("es-PE", { timeZone: "America/Lima" }) %>
+  <%= new Date(orden.fecha).toLocaleString("es-PE", {
+    timeZone: "America/Lima",
+    year: "numeric",
+    month: "2-digit",
+    day: "2-digit",
+    hour: "2-digit",
+    minute: "2-digit",
+    second: "2-digit",
+    hour12: true
+  }) %>
 </td>
         <td data-label="Estado">
           <span class="estado-badge"><%= orden.estado %></span>

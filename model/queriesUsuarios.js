@@ -42,6 +42,15 @@ const crearUsuario = async ({ username, password, email, rol }) => {
   )
 }
 
+async function actualizarUsuario(id, { username, email, rol, estado }) {
+  const query = `
+    UPDATE usuarios
+    SET username = $1, email = $2, rol = $3, estado = $4
+    WHERE id = $5
+  `;
+  await pool.query(query, [username, email, rol, estado, id]);
+}
+
 // Guardar token y expiración
 const guardarTokenDeReset = async (id, token, expires) => {
   await pool.query(
@@ -79,5 +88,6 @@ module.exports = {
   buscarUsuarioPorEmail,
   guardarTokenDeReset,
   buscarUsuarioPorToken,
-  actualizarPasswordYLimpiarToken
+  actualizarPasswordYLimpiarToken,
+  actualizarUsuario
 }

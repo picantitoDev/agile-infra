@@ -51,7 +51,7 @@
             <td><%= usuario.username %></td>
             <td><%= usuario.email || '—' %></td>
             <td><%= usuario.rol %></td>
-            <td><a href="/usuarios/editar">Editar</a></td>
+            <td><a href="/usuarios/editar/<%= usuario.id %>">Editar</a></td>
           </tr>
           <% }) %>
         </tbody>

@@ -62,8 +62,41 @@ const obtenerUsuarios = async (req, res) => {
     res.status(500).send("Error al obtener los datos de usuarios")
   }
 }
+
+
+async function editarUsuarioGet(req, res) {
+  try {
+    const id = req.params.id;
+    const usuario = await dbUsuarios.buscarUsuarioPorId(id);
+
+    if (!usuario) return res.status(404).send("Usuario no encontrado");
+
+    res.render("editarUsuario", { usuario });
+  } catch (error) {
+    console.error("Error al cargar edición de usuario:", error);
+    res.status(500).send("Error interno");
+  }
+}
+
+async function editarUsuarioPost(req, res) {
+  try {
+    const id = req.params.id;
+    const { username, email, rol, estado } = req.body;
+
+    await dbUsuarios.actualizarUsuario(id, { username, email, rol, estado });
+
+    res.redirect("/usuarios");
+  } catch (error) {
+    console.error("Error al actualizar usuario:", error);
+    res.status(500).send("Error al actualizar usuario");
+  }
+}
+
+
 module.exports = {
   crearUsuarioPost,
   obtenerUsuarios,
   crearUsuarioGet,
+  editarUsuarioGet,
+  editarUsuarioPost
 }

@@ -1,0 +1,35 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+  <meta charset="UTF-8" />
+  <title>Editar Usuario</title>
+  <link rel="stylesheet" href="/formularioUsuario.css" />
+</head>
+<body>
+  <div class="form-container">
+    <h1>Editar Usuario</h1>
+    <form action="/usuarios/editar/<%= usuario.id %>" method="POST">
+      <label>Usuario:</label>
+      <input type="text" name="username" value="<%= usuario.username %>" required />
+
+      <label>Email:</label>
+      <input type="email" name="email" value="<%= usuario.email %>" required />
+
+      <label>Rol:</label>
+      <select name="rol">
+        <option value="Admin" <%= usuario.rol === 'Admin' ? 'selected' : '' %>>Admin</option>
+        <option value="Usuario" <%= usuario.rol === 'Usuario' ? 'selected' : '' %>>Usuario</option>
+      </select>
+
+      <label>Estado:</label>
+      <select name="estado">
+        <option value="Activado" <%= usuario.estado === 'Activado' ? 'selected' : '' %>>Activado</option>
+        <option value="Desactivado" <%= usuario.estado === 'Desactivado' ? 'selected' : '' %>>Desactivado</option>
+      </select>
+
+      <button type="submit">Guardar cambios</button>
+    </form>
+    <a href="/usuarios">← Volver</a>
+  </div>
+</body>
+</html>

@@ -202,23 +202,16 @@ async function obtenerOrdenPorProducto(req, res) {
   }
 }
 
-async function detalleOrdenPorFecha(fechaLimaStr) {
-  const result = await pool.query(`
-    SELECT o.*, p.nombre AS proveedor, json_agg(json_build_object(
-      'nombre', pr.nombre,
-      'cantidad', po.cantidad
-    )) AS products
-    FROM orden_reabastecimiento o
-    JOIN proveedor p ON o.id_proveedor = p.id_proveedor
-    JOIN producto_orden po ON po.id_orden = o.id_order
-    JOIN producto pr ON po.id_producto = pr.id_producto
-    WHERE (o.fecha AT TIME ZONE 'UTC' AT TIME ZONE 'America/Lima')::DATE = $1
-    GROUP BY o.id_order, p.nombre
-    ORDER BY o.fecha;
-  `, [fechaLimaStr]);
-
-  return result.rows;
-}
+async function detalleOrdenPorFecha(req, res){
+  try {
+    const { fecha } = req.params;
+    const detalle = await dbOrdenes.obtenerDetalleOrdenesPorFecha(fecha);
+    res.json(detalle);
+  } catch (error) {
+    console.error('Error al obtener detalle de órdenes por fecha:', error);
+    res.status(500).json({ error: 'Error interno al obtener detalle de órdenes' });
+  }
+};
 
 async function obtenerResumenOrdenes() {
   const ordenes = await dbOrdenes.obtenerOrdenesUltimos30Dias();

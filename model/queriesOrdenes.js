@@ -112,32 +112,16 @@ async function buscarOrdenPorProductoEnCurso(idProducto) {
   }
 }
 
-async function obtenerResumenOrdenes30Dias() {
-  try {
-    const query = `
-      SELECT 
-        DATE(fecha AT TIME ZONE 'UTC' AT TIME ZONE 'America/Lima') as fecha_peru,
-        COUNT(*) as numero_ordenes
-      FROM orden_reabastecimiento 
-      WHERE (fecha AT TIME ZONE 'UTC' AT TIME ZONE 'America/Lima')::DATE >= (CURRENT_DATE - INTERVAL '30 days')
-      GROUP BY DATE(fecha AT TIME ZONE 'UTC' AT TIME ZONE 'America/Lima')
-      ORDER BY fecha_peru DESC
-    `;
-    
-    const result = await pool.query(query);
-    
-    const resumen = result.rows.map(row => ({
-      fecha: row.fecha_peru.toISOString().split('T')[0],
-      numeroOrdenes: parseInt(row.numero_ordenes)
-    }));
-    
-    return resumen;
-    
-  } catch (error) {
-    console.error('Error al obtener resumen de órdenes:', error);
-    throw error;
-  }
+async function obtenerOrdenesUltimos30Dias() {
+  const result = await pool.query(`
+    SELECT id_order, fecha
+    FROM orden_reabastecimiento
+    WHERE fecha >= NOW() - INTERVAL '30 days'
+  `);
+  return result.rows;
 }
+
+
 async function obtenerDetalleOrdenesPorFecha(fecha) {
   const fechaInicio = `${fecha}T00:00:00.000Z`;
   const fechaFin = `${fecha}T23:59:59.999Z`;
@@ -164,6 +148,6 @@ module.exports = {
     actualizarEstadoOrden,
     actualizarProductosOrden,
     buscarOrdenPorProductoEnCurso,
-    obtenerResumenOrdenes30Dias,
+    obtenerOrdenesUltimos30Dias,
     obtenerDetalleOrdenesPorFecha
 }

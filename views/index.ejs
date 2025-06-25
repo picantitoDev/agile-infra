@@ -623,7 +623,7 @@
 </script>
 
 <script id="totales-orden-data" type="application/json">
-    <%- JSON.stringify(montosOrdenes) %>
+    <%- JSON.stringify(totalesOrdenes) %>
 </script>
 
 <script>
@@ -738,8 +738,9 @@ fechasOrdenesRaw.forEach((fecha, index) => {
     resumenOrdenes[fechaStr] = (resumenOrdenes[fechaStr] || 0) + parseInt(totalesOrdenes[index] || 0);
 });
 
-const fechasOrdenes = Object.keys(resumenOrdenes);
-const cantidadesOrdenes = Object.values(resumenOrdenes);
+const fechasOrdenes = JSON.parse(document.getElementById("fechas-orden-data").textContent);
+const cantidadesOrdenes = JSON.parse(document.getElementById("totales-orden-data").textContent);
+
 const etiquetasOrdenes = fechasOrdenes.map(f => {
     const [y, m, d] = f.split("-");
     const meses = ["ene", "feb", "mar", "abr", "may", "jun", "jul", "ago", "sep", "oct", "nov", "dic"];

@@ -213,6 +213,44 @@ async function detalleOrdenPorFecha(req, res){
   }
 };
 
+async function obtenerResumenOrdenes() {
+  const ordenes = await dbOrdenes.obtenerOrdenesUltimos30Dias();
+
+  const resumenAgrupado = {};
+
+  ordenes.forEach(orden => {
+    const fechaOriginalUTC = orden.fecha.toISOString();
+
+    // Convertimos a zona horaria Lima y agrupamos por día
+    const fechaLimaAgrupada = DateTime
+      .fromISO(fechaOriginalUTC, { zone: 'utc' })
+      .setZone('America/Lima')
+      .toFormat('yyyy-MM-dd');
+
+    if (!resumenAgrupado[fechaLimaAgrupada]) resumenAgrupado[fechaLimaAgrupada] = [];
+    resumenAgrupado[fechaLimaAgrupada].push({
+      id: orden.id_orden,
+      fechaUTC: orden.fecha,
+    });
+  });
+
+  const resumen = Object.entries(resumenAgrupado).map(([fecha, ordenes]) => ({
+    fecha,
+    total: ordenes.length,
+    ordenes,
+  }));
+
+resumen.sort((a, b) => a.fecha.localeCompare(b.fecha));
+
+// 🔍 Nuevo log general del resumen final
+console.log("📊 Resumen de órdenes por fecha (hora Lima):");
+resumen.forEach(r => {
+  console.log(`   📅 ${r.fecha} — ${r.total} orden(es)`);
+});
+
+  return resumen;
+}
+
 module.exports = {
     listarOrdenes,
     crearOrdenGet,
@@ -221,5 +259,6 @@ module.exports = {
     detalleOrden,
     generarOrdenPDF,
     obtenerOrdenPorProducto,
-    detalleOrdenPorFecha
+    detalleOrdenPorFecha,
+    obtenerResumenOrdenes
 }

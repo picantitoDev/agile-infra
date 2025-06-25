@@ -61,17 +61,18 @@ app.use((req, res, next) => {
 
 // Rutas principales
 const { obtenerResumenVentas30Dias } = require('./model/queriesMovimientos');
-const { obtenerResumenOrdenes30Dias } = require('./model/queriesOrdenes');
 const { obtenerResumenProductos } = require("./controllers/controladorProductos");
+const { obtenerResumenOrdenes } = require("./controllers/controladorOrdenes");
+
 
 app.get("/", async (req, res) => {
   const resumenVentas = await obtenerResumenVentas30Dias();
   const fechasVentas = resumenVentas.map(r => r.fecha);
   const montosVentas = resumenVentas.map(r => parseFloat(r.total));
 
-  const resumenOrdenes = await obtenerResumenOrdenes30Dias();
+  const resumenOrdenes = await obtenerResumenOrdenes();
   const fechasOrdenes = resumenOrdenes.map(r => r.fecha);
-  const montosOrdenes = resumenOrdenes.map(r => parseInt(r.total_ordenes));
+  const totalesOrdenes = resumenOrdenes.map(r => r.total);
 
   const rankingProductos = await obtenerResumenProductos();
 
@@ -80,10 +81,11 @@ app.get("/", async (req, res) => {
     fechasVentas,
     montosVentas,
     fechasOrdenes,
-    montosOrdenes,
+    totalesOrdenes,
     rankingProductos
   });
 });
+
 
 app.use('/ventas', rutaVentas);
 app.use("/productos", validarSesion, rutaProductos)

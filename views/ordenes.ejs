@@ -590,14 +590,10 @@
       <tr class="fila-orden" data-index="<%= index %>">
         <td data-label="ID Orden"><%= orden.id_order %></td>
         <td data-label="Proveedor"><%= orden.proveedor %></td>
-        <td data-label="Fecha">
-        <% let fechaFormateada = 'Fecha inválida';
-          if (orden.fecha instanceof Date) {
-            fechaFormateada = orden.fecha.toISOString().slice(0, 10);
-          }
-        %>
-        <%= fechaFormateada %>
-        </td>
+<td data-label="Fecha">
+  <%= new Date(orden.fecha).toString() %><br>
+  <%= new Date(orden.fecha).toLocaleString("es-PE", { timeZone: "America/Lima" }) %>
+</td>
         <td data-label="Estado">
           <span class="estado-badge"><%= orden.estado %></span>
         </td>

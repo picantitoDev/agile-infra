@@ -88,8 +88,8 @@ app.get("/", async (req, res) => {
 
 
 app.use('/ventas', rutaVentas);
-app.use("/productos", validarSesion, rutaProductos)
-app.use("/categorias", validarSesion, rutaCategorias)
+app.use("/productos", validarSesion, verificarAdmin, rutaProductos);
+app.use("/categorias", validarSesion, verificarAdmin, rutaCategorias);
 app.use("/proveedores", validarSesion, rutaProveedores)
 app.use("/usuarios", validarSesion, verificarAdmin, rutaUsuarios)
 app.use('/ordenes', validarSesion, rutaOrdenes);

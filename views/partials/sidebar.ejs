@@ -4,21 +4,27 @@
   </div>
   <nav class="sidebar-menu">
     <a href="/" class="menu-link"><i class="fas fa-home"></i> <span>Inicio</span></a>
-    <a href="/categorias" class="menu-link"><i class="fas fa-tags"></i> <span>Categorías</span></a>
-    <a href="/productos" class="menu-link"><i class="fas fa-box"></i> <span>Productos</span></a>
+
+    <% if (user.rol === 'Admin') { %>
+      <a href="/categorias" class="menu-link"><i class="fas fa-tags"></i> <span>Categorías</span></a>
+      <a href="/productos" class="menu-link"><i class="fas fa-box"></i> <span>Productos</span></a>
+      <a href="/usuarios" class="menu-link"><i class="fas fa-users"></i> <span>Usuarios</span></a>
+    <% } %>
+
     <a href="/proveedores" class="menu-link"><i class="fas fa-truck"></i> <span>Proveedores</span></a>
     <a href="/ordenes" class="menu-link"><i class="fas fa-clipboard-list"></i><span>Órdenes</span></a>
     <a href="/movimientos" class="menu-link"><i class="fas fa-arrows-rotate"></i> <span>Movimientos</span></a>
     <a href="/incidencias" class="menu-link"><i class="fas fa-exclamation-circle"></i> <span>Incidencias</span></a>
-
-    <% if (user.rol === 'Admin') { %>
+   <% if (user.rol === 'Admin') { %>
       <a href="/usuarios" class="menu-link"><i class="fas fa-users"></i> <span>Usuarios</span></a>
     <% } %>
   </nav>
-    <div class="logout-section">
+  
+  <div class="logout-section">
     <a href="/log-out" class="menu-link logout-link"><i class="fas fa-sign-out-alt"></i> <span>Cerrar Sesión</span></a>
   </div>
 </aside>
+
 <script>
   // Sidebar functionality script
 document.addEventListener('DOMContentLoaded', function() {

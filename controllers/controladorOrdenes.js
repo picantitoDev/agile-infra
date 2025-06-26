@@ -73,7 +73,9 @@ const fechaLimaUTC = DateTime.now().setZone('America/Lima').toUTC().toJSDate();
 
 
     // Crear orden y obtener ID
-    const idOrden = await dbOrdenes.crearOrden(proveedorId, productos, fechaLimaUTC, 'en_curso');
+    const idUsuario = req.user.id 
+    const idOrden = await dbOrdenes.crearOrden(proveedorId, productos, fechaLimaUTC, 'en_curso', idUsuario);
+
 
     // Obtener datos completos para generar PDF
     const orden = await dbOrdenes.obtenerOrdenPorId(idOrden);

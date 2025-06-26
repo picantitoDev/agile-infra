@@ -89,6 +89,10 @@
             <input type="date" id="filtro-desde" />
             <input type="date" id="filtro-hasta" />
         </div>
+        
+        <button id="btn-limpiar-filtros" class="btn-limpiar">
+          🧹 Limpiar filtros
+        </button>
 
         <button id="btn-exportar" class="btn-exportar">
           📤 Exportar
@@ -284,6 +288,19 @@ filtroFecha.addEventListener('change', filtrar);
 filtroDesde.addEventListener('change', filtrar);
 filtroHasta.addEventListener('change', filtrar);
 
+</script>
+
+<script>
+  const btnLimpiar = document.getElementById('btn-limpiar-filtros');
+
+  btnLimpiar.addEventListener('click', () => {
+    filtroId.value = '';
+    filtroTipo.value = '';
+    filtroFecha.value = '';
+    filtroDesde.value = '';
+    filtroHasta.value = '';
+    filtrar();
+  });
 </script>
 
 </html>

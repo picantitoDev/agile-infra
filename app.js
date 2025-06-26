@@ -63,28 +63,57 @@ app.use((req, res, next) => {
 const { obtenerResumenVentas30Dias } = require('./model/queriesMovimientos');
 const { obtenerResumenProductos } = require("./controllers/controladorProductos");
 const { obtenerResumenOrdenes } = require("./controllers/controladorOrdenes");
-
+const { obtenerResumenIncidencias } = require("./controllers/controladorIncidencias")
+const { obtenerResumenSobrantes } = require("./controllers/controladorMovimientos")
+const { obtenerResumenMermas } = require("./controllers/controladorMovimientos")
 
 app.get("/", async (req, res) => {
-  const resumenVentas = await obtenerResumenVentas30Dias();
+  const [
+    resumenVentas,
+    resumenOrdenes,
+    rankingProductos,
+    incidencias,
+    mermas,
+    sobrantes
+  ] = await Promise.all([
+    obtenerResumenVentas30Dias(),
+    obtenerResumenOrdenes(),
+    obtenerResumenProductos(),
+    obtenerResumenIncidencias(),
+    obtenerResumenMermas(),
+    obtenerResumenSobrantes()
+  ]);
+
   const fechasVentas = resumenVentas.map(r => r.fecha);
   const montosVentas = resumenVentas.map(r => parseFloat(r.total));
-
-  const resumenOrdenes = await obtenerResumenOrdenes();
   const fechasOrdenes = resumenOrdenes.map(r => r.fecha);
   const totalesOrdenes = resumenOrdenes.map(r => r.total);
 
-  const rankingProductos = await obtenerResumenProductos();
+  const resumenPorFecha = {};
+  function agregarAlResumen(fecha, tipo, valor) {
+    if (!resumenPorFecha[fecha]) {
+      resumenPorFecha[fecha] = { fecha, incidencias: 0, mermas: 0, sobrantes: 0 };
+    }
+    resumenPorFecha[fecha][tipo] = valor;
+  }
 
+  incidencias.forEach(({ fecha, incidencias }) => agregarAlResumen(fecha, 'incidencias', incidencias));
+  mermas.forEach(({ fecha, mermas }) => agregarAlResumen(fecha, 'mermas', mermas));
+  sobrantes.forEach(({ fecha, sobrantes }) => agregarAlResumen(fecha, 'sobrantes', sobrantes));
+
+  const resumenIncidenciasYMermas = Object.values(resumenPorFecha).sort((a, b) => a.fecha.localeCompare(b.fecha));
+  console.log(resumenIncidenciasYMermas)
   res.render("index", {
     user: req.user,
     fechasVentas,
     montosVentas,
     fechasOrdenes,
     totalesOrdenes,
-    rankingProductos
+    rankingProductos,
+    resumenIncidenciasYMermas
   });
 });
+
 
 
 app.use('/ventas', rutaVentas);

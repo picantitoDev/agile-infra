@@ -547,10 +547,10 @@
 
         <!-- Cuadrante 4: Placeholder -->
         <div class="cuadrante">
-        <h5><i class="fas fa-exclamation-triangle"></i> Incidencias y Ajustes (Últimos 30 días)</h5>
-        <div class="chart-container">
-            <canvas id="incidenciasChart"></canvas>
-        </div>
+            <h5><i class="fas fa-exclamation-triangle"></i> Incidencias y Ajustes (Últimos 30 días)</h5>
+            <div class="chart-container">
+                <canvas id="graficoIncidenciasMermasSobrantes"></canvas>
+            </div>
         </div>
     </div>
 </div>
@@ -623,6 +623,10 @@
 
 <script id="totales-orden-data" type="application/json">
     <%- JSON.stringify(totalesOrdenes) %>
+</script>
+
+<script id="incidencias-ajustes-data" type="application/json">
+  <%- JSON.stringify(resumenIncidenciasYMermas) %>
 </script>
 
 <script>
@@ -875,6 +879,68 @@ async function mostrarModalOrdenDetalle(fechaISO, fechaMostrada) {
     const modal = new bootstrap.Modal(document.getElementById('modalOrden'));
     modal.show();
 }
+
+  document.addEventListener("DOMContentLoaded", () => {
+    const rawData = JSON.parse(document.getElementById("incidencias-ajustes-data").textContent);
+
+    const labels = rawData.map(item => item.fecha);
+    const dataIncidencias = rawData.map(item => item.incidencias || 0);
+    const dataMermas = rawData.map(item => item.mermas || 0);
+    const dataSobrantes = rawData.map(item => item.sobrantes || 0);
+
+    const ctx = document.getElementById('graficoIncidenciasMermasSobrantes').getContext('2d');
+
+    new Chart(ctx, {
+      type: 'bar',
+      data: {
+        labels,
+        datasets: [
+          {
+            label: 'Incidencias',
+            data: dataIncidencias,
+            backgroundColor: '#ff7675'
+          },
+          {
+            label: 'Mermas',
+            data: dataMermas,
+            backgroundColor: '#fab1a0'
+          },
+          {
+            label: 'Sobrantes',
+            data: dataSobrantes,
+            backgroundColor: '#74b9ff'
+          }
+        ]
+      },
+      options: {
+        responsive: true,
+        plugins: {
+          legend: {
+            position: 'top'
+          },
+          title: {
+            display: false
+          }
+        },
+        scales: {
+          x: {
+            stacked: false,
+            title: {
+              display: true,
+              text: 'Fecha'
+            }
+          },
+          y: {
+            beginAtZero: true,
+            title: {
+              display: true,
+              text: 'Cantidad'
+            }
+          }
+        }
+      }
+    });
+  });
 </script>
 
 <% } %>

@@ -358,6 +358,24 @@ async function obtenerDetalleVentaPorFecha(fecha) {
   return rows;
 }
 
+async function obtenerMermasUltimos30Dias() {
+  const { rows } = await pool.query(`
+    SELECT fecha
+    FROM movimiento
+    WHERE tipo = 'Merma' AND fecha >= NOW() - INTERVAL '30 days'
+  `);
+  return rows;
+}
+
+async function obtenerSobrantesUltimos30Dias() {
+  const { rows } = await pool.query(`
+    SELECT fecha
+    FROM movimiento
+    WHERE tipo = 'Sobrante' AND fecha >= NOW() - INTERVAL '30 days'
+  `);
+  return rows;
+}
+
 module.exports = {
   obtenerMovimientos,
   obtenerDetalleMovimiento,
@@ -371,5 +389,7 @@ module.exports = {
   obtenerMovimientosMermas,
   obtenerMovimientosSobrantes,
   obtenerResumenVentas30Dias,
-  obtenerDetalleVentaPorFecha
+  obtenerDetalleVentaPorFecha,
+  obtenerMermasUltimos30Dias,
+  obtenerSobrantesUltimos30Dias
 }

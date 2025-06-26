@@ -457,7 +457,52 @@ async function generarComprobantePDF(req, res) {
   res.send(Buffer.from(pdfBytes))
 }
 
+async function obtenerResumenMermas() {
+  const mermas = await dbMovimientos.obtenerMermasUltimos30Dias();
 
+  const resumen = {};
+
+  mermas.forEach(m => {
+    const fechaLima = DateTime
+      .fromISO(m.fecha.toISOString())
+      .toFormat('yyyy-MM-dd');
+
+    resumen[fechaLima] = (resumen[fechaLima] || 0) + 1;
+  });
+
+  const resultado = Object.entries(resumen).map(([fecha, mermas]) => ({
+    fecha,
+    mermas
+  }));
+
+  resultado.sort((a, b) => a.fecha.localeCompare(b.fecha));
+
+  return resultado;
+}
+
+
+async function obtenerResumenSobrantes() {
+  const sobrantes = await dbMovimientos.obtenerSobrantesUltimos30Dias();
+
+  const resumen = {};
+
+  sobrantes.forEach(s => {
+    const fechaLima = DateTime
+      .fromISO(s.fecha.toISOString())
+      .toFormat('yyyy-MM-dd');
+
+    resumen[fechaLima] = (resumen[fechaLima] || 0) + 1;
+  });
+
+  const resultado = Object.entries(resumen).map(([fecha, sobrantes]) => ({
+    fecha,
+    sobrantes
+  }));
+
+  resultado.sort((a, b) => a.fecha.localeCompare(b.fecha));
+
+  return resultado;
+}
 
 module.exports = {
   obtenerMovimientos,
@@ -471,5 +516,7 @@ module.exports = {
   registrarMermaPost,
   verDetalleMovimiento,
   generarComprobantePDF,
-  exportarReporteExcel
+  exportarReporteExcel,
+  obtenerResumenMermas,
+  obtenerResumenSobrantes
 }

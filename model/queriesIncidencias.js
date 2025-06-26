@@ -98,10 +98,19 @@ async function obtenerIncidenciaPorId(id_incidencia){
   return row;
 }
 
+async function obtenerIncidenciasUltimos30Dias() {
+  const result = await pool.query(`
+    SELECT fecha
+    FROM incidencia
+    WHERE fecha >= NOW() - INTERVAL '30 days'
+  `);
+  return result.rows;
+}
 
 module.exports = {
   registrarIncidencia,
   obtenerIncidencias,
   obtenerIncidenciasPorOrden,
-  obtenerIncidenciaPorId
+  obtenerIncidenciaPorId,
+  obtenerIncidenciasUltimos30Dias
 }

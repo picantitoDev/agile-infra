@@ -1,5 +1,6 @@
 const dbIncidencias = require("../model/queriesIncidencias")
 const { generarPDFIncidencia } = require('../utils/pdfGenerator');
+const { DateTime } = require('luxon');
 
 async function obtenerIncidencias(req, res) {
   try {
@@ -41,7 +42,34 @@ async function descargarPDFIncidencia(req, res){
   }
 }
 
+async function obtenerResumenIncidencias() {
+  const incidencias = await dbIncidencias.obtenerIncidenciasUltimos30Dias();
+
+  const resumen = {};
+
+  incidencias.forEach(inc => {
+    const fechaUTC = inc.fecha.toISOString();
+
+    const fechaLima = DateTime
+      .fromISO(fechaUTC, { zone: 'utc' })
+      .setZone('America/Lima')
+      .toFormat('yyyy-MM-dd');
+
+    resumen[fechaLima] = (resumen[fechaLima] || 0) + 1;
+  });
+
+  const resultado = Object.entries(resumen).map(([fecha, incidencias]) => ({
+    fecha,
+    incidencias
+  }));
+
+  resultado.sort((a, b) => a.fecha.localeCompare(b.fecha));
+
+  return resultado;
+}
+
 module.exports = {
-obtenerIncidencias,
-descargarPDFIncidencia
+  obtenerIncidencias,
+  descargarPDFIncidencia,
+  obtenerResumenIncidencias
 }

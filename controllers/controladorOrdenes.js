@@ -142,17 +142,26 @@ async function obtenerOrdenPorId(req, res) {
   }
 }
 
-async function detalleOrden(req, res){
-    try {
+async function detalleOrden(req, res) {
+  try {
     const id_order = req.params.id;
     const orden = await dbOrdenes.obtenerOrdenPorId(id_order);
 
     if (!orden) {
       return res.status(404).json({ mensaje: 'Orden no encontrada' });
     }
+
+    // ✅ Convertir fecha UTC a hora Lima (solo si existe)
+    if (orden.fecha) {
+      orden.fecha = DateTime
+        .fromJSDate(orden.fecha, { zone: 'utc' })
+        .setZone('America/Lima')
+        .toISO(); // puedes usar .toISO() o pasar el objeto Date con .toJSDate()
+    }
+
     const incidencias = await dbIncidencias.obtenerIncidenciasPorOrden(id_order);
 
-    res.render('detalleOrden', { orden, incidencias});
+    res.render('detalleOrden', { orden, incidencias });
 
   } catch (error) {
     console.error('Error al obtener la orden por ID:', error);

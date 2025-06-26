@@ -244,12 +244,19 @@
 
     <div class="orden-info">
       <p><strong>Proveedor:</strong> <%= orden.proveedor %></p>
-      <p><strong>Fecha:</strong>         <% let fechaFormateada = 'Fecha inválida';
-          if (orden.fecha instanceof Date) {
-            fechaFormateada = orden.fecha.toISOString().slice(0, 10);
-          }
-        %>
-        <%= fechaFormateada %></p>
+      <p><strong>Fecha:</strong>
+        <%= new Date(orden.fecha).toLocaleString("es-PE", {
+          timeZone: "America/Lima",
+          year: "numeric",
+          month: "2-digit",
+          day: "2-digit",
+          hour: "2-digit",
+          minute: "2-digit",
+          second: "2-digit",
+          hour12: true
+        }) %>
+      </p>
+
       <p><strong>Estado:</strong> 
         <span class="estado <%= orden.estado %>">
           <%= orden.estado.replace('_', ' ').toUpperCase() %>

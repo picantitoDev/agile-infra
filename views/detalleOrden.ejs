@@ -326,6 +326,11 @@
         </table>
       <% } %>
     </div>
+<form action="/ordenes/<%= orden.id_order %>/cancelar" method="POST" onsubmit="return confirm('¿Estás seguro de que deseas cancelar esta orden?');">
+  <button type="submit" class="btn btn-pdf" style="background-color: var(--danger-color);">
+    <i class="fas fa-times-circle"></i> Cancelar Orden
+  </button>
+</form>
 
   </div>
 

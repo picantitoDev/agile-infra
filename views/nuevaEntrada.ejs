@@ -282,7 +282,7 @@
           ordenActual = orden;
 
 
-          if (orden.estado === 'finalizada') {
+          if (orden.estado === 'finalizada' || orden.estado === "cancelada") {
             alert('Esta orden ya ha sido finalizada. No puedes registrar otra entrada para ella.');
             ordenInfoDiv.style.display = 'none';
             proveedorSelect.disabled = true;

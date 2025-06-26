@@ -251,6 +251,19 @@ resumen.forEach(r => {
   return resumen;
 }
 
+
+async function cancelarOrden(req, res){
+  const idOrden = req.params.id;
+
+  try {
+    await dbOrdenes.cancelarOrden(idOrden);
+    res.redirect(`/ordenes`);
+  } catch (error) {
+    console.error("Error al cancelar la orden:", error);
+    res.status(500).send("Error al cancelar la orden.");
+  }
+};
+
 module.exports = {
     listarOrdenes,
     crearOrdenGet,
@@ -260,5 +273,6 @@ module.exports = {
     generarOrdenPDF,
     obtenerOrdenPorProducto,
     detalleOrdenPorFecha,
-    obtenerResumenOrdenes
+    obtenerResumenOrdenes,
+    cancelarOrden
 }

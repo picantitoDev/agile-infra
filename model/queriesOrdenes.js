@@ -152,6 +152,15 @@ async function obtenerDetalleOrdenesPorFecha(fechaLimaString) {
   return rows;
 }
 
+async function cancelarOrden(idOrden){
+  const query = `
+    UPDATE orden_reabastecimiento
+    SET estado = 'cancelada'
+    WHERE id_order = $1
+  `;
+  await pool.query(query, [idOrden]);
+};
+
 module.exports = {
     obtenerOrdenes,
     crearOrden,
@@ -160,5 +169,6 @@ module.exports = {
     actualizarProductosOrden,
     buscarOrdenPorProductoEnCurso,
     obtenerOrdenesUltimos30Dias,
-    obtenerDetalleOrdenesPorFecha
+    obtenerDetalleOrdenesPorFecha,
+    cancelarOrden
 }

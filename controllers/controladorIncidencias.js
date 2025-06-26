@@ -48,11 +48,8 @@ async function obtenerResumenIncidencias() {
   const resumen = {};
 
   incidencias.forEach(inc => {
-    const fechaUTC = inc.fecha.toISOString();
-
     const fechaLima = DateTime
-      .fromISO(fechaUTC, { zone: 'utc' })
-      .setZone('America/Lima')
+      .fromISO(inc.fecha.toISOString()) // ya está en Lima, no es necesario 'zone: utc'
       .toFormat('yyyy-MM-dd');
 
     resumen[fechaLima] = (resumen[fechaLima] || 0) + 1;
@@ -67,6 +64,7 @@ async function obtenerResumenIncidencias() {
 
   return resultado;
 }
+
 
 module.exports = {
   obtenerIncidencias,

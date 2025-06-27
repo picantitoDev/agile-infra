@@ -176,7 +176,7 @@
       const input = document.getElementById("nombre")
       const button = document.querySelector(".btn-agregar")
       const errorMessage = document.getElementById("error-message")
-      const regexNombreValido = /^[\p{L} ]+$/u;
+      const regexNombreValido = /^[\p{L}, ]+$/u;
 
       input.addEventListener("input", () => {
         const value = input.value.toLowerCase().trim()
@@ -267,7 +267,7 @@
     const id = tr.getAttribute('data-id');
     const nuevoNombre = input.value.trim();
     const nombreOriginal = span.textContent.trim();
-    const regexNombreValido = /^[\p{L} ]+$/u;
+    const regexNombreValido = /^[\p{L}, ]+$/u;
 
     const nuevoNombreNormalizado = nuevoNombre.toLowerCase();
     const nombreOriginalNormalizado = nombreOriginal.toLowerCase();
@@ -307,6 +307,7 @@
       input.style.display = 'none';
       btn.style.display = 'none';
       tr.querySelector('.btn-editar').style.display = 'inline-block';
+      tr.querySelector('.btn-cancelar').style.display = 'none';
       input.classList.remove("input-error");
 
       // Actualizar array local existingCategories correctamente

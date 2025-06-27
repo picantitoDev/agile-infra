@@ -216,6 +216,38 @@
       modalExportar.style.display = "none";
     }
   });
+
+  const formExportar = document.getElementById("form-exportar");
+
+  const today = new Date().toISOString().split("T")[0];
+
+    document.getElementById("desde").max = today;
+    document.getElementById("hasta").max = today;
+  
+formExportar.addEventListener("submit", function (e) {
+  const tipo = document.getElementById("tipo").value;
+  const desde = document.getElementById("desde").value;
+  const hasta = document.getElementById("hasta").value;
+
+  if (!tipo || !desde || !hasta) {
+    e.preventDefault();
+    alert("Por favor, seleccione un rango de fechas.");
+    return;
+  }
+
+  const fechaDesde = new Date(desde);
+  const fechaHasta = new Date(hasta);
+
+  if (fechaDesde > fechaHasta) {
+    e.preventDefault();
+    alert("La fecha 'desde' no puede ser mayor que la fecha 'hasta'.");
+  }
+
+      setTimeout(() => {
+      formExportar.reset(); // Limpia todos los inputs del formulario
+      modalExportar.style.display = "none"; // Cierra el modal
+    }, 500); // Tiempo suficiente para iniciar la descarga
+});
 </script>
 
 

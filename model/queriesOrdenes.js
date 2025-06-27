@@ -1,16 +1,18 @@
 const pool = require("./pool")
 const { DateTime } = require('luxon');
 
-async function obtenerOrdenes(){
+async function obtenerOrdenes() {
   const query = `
     SELECT 
       o.id_order, 
       p.razon_social AS proveedor, 
       o.products, 
       o.fecha,
-      o.estado
+      o.estado,
+      u.username AS usuario
     FROM orden_reabastecimiento o
     JOIN proveedor p ON o.id_proveedor = p.id_proveedor
+    JOIN usuarios u ON o.id_usuario = u.id
     ORDER BY o.id_order DESC
   `;
   const result = await pool.query(query);

@@ -85,37 +85,45 @@
       table-layout: fixed; /* Fixed table layout prevents column shifting */
     }
 
-/* Distribución ajustada para 6 columnas */
 .tabla-ordenes th:nth-child(1),
 .tabla-ordenes td:nth-child(1) {
-  width: 10%; /* ID Orden */
+  width: 9%;  /* ID Orden */
 }
 
 .tabla-ordenes th:nth-child(2),
 .tabla-ordenes td:nth-child(2) {
-  width: 24%; /* Proveedor */
+  width: 17%; /* Proveedor */
 }
 
 .tabla-ordenes th:nth-child(3),
 .tabla-ordenes td:nth-child(3) {
-  width: 20%; /* Fecha */
+  width: 10%; /* Fecha */
 }
 
 .tabla-ordenes th:nth-child(4),
 .tabla-ordenes td:nth-child(4) {
-  width: 13%; /* Estado */
+  width: 10%; /* Hora */
 }
 
 .tabla-ordenes th:nth-child(5),
 .tabla-ordenes td:nth-child(5) {
-  width: 23%; /* Productos */
+  width: 12%; /* Estado */
 }
 
 .tabla-ordenes th:nth-child(6),
 .tabla-ordenes td:nth-child(6) {
-  width: 10%; /* Detalle */
+  width: 12%; /* Usuario */
 }
 
+.tabla-ordenes th:nth-child(7),
+.tabla-ordenes td:nth-child(7) {
+  width: 20%; /* Productos */
+}
+
+.tabla-ordenes th:nth-child(8),
+.tabla-ordenes td:nth-child(8) {
+  width: 10%; /* Detalle */
+}
 .btn-detalle {
   background-color: var(--accent-color);
   color: white;
@@ -589,7 +597,9 @@
     <tr>
       <th>ID Orden</th>
       <th>Proveedor</th>
-      <th>Fecha</th>
+        <th>Fecha</th> <!-- Nueva columna -->
+        <th>Hora</th>  <!-- Nueva columna -->
+        <th>Usuario</th>
       <th>Estado</th>
       <th>Productos</th>
       <th>Detalle</th> <!-- Nueva columna -->
@@ -600,21 +610,26 @@
       <tr class="fila-orden" data-index="<%= index %>">
         <td data-label="ID Orden"><%= orden.id_order %></td>
         <td data-label="Proveedor"><%= orden.proveedor %></td>
-        <td data-label="Fecha">
-          <%= new Date(orden.fecha).toLocaleString("es-PE", {
+        <% const fechaObjeto = new Date(orden.fecha); %>
+
+        <td data-label="Fecha" data-fecha="<%= fechaObjeto.toISOString() %>">
+          <%= fechaObjeto.toLocaleDateString("es-PE", { timeZone: "America/Lima" }) %>
+        </td>
+
+        <td data-label="Hora">
+          <%= fechaObjeto.toLocaleTimeString("es-PE", {
             timeZone: "America/Lima",
-            year: "numeric",
-            month: "2-digit",
-            day: "2-digit",
             hour: "2-digit",
             minute: "2-digit",
             second: "2-digit",
             hour12: true
           }) %>
         </td>
+                  <td data-label="Usuario"><%= orden.usuario %></td>
         <td data-label="Estado">
           <span class="estado-badge"><%= orden.estado %></span>
         </td>
+
         <td data-label="Productos">
           <button class="btn-toggle-productos" data-index="<%= index %>">
             <span class="btn-text">Ver productos</span>
@@ -628,7 +643,7 @@
 
       <!-- Fila desplegable (oculta al inicio) -->
       <tr class="fila-productos" id="productos-<%= index %>">
-        <td colspan="6"> <!-- Actualizado de 5 a 6 columnas -->
+        <td colspan="8"> <!-- Actualizado de 5 a 6 columnas -->
           <% let productos = []; try {
             productos = typeof orden.products === 'string'
               ? JSON.parse(orden.products)
@@ -661,135 +676,32 @@
 </div>
 
 <script>
-  document.addEventListener("click", (e) => {
-  if (e.target.closest('.btn-toggle-productos')) {
-    const boton = e.target.closest('.btn-toggle-productos');
-    const index = boton.dataset.index;
-    const filaProductos = document.getElementById(`productos-${index}`);
-    const btnText = boton.querySelector('.btn-text');
-    const btnIcon = boton.querySelector('.btn-icon');
-    
-    if (filaProductos.classList.contains('show')) {
-      filaProductos.classList.remove('show');
-      filaProductos.style.display = 'none';
-      btnText.textContent = 'Ver productos';
-      btnIcon.style.transform = 'rotate(0deg)';
-      btnIcon.textContent = '▼';
-    } else {
-      filaProductos.classList.add('show');
-      filaProductos.style.display = 'table-row';
-      btnText.textContent = 'Ocultar productos';
-      btnIcon.style.transform = 'rotate(180deg)';
-      btnIcon.textContent = '▲';
-    }
-  }
-});
-</script>
-
-<script>
-  document.addEventListener("DOMContentLoaded", () => {
-    const filtroBusqueda = document.getElementById("filtro-busqueda");
-    const filtroFecha = document.getElementById("filtro-fecha");
-    const filtroDesde = document.getElementById("filtro-desde");
-    const filtroHasta = document.getElementById("filtro-hasta");
-    const filtroEstado = document.getElementById("filtro-estado");
-
-    const filas = document.querySelectorAll("table tbody tr.fila-orden");
-
-    const parseFechaTexto = (texto) => {
-      const meses = {
-        'ene': 0, 'feb': 1, 'mar': 2, 'abr': 3, 'may': 4, 'jun': 5,
-        'jul': 6, 'ago': 7, 'sep': 8, 'oct': 9, 'nov': 10, 'dic': 11
-      };
-
-      // Quitar punto del mes y la coma entre fecha y hora
-      texto = texto.replace(/\./g, "").replace(",", "");
-
-      const partes = texto.split(" "); // ["12", "jun", "2025", "14:30"]
-      if (partes.length < 4) return null;
-
-      const dia = parseInt(partes[0]);
-      const mes = meses[partes[1].toLowerCase()];
-      const anio = parseInt(partes[2]);
-
-      const [hora, minuto] = partes[3].split(":").map(Number);
-
-      if (isNaN(dia) || isNaN(mes) || isNaN(anio) || isNaN(hora) || isNaN(minuto)) return null;
-
-      return new Date(anio, mes, dia, hora, minuto);
-    };
-
-    const filtrarOrdenes = () => {
-      const termino = filtroBusqueda.value.trim().toLowerCase();
-      const diasFiltro = parseInt(filtroFecha.value);
-      const desde = filtroDesde.value ? new Date(filtroDesde.value) : null;
-      const hasta = filtroHasta.value ? new Date(filtroHasta.value) : null;
-      if (hasta) hasta.setHours(23, 59, 59, 999);
-
-      const estadoSeleccionado = filtroEstado.value;
-
-      filas.forEach(fila => {
-        const index = fila.dataset.index;
-        const filaProductos = document.getElementById(`productos-${index}`);
-        const idOrden = fila.querySelector("td:nth-child(1)").textContent.trim().toLowerCase();
-        const textoEstado = fila.querySelector("td:nth-child(4)").textContent.trim().toLowerCase();
-        const productosText = filaProductos.textContent.trim().toLowerCase();
-
-        const fechaTexto = fila.querySelector("td:nth-child(3)").textContent.trim();
-        const fecha = parseFechaTexto(fechaTexto);
-
-        let mostrar = true;
-
-        if (termino !== "") {
-          if (!isNaN(termino[0])) {
-            if (!idOrden.includes(termino)) mostrar = false;
-          } else {
-            if (!productosText.includes(termino)) mostrar = false;
-          }
-        }
-
-        if (!isNaN(diasFiltro) && fecha) {
-          const hoy = new Date();
-          const diasMs = diasFiltro * 24 * 60 * 60 * 1000;
-          if ((hoy - fecha) > diasMs) mostrar = false;
-        }
-
-        if (desde && fecha < desde) mostrar = false;
-        if (hasta && fecha > hasta) mostrar = false;
-
-        if (estadoSeleccionado && textoEstado !== estadoSeleccionado) {
-          mostrar = false;
-        }
-
-        // Mostrar u ocultar la fila principal
-        fila.style.display = mostrar ? "table-row" : "none";
-
-        // Mostrar productos solo si ya estaban desplegados
-        if (mostrar) {
-      fila.style.display = "table-row";
-      // Mantener el estado de los productos desplegables
+    document.addEventListener("click", (e) => {
+    if (e.target.closest('.btn-toggle-productos')) {
+      const boton = e.target.closest('.btn-toggle-productos');
+      const index = boton.dataset.index;
       const filaProductos = document.getElementById(`productos-${index}`);
-      filaProductos.style.display = filaProductos.classList.contains("show") ? "table-row" : "none";
-    } else {
-      fila.style.display = "none";
-      document.getElementById(`productos-${index}`).style.display = "none";
+      const btnText = boton.querySelector('.btn-text');
+      const btnIcon = boton.querySelector('.btn-icon');
+
+      if (filaProductos.classList.contains('show')) {
+        filaProductos.classList.remove('show');
+        filaProductos.style.display = 'none';
+        btnText.textContent = 'Ver productos';
+        btnIcon.style.transform = 'rotate(0deg)';
+        btnIcon.textContent = '▼';
+      } else {
+        filaProductos.classList.add('show');
+        filaProductos.style.display = 'table-row';
+        btnText.textContent = 'Ocultar productos';
+        btnIcon.style.transform = 'rotate(180deg)';
+        btnIcon.textContent = '▲';
+      }
     }
-
-      const algunaVisible = Array.from(filas).some(fila => fila.style.display !== "none");
-      const filaVacia = document.getElementById("fila-sin-resultados");
-      filaVacia.style.display = algunaVisible ? "none" : "table-row";
-
-      });
-    };
-
-    filtroBusqueda.addEventListener("input", filtrarOrdenes);
-    filtroFecha.addEventListener("change", filtrarOrdenes);
-    filtroDesde.addEventListener("change", filtrarOrdenes);
-    filtroHasta.addEventListener("change", filtrarOrdenes);
-    filtroEstado.addEventListener("change", filtrarOrdenes);
   });
 
-   document.addEventListener("DOMContentLoaded", () => {
+  // Filtros
+  document.addEventListener("DOMContentLoaded", () => {
     const filtroBusqueda = document.getElementById("filtro-busqueda");
     const filtroFecha = document.getElementById("filtro-fecha");
     const filtroDesde = document.getElementById("filtro-desde");
@@ -799,38 +711,25 @@
 
     const filas = document.querySelectorAll("table tbody tr.fila-orden");
 
-    const parseFechaTexto = (texto) => {
-      const meses = {
-        'ene': 0, 'feb': 1, 'mar': 2, 'abr': 3, 'may': 4, 'jun': 5,
-        'jul': 6, 'ago': 7, 'sep': 8, 'oct': 9, 'nov': 10, 'dic': 11
-      };
-      texto = texto.replace(/\./g, "").replace(",", "");
-      const partes = texto.split(" ");
-      if (partes.length < 4) return null;
-      const dia = parseInt(partes[0]);
-      const mes = meses[partes[1].toLowerCase()];
-      const anio = parseInt(partes[2]);
-      const [hora, minuto] = partes[3].split(":").map(Number);
-      if (isNaN(dia) || isNaN(mes) || isNaN(anio) || isNaN(hora) || isNaN(minuto)) return null;
-      return new Date(anio, mes, dia, hora, minuto);
-    };
-
     const filtrarOrdenes = () => {
       const termino = filtroBusqueda.value.trim().toLowerCase();
       const diasFiltro = parseInt(filtroFecha.value);
-      const desde = filtroDesde.value ? new Date(filtroDesde.value) : null;
-      const hasta = filtroHasta.value ? new Date(filtroHasta.value) : null;
-      if (hasta) hasta.setHours(23, 59, 59, 999);
+const desde = filtroDesde.value ? new Date(`${filtroDesde.value}T00:00:00`) : null;
+      const hasta = filtroHasta.value ? new Date(`${filtroHasta.value}T23:59:59.999`) : null;
+      if (hasta) hasta.setHours(23, 59, 59, 999); // ✅ Esto asegura que el día final sí se incluya
+
       const estadoSeleccionado = filtroEstado.value;
 
       filas.forEach(fila => {
         const index = fila.dataset.index;
         const filaProductos = document.getElementById(`productos-${index}`);
         const idOrden = fila.querySelector("td:nth-child(1)").textContent.trim().toLowerCase();
-        const textoEstado = fila.querySelector("td:nth-child(4)").textContent.trim().toLowerCase();
+        const textoEstado = fila.querySelector("td:nth-child(6)").textContent.trim().toLowerCase();
         const productosText = filaProductos.textContent.trim().toLowerCase();
-        const fechaTexto = fila.querySelector("td:nth-child(3)").textContent.trim();
-        const fecha = parseFechaTexto(fechaTexto);
+
+        const fechaIso = fila.querySelector("td:nth-child(3)").dataset.fecha;
+        const fecha = fechaIso ? new Date(fechaIso) : null;
+
         let mostrar = true;
 
         if (termino !== "") {
@@ -855,12 +754,7 @@
         }
 
         fila.style.display = mostrar ? "table-row" : "none";
-
-        if (mostrar) {
-          filaProductos.style.display = filaProductos.classList.contains("show") ? "table-row" : "none";
-        } else {
-          filaProductos.style.display = "none";
-        }
+        filaProductos.style.display = mostrar && filaProductos.classList.contains("show") ? "table-row" : "none";
       });
 
       const algunaVisible = Array.from(filas).some(fila => fila.style.display !== "none");
@@ -874,7 +768,7 @@
     filtroHasta.addEventListener("change", filtrarOrdenes);
     filtroEstado.addEventListener("change", filtrarOrdenes);
 
-    // Limpiar filtros
+    // Botón limpiar filtros
     btnLimpiarFiltros.addEventListener("click", () => {
       filtroBusqueda.value = "";
       filtroEstado.value = "";

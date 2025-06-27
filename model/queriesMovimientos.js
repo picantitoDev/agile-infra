@@ -327,7 +327,7 @@ async function registrarProductoMovimiento({
 async function obtenerResumenVentas30Dias() {
   const result = await pool.query(`
     SELECT 
-      (m.fecha AT TIME ZONE 'UTC' AT TIME ZONE 'America/Lima')::DATE AS fecha,
+      m.fecha::DATE AS fecha,
       SUM(v.total) AS total
     FROM movimiento m
     JOIN movimiento_venta v ON m.id_movimiento = v.id_movimiento

@@ -1,5 +1,19 @@
 <head>
     <link rel="stylesheet" href="/listarIncidencias.css">
+    <style>
+      .btn-limpiar {
+  margin-left: 1rem;
+  padding: 6px 12px;
+  background-color: #eee;
+  border: none;
+  border-radius: 4px;
+  cursor: pointer;
+}
+
+.btn-limpiar:hover {
+  background-color: #ddd;
+}
+    </style>
 </head>
 <div class="container mt-4">
   <h2 class="mb-4">Listado de Incidencias</h2>
@@ -25,16 +39,20 @@
             <input type="date" id="filtro-desde" />
             <input type="date" id="filtro-hasta" />
         </div>
+
+            <button id="btn-limpiar-filtros" class="btn-limpiar">
+      🧹 Limpiar filtros
+    </button>
     </div>
 </div>
 
   <table class="table table-bordered table-hover">
     <thead class="table-light">
       <tr>
-        <th>ID</th>
-        <th>Fecha Registro</th>
-        <th>Movimiento</th>
-        <th>Orden   </th>
+        <th>ID Orden</th>
+        <th>Fecha</th>     <!-- Nuevo -->
+        <th>Hora</th>      <!-- Nuevo -->
+        <th>ID Movimiento</th>
         <th>Detalle Productos</th>
         <th>Acciones</th>
       </tr>
@@ -47,18 +65,19 @@
       <% } else { %>
         <% incidencias.forEach(inc => { %>
           <tr>
-            <td><%= inc.id_incidencia %></td>
-              <td><%= new Date(inc.fecha).toLocaleString('es-PE', {
-                year: 'numeric',
-                month: '2-digit',
-                day: '2-digit',
-                hour: '2-digit',
-                minute: '2-digit',
-                second: '2-digit',
-                hour12: false
-              }) %></td>
-            <td><%= inc.id_movimiento %></td>
             <td><%= inc.id_orden || '—' %></td>
+            <td><%= new Date(inc.fecha).toLocaleDateString('es-PE', {
+              year: 'numeric',
+              month: '2-digit',
+              day: '2-digit'
+            }) %></td>
+            <td><%= new Date(inc.fecha).toLocaleTimeString('es-PE', {
+              hour: '2-digit',
+              minute: '2-digit',
+              second: '2-digit',
+              hour12: false
+            }) %></td>
+            <td><%= inc.id_movimiento %></td>
             <td>
             <ul class="mb-0">
                 <% inc.detalle_productos.forEach(p => { %>
@@ -85,7 +104,10 @@
   const filtroHasta = document.getElementById('filtro-hasta');
 
   const filas = document.querySelectorAll('table tbody tr');
-  const hoy = new Date();
+  const hoy = new Date().toISOString().split("T")[0];
+
+    filtroDesde.max = hoy;
+    filtroHasta.max = hoy;
 
   function filtrar() {
     const idFiltro = filtroId.value.trim();
@@ -133,4 +155,14 @@
   filtroFecha.addEventListener('change', filtrar);
   filtroDesde.addEventListener('change', filtrar);
   filtroHasta.addEventListener('change', filtrar);
+
+    const btnLimpiar = document.getElementById('btn-limpiar-filtros');
+
+  btnLimpiar.addEventListener('click', () => {
+    filtroId.value = '';
+    filtroFecha.value = '';
+    filtroDesde.value = '';
+    filtroHasta.value = '';
+    filtrar(); // <-- Asegúrate de que esta función aplique los filtros actuales
+  });
 </script>

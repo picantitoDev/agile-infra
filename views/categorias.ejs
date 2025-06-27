@@ -165,20 +165,34 @@
       const input = document.getElementById("nombre")
       const button = document.querySelector(".btn-agregar")
       const errorMessage = document.getElementById("error-message")
+      const regexNombreValido = /^[\p{L} ]+$/u;
 
       input.addEventListener("input", () => {
         const value = input.value.toLowerCase().trim()
 
-        if (existingCategories.includes(value)) {
-          input.setCustomValidity("La categoría ya existe.")
-          input.classList.add("input-error")
-          errorMessage.textContent = "La categoría ya existe."
-          button.disabled = true
+          if (value === "") {
+          input.setCustomValidity("");
+          input.classList.remove("input-error");
+          errorMessage.textContent = "";
+          button.disabled = true; // puedes deshabilitar mientras está vacío
+          return;
+        }
+
+          if (!regexNombreValido.test(value)) {
+          input.setCustomValidity("Solo se permiten letras y espacios.");
+          input.classList.add("input-error");
+          errorMessage.textContent = "Solo se permiten letras y espacios.";
+          button.disabled = true;
+        } else if (existingCategories.includes(value)) {
+          input.setCustomValidity("La categoría ya existe.");
+          input.classList.add("input-error");
+          errorMessage.textContent = "La categoría ya existe.";
+          button.disabled = true;
         } else {
-          input.setCustomValidity("")
-          input.classList.remove("input-error")
-          errorMessage.textContent = ""
-          button.disabled = false
+          input.setCustomValidity("");
+          input.classList.remove("input-error");
+          errorMessage.textContent = "";
+          button.disabled = false;
         }
       })
 
@@ -188,20 +202,34 @@
         .addEventListener("submit", (e) => {
           const value = input.value.toLowerCase().trim()
 
-          if (existingCategories.includes(value)) {
-            e.preventDefault()
-            input.setCustomValidity("La categoría ya existe.")
-            input.classList.add("input-error")
-            errorMessage.textContent = "La categoría ya existe."
-            button.disabled = true
-          }
+              if (value === "") {
+                e.preventDefault();
+                input.setCustomValidity("El campo no puede estar vacío.");
+                input.classList.add("input-error");
+                errorMessage.textContent = "El campo no puede estar vacío.";
+                button.disabled = true;
+            }
+
+            if (!regexNombreValido.test(value)) {
+              e.preventDefault();
+              input.setCustomValidity("Solo se permiten letras y espacios.");
+              input.classList.add("input-error");
+              errorMessage.textContent = "Solo se permiten letras y espacios.";
+              button.disabled = true;
+            } else if (existingCategories.includes(value)) {
+              e.preventDefault();
+              input.setCustomValidity("La categoría ya existe.");
+              input.classList.add("input-error");
+              errorMessage.textContent = "La categoría ya existe.";
+              button.disabled = true;
+            }
         })
 
 
 
         // AYUDAME DIOSITO
 
-       let categoriaIdSeleccionada = null;
+  let categoriaIdSeleccionada = null;
   let trSeleccionada = null;
 
   document.querySelectorAll('.btn-editar').forEach((btn) => {

@@ -754,13 +754,14 @@ const ventasChart = new Chart(ctx, {
     data: {
         labels: fechasFormateadas,
         datasets: [{
-            label: 'Monto total (S/)',
+            label: 'Monto total (S/.)',
             data: montosFiltrados,
             backgroundColor: 'rgba(99, 102, 241, 0.7)',
             borderColor: 'rgba(99, 102, 241, 1)',
             borderWidth: 0,
             borderRadius: 6,
             borderSkipped: false,
+            minBarLength: 5 // 👈 fuerza una altura mínima visible
         }]
     },
     options: {
@@ -793,13 +794,27 @@ const ventasChart = new Chart(ctx, {
         },
         scales: {
             y: {
-                beginAtZero: true,
+                type: 'logarithmic', // <-- Cambio aquí
+                beginAtZero: false, // <-- en log no se puede comenzar en cero
+                min: 1,             // <-- mínimo para que 0s no causen problemas
                 grid: {
                     color: 'rgba(229, 231, 235, 0.5)',
                     drawBorder: false
                 },
                 ticks: {
-                    color: '#6b7280'
+                    color: '#6b7280',
+                    callback: function(value) {
+                        if (value >= 1000) return (value / 1000) + 'K';
+                        return value;
+                    },
+                    // Solo mostrar potencias de 10
+                    autoSkip: true,
+                    maxTicksLimit: 6, // máximo de etiquetas visibles
+                    // Este filtro evita valores no redondos
+                    filter: function(value) {
+                        const log10 = Math.log10(value);
+                        return Number.isInteger(log10); // solo potencias de 10: 1, 10, 100, 1000, etc.
+                    }
                 }
             },
             x: {

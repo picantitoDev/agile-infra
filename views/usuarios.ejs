@@ -44,48 +44,48 @@
             <th>Acciones</th>
           </tr>
         </thead>
-<tbody>
-  <% usuarios.forEach(usuario => { %>
-    <tr>
-      <td><%= usuario.id %></td>
-      <td><%= usuario.username %></td>
-      <td><%= usuario.email || '—' %></td>
-      <td><%= usuario.rol %></td>
-      <td>
-        <% 
-          const actual = user;
-          const objetivo = usuario;
+      <tbody>
+        <% usuarios.forEach(usuario => { %>
+          <tr>
+            <td><%= usuario.id %></td>
+            <td><%= usuario.username %></td>
+            <td><%= usuario.email || '—' %></td>
+            <td><%= usuario.rol %></td>
+            <td>
+              <% 
+                const actual = user;
+                const objetivo = usuario;
 
-          const esSuperadmin = actual.nivel_acceso === 'superadmin';
-          const esAdmin = actual.rol === 'Admin' && actual.nivel_acceso !== 'superadmin';
+                const esSuperadmin = actual.nivel_acceso === 'superadmin';
+                const esAdmin = actual.rol === 'Admin' && actual.nivel_acceso !== 'superadmin';
 
-          const objetivoEsSuperadmin = objetivo.nivel_acceso === 'superadmin';
-          const objetivoEsAdmin = objetivo.rol === 'Admin';
+                const objetivoEsSuperadmin = objetivo.nivel_acceso === 'superadmin';
+                const objetivoEsAdmin = objetivo.rol === 'Admin';
 
-          const puedeEditar = (
-            esSuperadmin ||
-            (esAdmin && !objetivoEsAdmin && !objetivoEsSuperadmin)
-          );
-        %>
-<% if (puedeEditar) { %>
-  <a href="/usuarios/editar/<%= usuario.id %>" title="Editar usuario">
-    <svg class="edit-icon" viewBox="0 0 24 24">
-      <path d="m18 2 4 4-12 12H6v-4L18 2z"/>
-      <path d="m21.378 5.378-3.756-3.756"/>
-    </svg>
-  </a>
-<% } else { %>
-  <span title="Sin permisos para editar">
-    <svg class="edit-icon-disabled" viewBox="0 0 24 24">
-      <path d="m18 2 4 4-12 12H6v-4L18 2z"/>
-      <path d="m21.378 5.378-3.756-3.756"/>
-    </svg>
-  </span>
-<% } %>
-      </td>
-    </tr>
-  <% }) %>
-</tbody>
+                const puedeEditar = (
+                  esSuperadmin ||
+                  (esAdmin && !objetivoEsAdmin && !objetivoEsSuperadmin)
+                );
+              %>
+      <% if (puedeEditar) { %>
+        <a href="/usuarios/editar/<%= usuario.id %>" title="Editar usuario">
+          <svg class="edit-icon" viewBox="0 0 24 24">
+            <path d="m18 2 4 4-12 12H6v-4L18 2z"/>
+            <path d="m21.378 5.378-3.756-3.756"/>
+          </svg>
+        </a>
+      <% } else { %>
+        <span title="Sin permisos para editar">
+          <svg class="edit-icon-disabled" viewBox="0 0 24 24">
+            <path d="m18 2 4 4-12 12H6v-4L18 2z"/>
+            <path d="m21.378 5.378-3.756-3.756"/>
+          </svg>
+        </span>
+      <% } %>
+            </td>
+          </tr>
+        <% }) %>
+      </tbody>
 
       </table>
       </div>

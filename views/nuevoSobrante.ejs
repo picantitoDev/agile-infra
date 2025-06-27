@@ -74,11 +74,7 @@
       <a href="/movimientos">← Atrás</a>
       <h1 class="title">Registrar Sobrante</h1>
 
-      <form
-        id="adjustmentForm"
-        action="/movimientos/registrar-sobrante"
-        method="POST"
-      >
+      <form id="adjustmentForm" action="/movimientos/registrar-sobrante" method="POST">
         <div class="form-group" style="position: relative">
           <label for="producto">Producto</label>
           <input
@@ -154,16 +150,11 @@
 
         productoInput.addEventListener("input", function () {
           const query = productoInput.value.trim().toLowerCase()
-
-          // Limpiar resultados
           resultsContainer.innerHTML = ""
-          resultsContainer.style.border = "none" // Reset border
+          resultsContainer.style.border = "none"
 
-          if (query.length < 2) {
-            return
-          }
+          if (query.length < 2) return
 
-          // Filtrar productos
           const productosFiltrados = productos.filter((producto) =>
             producto.nombre.toLowerCase().includes(query)
           )
@@ -172,35 +163,62 @@
             productosFiltrados.forEach((producto) => {
               const resultItem = document.createElement("div")
               resultItem.classList.add("autocomplete-item")
+              resultItem.setAttribute("data-nombre", producto.nombre)
               resultItem.textContent = `${producto.nombre} - Stock: ${producto.stock} - $${producto.precio_unitario}`
 
               resultItem.addEventListener("click", function () {
-                productoInput.value = producto.nombre
+                productoInput.value = resultItem.getAttribute("data-nombre")
                 resultsContainer.innerHTML = ""
                 resultsContainer.style.border = "none"
               })
 
               resultsContainer.appendChild(resultItem)
             })
-
-            resultsContainer.style.border = "1px solid gray" // Mostrar borde
+            resultsContainer.style.border = "1px solid gray"
           } else {
             const noResult = document.createElement("div")
             noResult.textContent = "No se encontraron productos"
             noResult.classList.add("autocomplete-item")
             resultsContainer.appendChild(noResult)
-            resultsContainer.style.border = "1px solid gray" // Mostrar borde
+            resultsContainer.style.border = "1px solid gray"
           }
+        })
+
+        const form = document.getElementById("adjustmentForm")
+        const submitBtn = document.getElementById("submitBtn")
+
+        form.addEventListener("submit", function (e) {
+          const normalizar = (str) =>
+            str
+              .normalize("NFD") // Elimina tildes
+              .replace(/[\u0300-\u036f]/g, "")
+              .trim()
+              .toLowerCase()
+
+          const productoNombre = normalizar(productoInput.value)
+          const productoValido = productos.find(
+            (p) => normalizar(p.nombre) === productoNombre
+            )
+
+          if (!productoValido) {
+            e.preventDefault()
+            alert("El producto ingresado no es válido o no está disponible.")
+            submitBtn.disabled = false
+            submitBtn.innerHTML = "Registrar Ajuste"
+            return
+          }
+
+          submitBtn.disabled = true
+          submitBtn.innerHTML = '<span class="spinner"></span> Procesando...'
         })
       })
 
-      const form = document.getElementById("adjustmentForm")
-      const submitBtn = document.getElementById("submitBtn")
+      productoInput.addEventListener("input", function () {
+  const productoNombre = normalizar(productoInput.value)
+  const productoValido = productos.some(p => normalizar(p.nombre) === productoNombre)
+  submitBtn.disabled = !productoValido
+})
 
-      form.addEventListener("submit", function (e) {
-        submitBtn.disabled = true
-        submitBtn.innerHTML = '<span class="spinner"></span> Procesando...'
-      })
     </script>
   </body>
 </html>

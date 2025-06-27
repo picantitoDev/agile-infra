@@ -225,6 +225,10 @@ const filtroTipo = document.getElementById('filtro-tipo');
 const filtroFecha = document.getElementById('filtro-fecha');
 const filtroDesde = document.getElementById('filtro-desde');
 const filtroHasta = document.getElementById('filtro-hasta');
+const hoy = new Date().toISOString().split("T")[0];
+
+    filtroDesde.max = hoy;
+    filtroHasta.max = hoy;
 
 const movimientos = document.querySelectorAll('.movimiento-item');
 
@@ -236,7 +240,11 @@ function filtrar() {
   const desde = filtroDesde.value ? new Date(filtroDesde.value) : null;
   const hasta = filtroHasta.value ? new Date(filtroHasta.value) : null;
   if (hasta) hasta.setHours(23, 59, 59, 999); // incluir el final del día
-
+  
+  if (desde && hasta && desde > hasta) {
+    alert("La fecha 'Desde' no puede ser posterior a la fecha 'Hasta'.");
+    return;
+  }
   const hoy = new Date();
 
   movimientos.forEach(item => {

@@ -11,7 +11,10 @@ async function procesarFormularioRecuperacion(req, res) {
   const { email } = req.body;
   const usuario = await dbUsuarios.buscarUsuarioPorEmail(email);
 
-  const message = "Si el correo está registrado, recibirás un enlace para restablecer tu contraseña.";
+    const message = {
+      text: "Si el correo está registrado, recibirás un enlace para restablecer tu contraseña.",
+      type: "info"
+    };
   
   if (!usuario) return res.render("forgot-password", { message });
 
@@ -40,6 +43,8 @@ async function procesarFormularioRecuperacion(req, res) {
     html: `<p>Haz clic <a href="${resetUrl}">aquí</a> para restablecer tu contraseña. El enlace es válido por 1 hora.</p>`
   });
 
+  message.text = "Se ha enviado un correo con instrucciones para restablecer tu contraseña.";
+  message.type = "success";
   res.render("forgot-password", { message });
 }
 

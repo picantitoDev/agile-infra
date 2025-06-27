@@ -61,16 +61,28 @@
           />
         </div>
 
-        <div class="grupo-campo">
-          <label for="password"><i class="fas fa-lock"></i>Contraseña</label>
-          <input
-            type="password"
-            id="password"
-            name="password"
-            placeholder="Contraseña segura"
-            required
-          />
-        </div>
+<div class="grupo-campo">
+  <label for="password"><i class="fas fa-lock"></i>Contraseña</label>
+
+  <div style="position: relative; display: flex; align-items: center;">
+    <input
+      type="password"
+      id="password"
+      name="password"
+      placeholder="Contraseña segura"
+      required
+      style="width: 100%; padding-right: 40px;"
+    />
+    <i
+      class="fas fa-eye toggle-password"
+      id="togglePassword"
+      style="position: absolute; right: 10px; top: 50%; transform: translateY(-50%); cursor: pointer;"
+    ></i>
+  </div>
+
+  <small class="error-texto" style="color: red; display: none;"></small>
+  <small id="password-strength" style="display: block; margin-top: 4px; color: gray;"></small>
+</div>
 
         <div class="grupo-campo">
           <label for="rol"><i class="fas fa-user-tag"></i>Rol</label>
@@ -99,6 +111,72 @@
   const email = document.getElementById("email");
   const password = document.getElementById("password");
   const btnSubmit = document.querySelector(".btn-guardar-usuario");
+
+document.getElementById("togglePassword").addEventListener("click", function () {
+  const tipo = password.getAttribute("type") === "password" ? "text" : "password";
+  password.setAttribute("type", tipo);
+  this.classList.toggle("fa-eye");
+  this.classList.toggle("fa-eye-slash");
+});
+
+// Evaluar nivel de seguridad visualmente
+function evaluarFortaleza(valor) {
+  const strengthText = document.getElementById("password-strength");
+  let puntos = 0;
+
+  if (valor.length >= 8) puntos++;
+  if (/[A-Z]/.test(valor)) puntos++;
+  if (/\d/.test(valor)) puntos++;
+  if (/[^A-Za-z0-9]/.test(valor)) puntos++;
+
+  switch (puntos) {
+    case 0:
+    case 1:
+      strengthText.textContent = "Nivel: Débil";
+      strengthText.style.color = "red";
+      break;
+    case 2:
+    case 3:
+      strengthText.textContent = "Nivel: Media";
+      strengthText.style.color = "orange";
+      break;
+    case 4:
+      strengthText.textContent = "Nivel: Fuerte";
+      strengthText.style.color = "green";
+      break;
+  }
+}
+
+// Validación avanzada sin bloquear la original
+password.addEventListener("input", () => {
+  let valor = password.value;
+
+  // No permitir espacios (ni al escribir ni al pegar)
+  if (valor.includes(" ")) {
+    valor = valor.replace(/\s/g, "");
+    password.value = valor;
+  }
+
+  evaluarFortaleza(valor);
+
+  const errorElemento = password.parentElement.parentElement.querySelector(".error-texto");
+
+  if (valor.length < 8) {
+    errorElemento.textContent = "Debe tener al menos 8 caracteres";
+    errorElemento.style.display = "block";
+  } else if (!/[A-Z]/.test(valor)) {
+    errorElemento.textContent = "Debe contener al menos una letra mayúscula";
+    errorElemento.style.display = "block";
+  } else if (!/\d/.test(valor)) {
+    errorElemento.textContent = "Debe contener al menos un número";
+    errorElemento.style.display = "block";
+  } else if (!/[^A-Za-z0-9]/.test(valor)) {
+    errorElemento.textContent = "Debe contener al menos un carácter especial";
+    errorElemento.style.display = "block";
+  } else {
+    errorElemento.style.display = "none";
+  }
+});
 
   function mostrarError(input, mensaje) {
     eliminarError(input);
@@ -161,20 +239,42 @@
   }
 
   function validarPassword() {
-    const valor = password.value;
-    if (valor.trim() === "") {
-      mostrarError(password, "La contraseña no puede estar vacía ni contener solo espacios");
-      return false;
-    }
+  const valor = password.value;
 
-    if (valor.length < 6) {
-      mostrarError(password, "La contraseña debe tener al menos 6 caracteres");
-      return false;
-    }
-
-    eliminarError(password);
-    return true;
+  // Verifica que no esté vacío o solo espacios
+  if (valor.trim() === "") {
+    return false;
   }
+
+  // Verifica que no haya espacios
+  if (/\s/.test(valor)) {
+    return false;
+  }
+
+  // Verifica longitud mínima
+  if (valor.length < 8) {
+    return false;
+  }
+
+  // Verifica mayúscula
+  if (!/[A-Z]/.test(valor)) {
+    return false;
+  }
+
+  // Verifica número
+  if (!/\d/.test(valor)) {
+    return false;
+  }
+
+  // Verifica carácter especial
+  if (!/[^A-Za-z0-9]/.test(valor)) {
+    return false;
+  }
+
+  eliminarError(password);
+  return true;
+}
+
 
   // Validar en tiempo real
   nombre.addEventListener("input", validarNombre);

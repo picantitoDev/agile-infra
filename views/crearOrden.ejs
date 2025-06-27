@@ -362,15 +362,20 @@
           input.addEventListener("change", actualizarCantidad)
         })
       }
-      function actualizarCantidad(e) {
-        const index = parseInt(e.target.dataset.index)
-        const nuevaCantidad = parseInt(e.target.value)
 
-        if (nuevaCantidad > 0) {
-          carrito[index].cantidad = nuevaCantidad
-          renderResumenEntrada()
-        }
+    function actualizarCantidad(e) {
+      const index = parseInt(e.target.dataset.index);
+      const nuevaCantidad = parseInt(e.target.value);
+
+      if (!nuevaCantidad || nuevaCantidad < 1) {
+        alert("La cantidad debe ser un número mayor o igual a 1.");
+        e.target.value = carrito[index].cantidad; // Restaurar cantidad anterior
+        return;
       }
+
+      carrito[index].cantidad = nuevaCantidad;
+      renderResumenEntrada();
+    }
 
       // Función para quitar un producto del carrito
       function quitarProducto(index) {
@@ -403,23 +408,31 @@
       const form = document.querySelector(".orden-form")
       const submitButton = document.querySelector(".submit-button")
 
-      form.addEventListener("submit", function (e) {
-        const proveedorSeleccionado = proveedorSelect.value
-        if (!proveedorSeleccionado) {
-          alert("Por favor, seleccione un proveedor.")
-          e.preventDefault()
-          return
-        }
+form.addEventListener("submit", function (e) {
+  const proveedorSeleccionado = proveedorSelect.value;
+  if (!proveedorSeleccionado) {
+    alert("Por favor, seleccione un proveedor.");
+    e.preventDefault();
+    return;
+  }
 
-        if (carrito.length === 0) {
-          alert("Debe agregar al menos un producto al resumen de entrada.")
-          e.preventDefault()
-          return
-        }
+  if (carrito.length === 0) {
+    alert("Debe agregar al menos un producto al resumen de entrada.");
+    e.preventDefault();
+    return;
+  }
 
-        submitButton.textContent = "Registrando..."
-        submitButton.disabled = true
-      })
+  // Validar cantidades antes de enviar
+  const cantidadesValidas = carrito.every(item => Number.isInteger(item.cantidad) && item.cantidad > 0);
+  if (!cantidadesValidas) {
+    alert("Todos los productos deben tener una cantidad válida (mayor o igual a 1).");
+    e.preventDefault();
+    return;
+  }
+
+  submitButton.textContent = "Registrando...";
+  submitButton.disabled = true;
+})
 
 async function mostrarModalOrden(idProducto) {
   try {

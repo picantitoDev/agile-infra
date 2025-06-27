@@ -1,4 +1,5 @@
 const pool = require("./pool")
+const { DateTime } = require('luxon');
 
 async function obtenerMovimientos() {
   const { rows } = await pool.query(`
@@ -376,6 +377,38 @@ async function obtenerSobrantesUltimos30Dias() {
   return rows;
 }
 
+async function obtenerMovimientosAjustePorFecha(tipoAjuste, fechaLima) {
+  const inicioUTC = DateTime
+    .fromISO(fechaLima, { zone: "America/Lima" })
+    .startOf("day")
+    .toUTC()
+    .toISO();
+
+  const finUTC = DateTime
+    .fromISO(fechaLima, { zone: "America/Lima" })
+    .endOf("day")
+    .toUTC()
+    .toISO();
+
+  const { rows } = await pool.query(`
+    SELECT 
+      m.id_movimiento,
+      m.descripcion,
+      pm.id_producto,
+      p.nombre AS nombre_producto,
+      pm.cantidad
+    FROM movimiento m
+    JOIN producto_movimiento pm ON pm.id_movimiento = m.id_movimiento
+    JOIN producto p ON p.id_producto = pm.id_producto
+    WHERE m.tipo = $1
+      AND m.fecha BETWEEN $2 AND $3
+    ORDER BY m.fecha ASC
+  `, [tipoAjuste, inicioUTC, finUTC]);
+
+  return rows;
+}
+
+
 module.exports = {
   obtenerMovimientos,
   obtenerDetalleMovimiento,
@@ -391,5 +424,6 @@ module.exports = {
   obtenerResumenVentas30Dias,
   obtenerDetalleVentaPorFecha,
   obtenerMermasUltimos30Dias,
-  obtenerSobrantesUltimos30Dias
+  obtenerSobrantesUltimos30Dias,
+  obtenerMovimientosAjustePorFecha
 }

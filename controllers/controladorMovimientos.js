@@ -504,6 +504,30 @@ async function obtenerResumenSobrantes() {
   return resultado;
 }
 
+// Para obtener mermas de una fecha específica
+async function obtenerMermasPorFecha(req, res){
+  try {
+    const fecha = req.params.fecha;
+    const mermas = await dbMovimientos.obtenerMovimientosAjustePorFecha("Merma", fecha);
+    res.json(mermas);
+  } catch (error) {
+    console.error("Error al obtener mermas:", error);
+    res.status(500).json({ error: "Error interno del servidor" });
+  }
+};
+
+// Para obtener sobrantes de una fecha específica
+async function obtenerSobrantesPorFecha(req, res){
+  try {
+    const fecha = req.params.fecha;
+    const sobrantes = await dbMovimientos.obtenerMovimientosAjustePorFecha("Sobrante", fecha);
+    res.json(sobrantes);
+  } catch (error) {
+    console.error("Error al obtener sobrantes:", error);
+    res.status(500).json({ error: "Error interno del servidor" });
+  }
+};
+
 module.exports = {
   obtenerMovimientos,
   registrarVentaGet,
@@ -518,5 +542,7 @@ module.exports = {
   generarComprobantePDF,
   exportarReporteExcel,
   obtenerResumenMermas,
-  obtenerResumenSobrantes
+  obtenerResumenSobrantes,
+  obtenerMermasPorFecha,
+  obtenerSobrantesPorFecha
 }

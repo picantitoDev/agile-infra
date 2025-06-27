@@ -14,5 +14,7 @@ router.get('/resumen/cuenta', async (req, res) => {
     res.status(500).json({ error: 'Error interno' });
   }
 });
+router.get('/drill/:fecha', controladorIncidencias.detallePorFecha);
+
 
 module.exports = router

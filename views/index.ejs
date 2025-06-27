@@ -1,8 +1,9 @@
 <head>
     <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
     <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
-    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
     <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css" rel="stylesheet">
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
+
     <style>
         @import url('https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&display=swap');
         
@@ -609,6 +610,97 @@
     </div>
 </div>
 
+<div class="modal fade" id="modalDetalleIncidencias" tabindex="-1" aria-labelledby="modalDetalleLabel" aria-hidden="true">
+  <div class="modal-dialog modal-lg modal-dialog-centered modal-dialog-scrollable">
+    <div class="modal-content">
+      <div class="modal-header" style="background: #ff7675; color: var(--white);">
+        <h5 class="modal-title" id="modalDetalleLabel">
+          <i class="fas fa-exclamation-triangle me-2"></i>
+          Detalles de Incidencias<span id="modalFechaIncidencia"></span>
+        </h5>
+        <button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal" aria-label="Cerrar"></button>
+      </div>
+      <div class="modal-body">
+        <table class="table table-striped table-bordered table-sm">
+          <thead>
+            <tr>
+              <th>ID Orden</th>
+              <th>Producto</th>
+              <th>Cantidad</th>
+              <th>Incidencia</th>
+            </tr>
+          </thead>
+          <tbody id="tablaIncidenciasBody">
+            <!-- Aquí se cargan las filas dinámicamente -->
+          </tbody>
+        </table>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- Modal detalle de Mermas -->
+<div class="modal fade" id="modalDetalleMermas" tabindex="-1" aria-hidden="true">
+  <div class="modal-dialog modal-lg modal-dialog-centered modal-dialog-scrollable">
+    <div class="modal-content">
+      <div class="modal-header" style="background: #fab1a0; color: var(--gray-900);">
+        <h5 class="modal-title">
+          <i class="fas fa-minus-circle me-2"></i>
+          Detalle de Mermas - <span id="modalFechaMerma"></span>
+        </h5>
+        <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Cerrar"></button>
+      </div>
+      <div class="modal-body">
+        <table class="table table-striped table-bordered table-sm">
+          <thead>
+            <tr>
+              <th>ID Movimiento</th>
+              <th>Producto</th>
+              <th>Cantidad</th>
+              <th>Descripción</th>
+            </tr>
+          </thead>
+          <tbody id="tablaMermasBody">
+            <!-- Se insertan filas dinámicamente -->
+          </tbody>
+        </table>
+      </div>
+    </div>
+  </div>
+</div>
+
+
+<!-- Modal detalle de Sobrantes -->
+<div class="modal fade" id="modalDetalleSobrantes" tabindex="-1" aria-hidden="true">
+  <div class="modal-dialog modal-lg modal-dialog-centered modal-dialog-scrollable">
+    <div class="modal-content">
+      <div class="modal-header" style="background: #74b9ff; color: var(--white);">
+        <h5 class="modal-title">
+          <i class="fas fa-plus-circle me-2"></i>
+          Detalle de Sobrantes - <span id="modalFechaSobrante"></span>
+        </h5>
+        <button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal" aria-label="Cerrar"></button>
+      </div>
+      <div class="modal-body">
+        <table class="table table-striped table-bordered table-sm">
+          <thead>
+            <tr>
+              <th>ID Movimiento</th>
+              <th>Producto</th>
+              <th>Cantidad</th>
+              <th>Descripción</th>
+            </tr>
+          </thead>
+          <tbody id="tablaSobrantesBody">
+            <!-- Se insertan filas dinámicamente -->
+          </tbody>
+        </table>
+      </div>
+    </div>
+  </div>
+</div>
+
+
 <script id="fechas-data" type="application/json">
     <%- JSON.stringify(fechasVentas) %>
 </script>
@@ -881,66 +973,241 @@ async function mostrarModalOrdenDetalle(fechaISO, fechaMostrada) {
 }
 
   document.addEventListener("DOMContentLoaded", () => {
-    const rawData = JSON.parse(document.getElementById("incidencias-ajustes-data").textContent);
+  const rawData = getIncidenciasAjustesData();
+  const { labels, dataIncidencias, dataMermas, dataSobrantes } = procesarDatosGrafico(rawData);
+  const ctx = document.getElementById('graficoIncidenciasMermasSobrantes').getContext('2d');
+  inicializarGraficoIncidencias(ctx, labels, dataIncidencias, dataMermas, dataSobrantes);
+});
 
-    const labels = rawData.map(item => item.fecha);
-    const dataIncidencias = rawData.map(item => item.incidencias || 0);
-    const dataMermas = rawData.map(item => item.mermas || 0);
-    const dataSobrantes = rawData.map(item => item.sobrantes || 0);
+/** Obtiene y parsea los datos desde el script embebido en HTML */
+function getIncidenciasAjustesData() {
+  const raw = document.getElementById("incidencias-ajustes-data").textContent;
+  return JSON.parse(raw);
+}
 
-    const ctx = document.getElementById('graficoIncidenciasMermasSobrantes').getContext('2d');
+/** Separa los datos por tipo para pasarlos al gráfico */
+function procesarDatosGrafico(data) {
+  const labels = data.map(item => item.fecha);
+  const dataIncidencias = data.map(item => item.incidencias || 0);
+  const dataMermas = data.map(item => item.mermas || 0);
+  const dataSobrantes = data.map(item => item.sobrantes || 0);
+  return { labels, dataIncidencias, dataMermas, dataSobrantes };
+}
 
-    new Chart(ctx, {
-      type: 'bar',
-      data: {
-        labels,
-        datasets: [
-          {
-            label: 'Incidencias',
-            data: dataIncidencias,
-            backgroundColor: '#ff7675'
-          },
-          {
-            label: 'Mermas',
-            data: dataMermas,
-            backgroundColor: '#fab1a0'
-          },
-          {
-            label: 'Sobrantes',
-            data: dataSobrantes,
-            backgroundColor: '#74b9ff'
+function formatearFechasLabels(fechasISO) {
+  return fechasISO.map(fechaStr => {
+    const fecha = new Date(fechaStr);
+    return new Intl.DateTimeFormat('es-PE', {
+      day: 'numeric',
+      month: 'short'
+    }).format(fecha);
+  });
+}
+
+
+function inicializarGraficoIncidencias(ctx, labelsOriginales, dataIncidencias, dataMermas, dataSobrantes) {
+  const labelsFormateadas = formatearFechasLabels(labelsOriginales);
+
+  new Chart(ctx, {
+    type: 'bar',
+    data: {
+      labels: labelsFormateadas,
+      datasets: [
+        {
+          label: 'Incidencias',
+          data: dataIncidencias,
+          backgroundColor: '#ff7675',
+          borderRadius: 6,
+          borderSkipped: false
+        },
+        {
+          label: 'Mermas',
+          data: dataMermas,
+          backgroundColor: '#fab1a0',
+          borderRadius: 6,
+          borderSkipped: false
+        },
+        {
+          label: 'Sobrantes',
+          data: dataSobrantes,
+          backgroundColor: '#74b9ff',
+          borderRadius: 6,
+          borderSkipped: false
+        }
+      ]
+    },
+    options: {
+      responsive: true,
+      maintainAspectRatio: false,
+      onClick: function (event, elements) {
+        if (elements.length > 0) {
+          const element = elements[0];
+          const datasetIndex = element.datasetIndex;
+          const tipo = this.data.datasets[datasetIndex].label;
+          const fechaISO = labelsOriginales[element.index];
+          const fechaMostrada = labelsFormateadas[element.index];
+
+          if (tipo === "Incidencias") {
+            abrirModalIncidencias(fechaISO, fechaMostrada);
+          } else if (tipo === "Mermas") {
+            abrirModalMermas(fechaISO, fechaMostrada);
+          } else if (tipo === "Sobrantes") {
+            abrirModalSobrantes(fechaISO, fechaMostrada);
           }
-        ]
+        }
       },
-      options: {
-        responsive: true,
-        plugins: {
-          legend: {
-            position: 'top'
+      onHover: (event, elements) => {
+        event.native.target.style.cursor = elements.length ? 'pointer' : 'default';
+      },
+      plugins: {
+        legend: {
+          position: 'top',
+        },
+        tooltip: {
+          backgroundColor: 'rgba(17, 24, 39, 0.95)',
+          titleColor: '#fff',
+          bodyColor: '#fff',
+          borderColor: 'rgba(99, 102, 241, 0.5)',
+          borderWidth: 1,
+          cornerRadius: 8,
+          displayColors: false
+        }
+      },
+      scales: {
+        y: {
+          beginAtZero: true,
+          grid: {
+            color: 'rgba(229, 231, 235, 0.5)',
+            drawBorder: false
           },
-          title: {
-            display: false
+          ticks: {
+            color: '#6b7280'
           }
         },
-        scales: {
-          x: {
-            stacked: false,
-            title: {
-              display: true,
-              text: 'Fecha'
-            }
+        x: {
+          grid: {
+            display: false
           },
-          y: {
-            beginAtZero: true,
-            title: {
-              display: true,
-              text: 'Cantidad'
-            }
+          ticks: {
+            maxRotation: 45,
+            minRotation: 30,
+            autoSkip: false,
+            color: '#6b7280'
           }
         }
       }
-    });
+    }
   });
+}
+
+function abrirModalIncidencias(fecha) {
+  fetch(`/incidencias/drill/${fecha}`)
+    .then(res => res.json())
+    .then(data => {
+      const tbody = document.getElementById("tablaIncidenciasBody");
+      tbody.innerHTML = "";
+
+      if (!Array.isArray(data) || data.length === 0) {
+        tbody.innerHTML = "<tr><td colspan='4'>No se encontraron incidencias.</td></tr>";
+        return;
+      }
+
+      data.forEach(incidencia => {
+        const { id_orden, detalle_productos } = incidencia;
+        detalle_productos.forEach(producto => {
+          const tr = document.createElement("tr");
+          tr.innerHTML = `
+            <td>${id_orden ?? '—'}</td>
+            <td>${producto.nombre}</td>
+            <td>${producto.cantidad}</td>
+            <td>${producto.incidencia}</td>
+          `;
+          tbody.appendChild(tr);
+        });
+      });
+
+      // Mostrar el modal
+      const modal = new bootstrap.Modal(document.getElementById('modalDetalleIncidencias'));
+      modal.show();
+    })
+    .catch(error => {
+      console.error("❌ Error al cargar incidencias:", error);
+      const tbody = document.getElementById("tablaIncidenciasBody");
+      tbody.innerHTML = "<tr><td colspan='4'>Error al cargar los datos.</td></tr>";
+    });
+}
+
+function cerrarModal() {
+  document.getElementById("modalDetalles").style.display = "none";
+}
+
+function abrirModalMermas(fecha) {
+  document.getElementById("modalFechaMerma").textContent = fecha;
+
+  fetch(`/movimientos/drill/mermas/${fecha}`)
+    .then(res => res.json())
+    .then(data => {
+      const tbody = document.getElementById("tablaMermasBody");
+      tbody.innerHTML = "";
+
+      if (!Array.isArray(data) || data.length === 0) {
+        tbody.innerHTML = "<tr><td colspan='4'>No se encontraron mermas.</td></tr>";
+        return;
+      }
+
+      data.forEach(m => {
+        const tr = document.createElement("tr");
+        tr.innerHTML = `
+          <td>${m.id_movimiento}</td>
+          <td>${m.nombre_producto}</td>
+          <td>${m.cantidad}</td>
+          <td>${m.descripcion || '—'}</td>
+        `;
+        tbody.appendChild(tr);
+      });
+
+      new bootstrap.Modal(document.getElementById('modalDetalleMermas')).show();
+    })
+    .catch(err => {
+      console.error("❌ Error al cargar mermas:", err);
+      document.getElementById("tablaMermasBody").innerHTML =
+        "<tr><td colspan='4'>Error al cargar los datos.</td></tr>";
+    });
+}
+
+function abrirModalSobrantes(fecha) {
+  document.getElementById("modalFechaSobrante").textContent = fecha;
+
+  fetch(`/movimientos/drill/sobrantes/${fecha}`)
+    .then(res => res.json())
+    .then(data => {
+      const tbody = document.getElementById("tablaSobrantesBody");
+      tbody.innerHTML = "";
+
+      if (!Array.isArray(data) || data.length === 0) {
+        tbody.innerHTML = "<tr><td colspan='4'>No se encontraron sobrantes.</td></tr>";
+        return;
+      }
+
+      data.forEach(s => {
+        const tr = document.createElement("tr");
+        tr.innerHTML = `
+          <td>${s.id_movimiento}</td>
+          <td>${s.nombre_producto}</td>
+          <td>${s.cantidad}</td>
+          <td>${s.descripcion || '—'}</td>
+        `;
+        tbody.appendChild(tr);
+      });
+
+      new bootstrap.Modal(document.getElementById('modalDetalleSobrantes')).show();
+    })
+    .catch(err => {
+      console.error("❌ Error al cargar sobrantes:", err);
+      document.getElementById("tablaSobrantesBody").innerHTML =
+        "<tr><td colspan='4'>Error al cargar los datos.</td></tr>";
+    });
+}
 </script>
 
 <% } %>

@@ -66,8 +66,26 @@ async function obtenerResumenIncidencias() {
 }
 
 
+async function detallePorFecha(req, res) {
+  try {
+    const { fecha } = req.params;
+
+    if (!/^\d{4}-\d{2}-\d{2}$/.test(fecha)) {
+      return res.status(400).json({ error: "Formato de fecha inválido" });
+    }
+
+    const datos = await dbIncidencias.obtenerIncidenciasPorFecha(fecha);
+
+    res.json(datos);
+  } catch (error) {
+    console.error("❌ Error al obtener incidencias por fecha:", error);
+    res.status(500).json({ error: "Error interno al obtener incidencias" });
+  }
+}
+
 module.exports = {
   obtenerIncidencias,
   descargarPDFIncidencia,
-  obtenerResumenIncidencias
+  obtenerResumenIncidencias,
+  detallePorFecha
 }

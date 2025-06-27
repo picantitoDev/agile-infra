@@ -1,6 +1,6 @@
 // queriesIncidencias.js
 const pool = require("./pool")
-
+const { DateTime } = require('luxon');
 /**
  * Registra una incidencia asociada a un movimiento.
  * 
@@ -107,10 +107,33 @@ async function obtenerIncidenciasUltimos30Dias() {
   return result.rows;
 }
 
+async function obtenerIncidenciasPorFecha(fechaLima) {
+  const inicioUTC = DateTime
+    .fromISO(fechaLima, { zone: 'America/Lima' })
+    .startOf('day')
+    .toUTC()
+    .toISO();
+
+  const finUTC = DateTime
+    .fromISO(fechaLima, { zone: 'America/Lima' })
+    .endOf('day')
+    .toUTC()
+    .toISO();
+
+  const { rows } = await pool.query(`
+    SELECT * FROM incidencia
+    WHERE fecha BETWEEN $1 AND $2
+    ORDER BY fecha ASC
+  `, [inicioUTC, finUTC]);
+
+  return rows;
+}
+
 module.exports = {
   registrarIncidencia,
   obtenerIncidencias,
   obtenerIncidenciasPorOrden,
   obtenerIncidenciaPorId,
-  obtenerIncidenciasUltimos30Dias
+  obtenerIncidenciasUltimos30Dias,
+  obtenerIncidenciasPorFecha
 }

@@ -262,7 +262,6 @@ resumen.forEach(r => {
   return resumen;
 }
 
-
 async function cancelarOrden(req, res){
   const idOrden = req.params.id;
 

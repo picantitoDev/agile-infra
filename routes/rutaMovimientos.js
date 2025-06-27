@@ -19,4 +19,8 @@ router.get(
 )
 router.get("/exportar", controladorMovimientos.exportarReporteExcel)
 
+router.get("/drill/mermas/:fecha", controladorMovimientos.obtenerMermasPorFecha);
+router.get("/drill/sobrantes/:fecha", controladorMovimientos.obtenerSobrantesPorFecha);
+
+
 module.exports = router

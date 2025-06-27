@@ -74,6 +74,7 @@
           title="Número de teléfono con un formato válido."
           required
         />
+        <div id="telefono-error" class="error-msg"></div>
       </div>
 
       <div class="form-group">
@@ -85,6 +86,7 @@
           maxlength="255"
           required
         />
+        <div id="correo-error" class="error-msg"></div>
       </div>
 
       <div class="form-group">
@@ -106,61 +108,151 @@
       <%- JSON.stringify(proveedores) %>
     </script>
 
-    <script>
-      document.addEventListener("DOMContentLoaded", () => {
-        const proveedores = JSON.parse(
-          document.getElementById("proveedores-data").textContent
-        )
+  <script>
+document.addEventListener("DOMContentLoaded", () => {
+  const proveedores = JSON.parse(document.getElementById("proveedores-data").textContent)
 
-        const form = document.querySelector("form")
-        const submitBtn = document.querySelector(".btn-submit") // Changed to class selector
-        const razonInput = document.getElementById("razon_social")
-        const rucInput = document.getElementById("ruc")
-        const razonError = document.getElementById("razon-error")
-        const rucError = document.getElementById("ruc-error")
+  const form = document.querySelector("form")
+  const submitBtn = document.querySelector(".btn-submit")
 
-        function verificarDuplicados() {
-          const razon = razonInput.value.trim().toLowerCase()
-          const ruc = rucInput.value.trim()
+  const razonInput = document.getElementById("razon_social")
+  const rucInput = document.getElementById("ruc")
+  const telefonoInput = document.getElementById("numero_telefono")
+  const correoInput = document.getElementById("correo")
 
-          const existeRazon = proveedores.some(
-            (p) => p.razon_social.toLowerCase() === razon
-          )
+  const razonError = document.getElementById("razon-error")
+  const rucError = document.getElementById("ruc-error")
+  const telefonoError = document.getElementById("telefono-error")
+  const correoError = document.getElementById("correo-error")
 
-          const existeRuc = proveedores.some((p) => p.ruc === ruc)
+  // Estado de campos tocados
+  const tocados = {
+    razon: false,
+    ruc: false,
+    telefono: false,
+    correo: false,
+  }
 
-          // Mostrar mensajes de error
-          razonError.textContent = existeRazon
-            ? "Esta razón social ya está registrada."
-            : ""
+  function validarRucPeru(ruc) {
+    return /^[12]0\d{9}$/.test(ruc)
+  }
 
-          rucError.textContent = existeRuc ? "Este RUC ya está registrado." : ""
+  function validarTelefonoPeru(numero) {
+    return /^(9\d{8}|01\d{7}|0[2-8]\d{7})$/.test(numero)
+  }
 
-          const hayError = existeRazon || existeRuc
+  function validarEmail(email) {
+    return /^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(email)
+  }
 
-          // Desactivar y estilizar botón si hay error
-          submitBtn.disabled = hayError
-          submitBtn.style.opacity = hayError ? "0.5" : "1"
-          submitBtn.style.cursor = hayError ? "not-allowed" : "pointer"
+  function validarCampoIndividual(campo) {
+    const razon = razonInput.value.trim().toLowerCase()
+    const ruc = rucInput.value.trim()
+    const telefono = telefonoInput.value.trim()
+    const correo = correoInput.value.trim().toLowerCase()
 
-          return !hayError // Return true if no duplicates
-        }
+    // Razón social
+    if (campo === "razon" && tocados.razon) {
+      const existe = proveedores.some(p => p.razon_social.toLowerCase() === razon)
+      razonError.textContent = existe ? "Esta razón social ya está registrada." : ""
+    }
 
-        // Check on input
-        razonInput.addEventListener("input", verificarDuplicados)
-        rucInput.addEventListener("input", verificarDuplicados)
+    // RUC
+    if (campo === "ruc" && tocados.ruc) {
+      const existe = proveedores.some(p => p.ruc === ruc)
+      if (!validarRucPeru(ruc)) {
+        rucError.textContent = "RUC inválido. Debe tener 11 dígitos y comenzar con 10 o 20."
+      } else if (existe) {
+        rucError.textContent = "Este RUC ya está registrado."
+      } else {
+        rucError.textContent = ""
+      }
+    }
 
-        // Also check on form submission
-        form.addEventListener("submit", (e) => {
-          if (!verificarDuplicados()) {
-            e.preventDefault() // Prevent form submission if duplicates exist
-            return
-          }
+    // Teléfono
+    if (campo === "telefono" && tocados.telefono) {
+      const existe = proveedores.some(p => p.numero_telefono === telefono)
+      if (!validarTelefonoPeru(telefono)) {
+        telefonoError.textContent = "Número inválido. Use móvil (9...) o fijo (01..., 07...)."
+      } else if (existe) {
+        telefonoError.textContent = "Este número ya está registrado."
+      } else {
+        telefonoError.textContent = ""
+      }
+    }
 
-          submitBtn.textContent = "Registrando..."
-          submitBtn.disabled = true
-        })
-      })
-    </script>
+    // Correo
+    if (campo === "correo" && tocados.correo) {
+      const existe = proveedores.some(p => p.correo.toLowerCase() === correo)
+      if (!validarEmail(correo)) {
+        correoError.textContent = "Ingrese un correo electrónico válido."
+      } else if (existe) {
+        correoError.textContent = "Este correo ya está registrado."
+      } else {
+        correoError.textContent = ""
+      }
+    }
+
+    // Verificar si hay errores visibles para deshabilitar botón
+    const hayErrores =
+      razonError.textContent ||
+      rucError.textContent ||
+      telefonoError.textContent ||
+      correoError.textContent
+
+    submitBtn.disabled = !!hayErrores
+    submitBtn.style.opacity = !!hayErrores ? "0.5" : "1"
+    submitBtn.style.cursor = !!hayErrores ? "not-allowed" : "pointer"
+  }
+
+  // Listeners con marca de tocado
+  razonInput.addEventListener("input", () => {
+    tocados.razon = true
+    validarCampoIndividual("razon")
+  })
+
+  rucInput.addEventListener("input", () => {
+    tocados.ruc = true
+    validarCampoIndividual("ruc")
+  })
+
+  telefonoInput.addEventListener("input", () => {
+    tocados.telefono = true
+    validarCampoIndividual("telefono")
+  })
+
+  correoInput.addEventListener("input", () => {
+    tocados.correo = true
+    validarCampoIndividual("correo")
+  })
+
+  // Validación completa al enviar
+  form.addEventListener("submit", (e) => {
+    // Marcamos todo como tocado antes de validar
+    Object.keys(tocados).forEach(k => tocados[k] = true)
+    validarCampoIndividual("razon")
+    validarCampoIndividual("ruc")
+    validarCampoIndividual("telefono")
+    validarCampoIndividual("correo")
+
+    const hayErrores =
+      razonError.textContent ||
+      rucError.textContent ||
+      telefonoError.textContent ||
+      correoError.textContent
+
+    if (hayErrores) {
+      e.preventDefault()
+      return
+    }
+
+    submitBtn.textContent = "Registrando..."
+    submitBtn.disabled = true
+    submitBtn.style.opacity = "0.6"
+    submitBtn.style.cursor = "not-allowed"
+  })
+})
+</script>
+
   </body>
 </html>

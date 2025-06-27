@@ -41,7 +41,8 @@ async function nuevoProveedorPost(req, res) {
 async function editarProveedorGet(req, res){
   const id = req.params.id;
   const proveedor = await dbProveedores.obtenerProveedorPorId(id); // función en queries
-  res.render('detalleProveedor', { proveedor });
+  const proveedores = await dbProveedores.obtenerProveedores()
+  res.render('detalleProveedor', { proveedor, proveedores });
 };
 
 async function editarProveedorPut(req, res){

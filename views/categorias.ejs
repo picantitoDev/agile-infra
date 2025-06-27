@@ -56,6 +56,11 @@
       margin: 0 3px;
       cursor: pointer;
     }
+
+    td button:hover i {
+  transform: scale(1.1);
+  transition: transform 0.2s ease;
+}
     </style>
   </head>
   <body>
@@ -99,6 +104,9 @@
         <button class="btn-guardar" title="Guardar" style="display: none; background: none; border: none; cursor: pointer;">
           <i class="fas fa-check" style="color: #28a745; font-size: 18px;"></i>
         </button>
+        <button class="btn-cancelar" title="Cancelar" style="display: none; background: none; border: none; cursor: pointer;">
+          <i class="fas fa-xmark" style="color: #dc3545; font-size: 18px;"></i>
+        </button>
         <button class="btn-desactivar" title="Desactivar" style="background: none; border: none; cursor: pointer;">
           <i class="fas fa-ban" style="color: #dc3545; font-size: 18px;"></i>
         </button>
@@ -117,12 +125,15 @@
         <span class="nombre-texto"><%= cat.nombre %></span>
         <input class="nombre-input" type="text" value="<%= cat.nombre %>" style="display: none;" />
       </td>
-      <td>
+      <td>  
         <button class="btn-editar" title="Editar" style="background: none; border: none; cursor: pointer;">
           <i class="fas fa-pen-to-square" style="color: #007bff; font-size: 18px;"></i>
         </button>
         <button class="btn-guardar" title="Guardar" style="display: none; background: none; border: none; cursor: pointer;">
           <i class="fas fa-check" style="color: #28a745; font-size: 18px;"></i>
+        </button>
+        <button class="btn-cancelar" title="Cancelar" style="display: none; background: none; border: none; cursor: pointer;">
+          <i class="fas fa-xmark" style="color: #dc3545; font-size: 18px;"></i>
         </button>
         <button class="btn-desactivar" title="Desactivar" style="display: none; background: none; border: none; cursor: pointer;">
           <i class="fas fa-ban" style="color: #dc3545; font-size: 18px;"></i>
@@ -238,11 +249,13 @@
       const span = tr.querySelector('.nombre-texto')
       const input = tr.querySelector('.nombre-input')
       const btnGuardar = tr.querySelector('.btn-guardar')
+      const btnCancelar = tr.querySelector('.btn-cancelar');
 
       span.style.display = 'none'
       input.style.display = 'inline-block'
       btn.style.display = 'none'
       btnGuardar.style.display = 'inline-block'
+      btnCancelar.style.display = 'inline-block';
     })
   })
 
@@ -254,9 +267,16 @@
     const id = tr.getAttribute('data-id');
     const nuevoNombre = input.value.trim();
     const nombreOriginal = span.textContent.trim();
-    
+    const regexNombreValido = /^[\p{L} ]+$/u;
+
     const nuevoNombreNormalizado = nuevoNombre.toLowerCase();
     const nombreOriginalNormalizado = nombreOriginal.toLowerCase();
+
+    if (!regexNombreValido.test(nuevoNombre)) {
+      input.classList.add("input-error");
+      alert("Solo se permiten letras y espacios.");
+      return;
+    }
 
     if (nuevoNombre === "") {
       input.classList.add("input-error");
@@ -432,6 +452,29 @@ document.getElementById('volverModal').addEventListener('click', function () {
 
     filasOrdenadas.forEach(fila => tbody.appendChild(fila))
   }
+
+  document.querySelectorAll('.btn-cancelar').forEach((btn) => {
+  btn.addEventListener('click', function () {
+    const tr = btn.closest('tr');
+    const input = tr.querySelector('.nombre-input');
+    const span = tr.querySelector('.nombre-texto');
+    const btnEditar = tr.querySelector('.btn-editar');
+    const btnGuardar = tr.querySelector('.btn-guardar');
+
+    // Restaurar valor original
+    input.value = span.textContent.trim();
+
+    // Restaurar visibilidad
+    input.style.display = 'none';
+    span.style.display = 'inline-block';
+    btn.style.display = 'none';
+    btnGuardar.style.display = 'none';
+    btnEditar.style.display = 'inline-block';
+
+    // Limpiar estilos de error si los hubiera
+    input.classList.remove("input-error");
+  });
+});
     </script>
 
 

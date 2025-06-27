@@ -1092,16 +1092,12 @@ function procesarDatosGrafico(data) {
   return { labels, dataIncidencias, dataMermas, dataSobrantes };
 }
 
-function formatearFechasLabels(fechasISO) {
-  return fechasISO.map(fechaStr => {
-    const fecha = new Date(fechaStr);
-    return new Intl.DateTimeFormat('es-PE', {
-      day: 'numeric',
-      month: 'short'
-    }).format(fecha);
+function formatearFechasLabels(labels) {
+  return labels.map(fechaISO => {
+    const fecha = new Date(fechaISO + "T00:00:00-05:00"); // fuerza Lima
+    return fecha.toLocaleDateString('es-PE', { day: 'numeric', month: 'short' });
   });
 }
-
 
 function inicializarGraficoIncidencias(ctx, labelsOriginales, dataIncidencias, dataMermas, dataSobrantes) {
   const labelsFormateadas = formatearFechasLabels(labelsOriginales);

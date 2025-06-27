@@ -676,7 +676,8 @@
 </div>
 
 <script>
-    document.addEventListener("click", (e) => {
+  // Mostrar/Ocultar productos
+  document.addEventListener("click", (e) => {
     if (e.target.closest('.btn-toggle-productos')) {
       const boton = e.target.closest('.btn-toggle-productos');
       const index = boton.dataset.index;
@@ -684,19 +685,11 @@
       const btnText = boton.querySelector('.btn-text');
       const btnIcon = boton.querySelector('.btn-icon');
 
-      if (filaProductos.classList.contains('show')) {
-        filaProductos.classList.remove('show');
-        filaProductos.style.display = 'none';
-        btnText.textContent = 'Ver productos';
-        btnIcon.style.transform = 'rotate(0deg)';
-        btnIcon.textContent = '▼';
-      } else {
-        filaProductos.classList.add('show');
-        filaProductos.style.display = 'table-row';
-        btnText.textContent = 'Ocultar productos';
-        btnIcon.style.transform = 'rotate(180deg)';
-        btnIcon.textContent = '▲';
-      }
+      const visible = filaProductos.classList.toggle('show');
+      filaProductos.style.display = visible ? 'table-row' : 'none';
+      btnText.textContent = visible ? 'Ocultar productos' : 'Ver productos';
+      btnIcon.textContent = visible ? '▲' : '▼';
+      btnIcon.style.transform = visible ? 'rotate(180deg)' : 'rotate(0deg)';
     }
   });
 
@@ -708,17 +701,26 @@
     const filtroHasta = document.getElementById("filtro-hasta");
     const filtroEstado = document.getElementById("filtro-estado");
     const btnLimpiarFiltros = document.getElementById("btn-limpiar-filtros");
+    const hoy = new Date().toISOString().split("T")[0];
+
+    // Limitar fechas futuras
+    filtroDesde.max = hoy;
+    filtroHasta.max = hoy;
 
     const filas = document.querySelectorAll("table tbody tr.fila-orden");
 
     const filtrarOrdenes = () => {
       const termino = filtroBusqueda.value.trim().toLowerCase();
       const diasFiltro = parseInt(filtroFecha.value);
-const desde = filtroDesde.value ? new Date(`${filtroDesde.value}T00:00:00`) : null;
+      const desde = filtroDesde.value ? new Date(`${filtroDesde.value}T00:00:00`) : null;
       const hasta = filtroHasta.value ? new Date(`${filtroHasta.value}T23:59:59.999`) : null;
-      if (hasta) hasta.setHours(23, 59, 59, 999); // ✅ Esto asegura que el día final sí se incluya
-
       const estadoSeleccionado = filtroEstado.value;
+
+      // Validación de rango de fechas
+      if (desde && hasta && desde > hasta) {
+        alert("La fecha 'Desde' no puede ser posterior a la fecha 'Hasta'.");
+        return;
+      }
 
       filas.forEach(fila => {
         const index = fila.dataset.index;
@@ -726,13 +728,12 @@ const desde = filtroDesde.value ? new Date(`${filtroDesde.value}T00:00:00`) : nu
         const idOrden = fila.querySelector("td:nth-child(1)").textContent.trim().toLowerCase();
         const textoEstado = fila.querySelector("td:nth-child(6)").textContent.trim().toLowerCase();
         const productosText = filaProductos.textContent.trim().toLowerCase();
-
         const fechaIso = fila.querySelector("td:nth-child(3)").dataset.fecha;
         const fecha = fechaIso ? new Date(fechaIso) : null;
 
         let mostrar = true;
 
-        if (termino !== "") {
+        if (termino) {
           if (!isNaN(termino[0])) {
             if (!idOrden.includes(termino)) mostrar = false;
           } else {
@@ -749,9 +750,7 @@ const desde = filtroDesde.value ? new Date(`${filtroDesde.value}T00:00:00`) : nu
         if (desde && fecha < desde) mostrar = false;
         if (hasta && fecha > hasta) mostrar = false;
 
-        if (estadoSeleccionado && textoEstado !== estadoSeleccionado) {
-          mostrar = false;
-        }
+        if (estadoSeleccionado && textoEstado !== estadoSeleccionado) mostrar = false;
 
         fila.style.display = mostrar ? "table-row" : "none";
         filaProductos.style.display = mostrar && filaProductos.classList.contains("show") ? "table-row" : "none";
@@ -775,7 +774,6 @@ const desde = filtroDesde.value ? new Date(`${filtroDesde.value}T00:00:00`) : nu
       filtroFecha.value = "";
       filtroDesde.value = "";
       filtroHasta.value = "";
-
       filtrarOrdenes();
     });
   });

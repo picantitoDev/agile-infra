@@ -93,6 +93,9 @@
           </tr>
         <% }) %>
       <% } %>
+        <tr id="fila-sin-incidencias" style="display: none;">
+    <td colspan="6" class="text-center text-muted">No se encontraron incidencias con los filtros aplicados.</td>
+  </tr>
     </tbody>
   </table>
 </div>
@@ -102,67 +105,63 @@
   const filtroFecha = document.getElementById('filtro-fecha');
   const filtroDesde = document.getElementById('filtro-desde');
   const filtroHasta = document.getElementById('filtro-hasta');
+  const filaSinIncidencias = document.getElementById('fila-sin-incidencias');
 
-  const filas = document.querySelectorAll('table tbody tr');
-  const hoy = new Date().toISOString().split("T")[0];
+  const filas = Array.from(document.querySelectorAll('table tbody tr')).filter(
+    tr => tr.id !== 'fila-sin-incidencias' && tr.cells.length > 1
+  );
 
-    filtroDesde.max = hoy;
-    filtroHasta.max = hoy;
+  const hoy = new Date();
+  const hoyISO = hoy.toISOString().split("T")[0];
+  filtroDesde.max = hoyISO;
+  filtroHasta.max = hoyISO;
 
   function filtrar() {
     const idFiltro = filtroId.value.trim();
     const diasFiltro = parseInt(filtroFecha.value);
     const desde = filtroDesde.value ? new Date(filtroDesde.value) : null;
     const hasta = filtroHasta.value ? new Date(filtroHasta.value) : null;
-    if (hasta) hasta.setHours(23, 59, 59, 999); // incluir todo el día
+    if (hasta) hasta.setHours(23, 59, 59, 999);
+
+    let visibles = 0;
 
     filas.forEach(fila => {
       const celdas = fila.querySelectorAll('td');
-      if (celdas.length === 1) return; // Saltar fila "No hay incidencias"
+      const idOrden = celdas[0].textContent.trim();
+      const fechaTexto = celdas[1].textContent.trim(); // DD/MM/YYYY
 
-      const idOrden = celdas[3].textContent.trim(); // columna 'Orden'
-      const fechaTexto = celdas[1].textContent.trim(); // columna 'Fecha Registro'
-      
       const partes = fechaTexto.split('/');
       const fecha = new Date(`${partes[2]}-${partes[1]}-${partes[0]}`);
 
       let visible = true;
 
-      if (idFiltro && !idOrden.includes(idFiltro)) {
-        visible = false;
-      }
-
+      if (idFiltro && !idOrden.includes(idFiltro)) visible = false;
       if (!isNaN(diasFiltro)) {
-        const diasMs = diasFiltro * 24 * 60 * 60 * 1000;
-        if ((hoy - fecha) > diasMs) {
-          visible = false;
-        }
+        const limite = new Date(hoy.getTime() - diasFiltro * 86400000);
+        if (fecha < limite) visible = false;
       }
-
-      if (desde && fecha < desde) {
-        visible = false;
-      }
-
-      if (hasta && fecha > hasta) {
-        visible = false;
-      }
+      if (desde && fecha < desde) visible = false;
+      if (hasta && fecha > hasta) visible = false;
 
       fila.style.display = visible ? '' : 'none';
+      if (visible) visibles++;
     });
+
+    filaSinIncidencias.style.display = visibles === 0 ? '' : 'none';
   }
 
+  // Eventos
   filtroId.addEventListener('input', filtrar);
   filtroFecha.addEventListener('change', filtrar);
   filtroDesde.addEventListener('change', filtrar);
   filtroHasta.addEventListener('change', filtrar);
 
-    const btnLimpiar = document.getElementById('btn-limpiar-filtros');
-
+  const btnLimpiar = document.getElementById('btn-limpiar-filtros');
   btnLimpiar.addEventListener('click', () => {
     filtroId.value = '';
     filtroFecha.value = '';
     filtroDesde.value = '';
     filtroHasta.value = '';
-    filtrar(); // <-- Asegúrate de que esta función aplique los filtros actuales
+    filtrar();
   });
 </script>

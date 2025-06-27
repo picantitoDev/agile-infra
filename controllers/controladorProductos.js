@@ -3,6 +3,7 @@ const dbCategorias = require("../model/queriesCategorias")
 const dbProveedores = require("../model/queriesProveedores")
 const dbUsuarios = require("../model/queriesUsuarios")
 const dbAuditoria = require("../model/queriesAuditoria")
+const dbOrdenes = require("../model/queriesOrdenes")
 const pdfUtils = require("../utils/pdfGenerator")
 const { DateTime } = require("luxon")
 
@@ -10,7 +11,7 @@ async function obtenerProductos(req, res) {
   try {
     const productos = await dbProductos.obtenerProductos()
     const categorias = await dbCategorias.obtenerCategoriasActivas()
-
+    
     res.render("productos", {
       productos,
       categorias,
@@ -33,18 +34,21 @@ async function obtenerProductoPorId(req, res) {
     const categorias = await dbCategorias.obtenerCategorias()
     const proveedores = await dbProveedores.obtenerProveedores()
     const productosSinActual = productos.filter(p => p.id_producto !== producto.id_producto);
+    const ordenAsociada = await dbOrdenes.buscarOrdenPorProductoEnCurso(id);
 
     if (!producto) {
       return res.status(404).send("Producto no encontrado")
     }
 
-    res.render("detalleProducto", {
-      productos:productosSinActual,
-      producto,
-      categorias,
-      proveedores,
-      usuario: req.user
-    })
+  res.render("detalleProducto", {
+    productos: productosSinActual,
+    producto,
+    categorias,
+    proveedores,
+    ordenAsociada, // <-- nueva variable
+    usuario: req.user
+  });
+  
   } catch (error) {
     console.error("Error al obtener producto por ID:", error)
     res.status(500).send("Error al obtener el producto")

@@ -92,9 +92,22 @@
           <label>Estado:</label>
           <select name="estado">
             <option value="Activado" <%= producto.estado === 'Activado' ? 'selected' : '' %>>Activado</option>
-            <option value="Desactivado" <%= producto.estado === 'Desactivado' ? 'selected' : '' %>>Desactivado</option>
+            <option value="Desactivado" 
+              <%= producto.estado === 'Desactivado' ? 'selected' : '' %>
+              <%= ordenAsociada ? 'disabled' : '' %>
+            >Desactivado</option>
           </select>
         </div>
+
+        <% if (ordenAsociada) { %>
+  <div class="alert alert-warning mt-2">
+    ⚠ Este producto forma parte de una orden de reabastecimiento en curso
+    (ID:
+    <a href="/ordenes/detalle/<%= ordenAsociada.id_orden %>" class="fw-bold text-decoration-underline">
+      <%= ordenAsociada.id_orden %>
+    </a>). No se puede desactivar mientras la orden esté activa.
+  </div>
+<% } %>
 
         <!-- Submit -->
         <button type="submit" id="submit-btn">Guardar</button>

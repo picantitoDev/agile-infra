@@ -346,6 +346,7 @@ async function obtenerDetalleVentaPorFecha(fecha) {
 
   const { rows } = await pool.query(`
     SELECT 
+      m.id_movimiento,            -- Incluido aquí
       p.nombre,
       pm.cantidad,
       pm.subtotal

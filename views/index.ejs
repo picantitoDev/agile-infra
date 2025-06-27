@@ -512,6 +512,19 @@
 .card-producto {
   height: 100%;
 }
+
+  .modal-body {
+    max-height: 60vh; /* Altura máxima del contenido */
+    overflow-y: auto; /* Scroll vertical si excede */
+  }
+
+  /* Opcional: ajuste del encabezado para sticky efecto */
+  .modal-header {
+    position: sticky;
+    top: 0;
+    z-index: 10;
+    background-color: inherit;
+  }
     </style>
 </head>
 
@@ -654,6 +667,7 @@
                 <table class="table table-striped">
                     <thead>
                         <tr>
+                          <th>ID Movimiento</th>
                             <th>Producto</th>
                             <th>Cantidad</th>
                             <th>Subtotal (S/.)</th>
@@ -681,9 +695,10 @@
                 <table class="table table-striped">
                     <thead>
                         <tr>
+                            <th>ID Orden</th>
                             <th>Proveedor</th>
-                            <th>Producto</th>
-                            <th>Cantidad</th>
+                            <th>Productos</th>
+                            <th>Estado</th>
                         </tr>
                     </thead>
                     <tbody id="detalleOrdenBody"></tbody>
@@ -808,6 +823,7 @@
 // Ventas Chart
 const fechasCrudas = JSON.parse(document.getElementById("fechas-data").textContent);
 const montos = JSON.parse(document.getElementById("montos-data").textContent);
+let modalCargando = false;
 
 const resumenPorFecha = {};
 fechasCrudas.forEach((fecha, index) => {
@@ -844,18 +860,26 @@ const ventasChart = new Chart(ctx, {
             borderWidth: 0,
             borderRadius: 6,
             borderSkipped: false,
-            minBarLength: 5 // 👈 fuerza una altura mínima visible
+            minBarLength: 5 //fuerza una altura mínima visible
         }]
     },
-    options: {
-        responsive: true,
-        maintainAspectRatio: false,
-        onClick: async (event, elements) => {
+         options: {
+                responsive: true,
+                maintainAspectRatio: false,
+                onClick: async (event, elements) => {
+            if (modalCargando) return; // Evita múltiples clics
+
             if (elements.length > 0) {
+                modalCargando = true; // Bloquea nuevos clics
                 const index = elements[0].index;
                 const fechaISO = fechasFiltradas[index];
                 const fechaMostrada = fechasFormateadas[index];
-                await mostrarModalDetalle(fechaISO, fechaMostrada);
+                try {
+                    await mostrarModalDetalle(fechaISO, fechaMostrada);
+                } catch (err) {
+                    console.error("Error al mostrar modal:", err);
+                }
+                modalCargando = false; // Desbloquea clics después
             }
         },
         onHover: (event, chartElement) => {
@@ -915,7 +939,7 @@ const ventasChart = new Chart(ctx, {
     }
 });
 
-// Órdenes Chart
+// -------------------------------------------------------------------Órdenes Chart-----------------------------------------------------------------------------------
 const fechasOrdenesRaw = JSON.parse(document.getElementById("fechas-orden-data").textContent);
 const totalesOrdenes = JSON.parse(document.getElementById("totales-orden-data").textContent);
 const resumenOrdenes = {};
@@ -940,6 +964,7 @@ const etiquetasOrdenes = fechasOrdenes.map(f => {
     return `${parseInt(d)} de ${meses[parseInt(m) - 1]}`;
 });
 
+let ordenModalCargando = false;
 const ctxOrden = document.getElementById('ordenesChart').getContext('2d');
 const ordenesChart = new Chart(ctxOrden, {
     type: 'bar',
@@ -959,13 +984,24 @@ const ordenesChart = new Chart(ctxOrden, {
         responsive: true,
         maintainAspectRatio: false,
         onClick: async (event, elements) => {
-            if (elements.length > 0) {
-                const index = elements[0].index;
-                const fechaISO = fechasOrdenes[index];
-                const fechaMostrada = etiquetasOrdenes[index];
-                await mostrarModalOrdenDetalle(fechaISO, fechaMostrada);
-            }
-        },
+    if (ordenModalCargando) return; // Evita múltiples clics
+
+    if (elements.length > 0) {
+        ordenModalCargando = true; // Bloquea nuevos clics
+        const index = elements[0].index;
+        const fechaISO = fechasOrdenes[index];
+        const fechaMostrada = etiquetasOrdenes[index];
+        try {
+            document.body.style.cursor = 'wait';
+            await mostrarModalOrdenDetalle(fechaISO, fechaMostrada);
+        } catch (err) {
+            console.error("Error al mostrar modal de órdenes:", err);
+        } finally {
+            document.body.style.cursor = 'default';
+            ordenModalCargando = false; // Libera el bloqueo
+        }
+    }
+},
         onHover: (event, chartElement) => {
             event.native.target.style.cursor = chartElement.length ? 'pointer' : 'default';
         },
@@ -1009,7 +1045,7 @@ const ordenesChart = new Chart(ctxOrden, {
     }
 });
 
-// Modal functions (unchanged)
+// Modal VENTAS (unchanged)
 async function mostrarModalDetalle(fechaISO, fechaMostrada) {
     const res = await fetch(`/ventas/detalle/${fechaISO}`);
     const productos = await res.json();
@@ -1026,6 +1062,11 @@ async function mostrarModalDetalle(fechaISO, fechaMostrada) {
         productosValidos.forEach(p => {
             body.innerHTML += `
                 <tr>
+                    <td>
+                      ${p.id_movimiento
+                        ? `<a href="/movimientos/detalle/${p.id_movimiento}" class="text-primary text-decoration-underline">${p.id_movimiento}</a>`
+                        : '—'}
+                    </td> 
                     <td>${p.nombre}</td>
                     <td>${p.cantidad}</td>
                     <td>S/ ${parseFloat(p.subtotal).toFixed(2)}</td>
@@ -1059,8 +1100,14 @@ async function mostrarModalOrdenDetalle(fechaISO, fechaMostrada) {
             
             body.innerHTML += `
                 <tr>
+                    <td>
+                      ${o.id_order
+                        ? `<a href="/ordenes/detalle/${o.id_order}" class="text-primary text-decoration-underline">${o.id_order}</a>`
+                        : '—'}
+                    </td>
                     <td>${o.proveedor}</td>
-                    <td colspan="2">${listaProductos}</td>
+                    <td>${listaProductos}</td>
+                    <td>${o.estado}</td>
                 </tr>
             `;
         });
@@ -1099,6 +1146,10 @@ function formatearFechasLabels(labels) {
   });
 }
 
+let cargandoIncidencias = false;
+let cargandoMermas = false;
+let cargandoSobrantes = false;
+
 function inicializarGraficoIncidencias(ctx, labelsOriginales, dataIncidencias, dataMermas, dataSobrantes) {
   const labelsFormateadas = formatearFechasLabels(labelsOriginales);
 
@@ -1133,23 +1184,43 @@ function inicializarGraficoIncidencias(ctx, labelsOriginales, dataIncidencias, d
     options: {
       responsive: true,
       maintainAspectRatio: false,
-      onClick: function (event, elements) {
-        if (elements.length > 0) {
-          const element = elements[0];
-          const datasetIndex = element.datasetIndex;
-          const tipo = this.data.datasets[datasetIndex].label;
-          const fechaISO = labelsOriginales[element.index];
-          const fechaMostrada = labelsFormateadas[element.index];
+      onClick: async function (event, elements) {
+  if (elements.length > 0) {
+    const element = elements[0];
+    const datasetIndex = element.datasetIndex;
+    const tipo = this.data.datasets[datasetIndex].label;
+    const fechaISO = labelsOriginales[element.index];
+    const fechaMostrada = labelsFormateadas[element.index];
 
-          if (tipo === "Incidencias") {
-            abrirModalIncidencias(fechaISO, fechaMostrada);
-          } else if (tipo === "Mermas") {
-            abrirModalMermas(fechaISO, fechaMostrada);
-          } else if (tipo === "Sobrantes") {
-            abrirModalSobrantes(fechaISO, fechaMostrada);
-          }
-        }
-      },
+    try {
+      document.body.style.cursor = 'wait';
+
+      if (tipo === "Incidencias") {
+        if (cargandoIncidencias) return;
+        cargandoIncidencias = true;
+        await abrirModalIncidencias(fechaISO, fechaMostrada);
+        cargandoIncidencias = false;
+
+      } else if (tipo === "Mermas") {
+        if (cargandoMermas) return;
+        cargandoMermas = true;
+        await abrirModalMermas(fechaISO, fechaMostrada);
+        cargandoMermas = false;
+
+      } else if (tipo === "Sobrantes") {
+        if (cargandoSobrantes) return;
+        cargandoSobrantes = true;
+        await abrirModalSobrantes(fechaISO, fechaMostrada);
+        cargandoSobrantes = false;
+      }
+
+    } catch (err) {
+      console.error("Error al abrir modal:", err);
+    } finally {
+      document.body.style.cursor = 'default';
+    }
+  }
+},
       onHover: (event, elements) => {
         event.native.target.style.cursor = elements.length ? 'pointer' : 'default';
       },
@@ -1194,24 +1265,27 @@ function inicializarGraficoIncidencias(ctx, labelsOriginales, dataIncidencias, d
   });
 }
 
-function abrirModalIncidencias(fecha) {
-  fetch(`/incidencias/drill/${fecha}`)
-    .then(res => res.json())
-    .then(data => {
-      const tbody = document.getElementById("tablaIncidenciasBody");
-      tbody.innerHTML = "";
+async function abrirModalIncidencias(fecha) {
+  try {
+    const res = await fetch(`/incidencias/drill/${fecha}`);
+    const data = await res.json();
 
-      if (!Array.isArray(data) || data.length === 0) {
-        tbody.innerHTML = "<tr><td colspan='4'>No se encontraron incidencias.</td></tr>";
-        return;
-      }
+    const tbody = document.getElementById("tablaIncidenciasBody");
+    tbody.innerHTML = "";
 
+    if (!Array.isArray(data) || data.length === 0) {
+      tbody.innerHTML = "<tr><td colspan='4'>No se encontraron incidencias.</td></tr>";
+    } else {
       data.forEach(incidencia => {
         const { id_orden, detalle_productos } = incidencia;
         detalle_productos.forEach(producto => {
           const tr = document.createElement("tr");
           tr.innerHTML = `
-            <td>${id_orden ?? '—'}</td>
+            <td>
+              ${id_orden
+                ? `<a href="/ordenes/detalle/${id_orden}" class="text-primary text-decoration-underline">${id_orden}</a>`
+                : '—'}
+            </td>
             <td>${producto.nombre}</td>
             <td>${producto.cantidad}</td>
             <td>${producto.incidencia}</td>
@@ -1219,88 +1293,93 @@ function abrirModalIncidencias(fecha) {
           tbody.appendChild(tr);
         });
       });
+    }
 
-      // Mostrar el modal
-      const modal = new bootstrap.Modal(document.getElementById('modalDetalleIncidencias'));
-      modal.show();
-    })
-    .catch(error => {
-      console.error("❌ Error al cargar incidencias:", error);
-      const tbody = document.getElementById("tablaIncidenciasBody");
-      tbody.innerHTML = "<tr><td colspan='4'>Error al cargar los datos.</td></tr>";
-    });
+    const modal = new bootstrap.Modal(document.getElementById('modalDetalleIncidencias'));
+    modal.show();
+  } catch (error) {
+    console.error("❌ Error al cargar incidencias:", error);
+    const tbody = document.getElementById("tablaIncidenciasBody");
+    tbody.innerHTML = "<tr><td colspan='4'>Error al cargar los datos.</td></tr>";
+  }
 }
 
 function cerrarModal() {
   document.getElementById("modalDetalles").style.display = "none";
 }
 
-function abrirModalMermas(fecha) {
-  document.getElementById("modalFechaMerma").textContent = fecha;
+async function abrirModalMermas(fecha) {
+  try {
+    document.getElementById("modalFechaMerma").textContent = fecha;
 
-  fetch(`/movimientos/drill/mermas/${fecha}`)
-    .then(res => res.json())
-    .then(data => {
-      const tbody = document.getElementById("tablaMermasBody");
-      tbody.innerHTML = "";
+    const res = await fetch(`/movimientos/drill/mermas/${fecha}`);
+    const data = await res.json();
 
-      if (!Array.isArray(data) || data.length === 0) {
-        tbody.innerHTML = "<tr><td colspan='4'>No se encontraron mermas.</td></tr>";
-        return;
-      }
+    const tbody = document.getElementById("tablaMermasBody");
+    tbody.innerHTML = "";
 
+    if (!Array.isArray(data) || data.length === 0) {
+      tbody.innerHTML = "<tr><td colspan='4'>No se encontraron mermas.</td></tr>";
+    } else {
       data.forEach(m => {
         const tr = document.createElement("tr");
         tr.innerHTML = `
-          <td>${m.id_movimiento}</td>
+          <td>
+            ${m.id_movimiento
+              ? `<a href="/movimientos/detalle/${m.id_movimiento}" class="text-primary text-decoration-underline">${m.id_movimiento}</a>`
+              : '—'}
+          </td>          
           <td>${m.nombre_producto}</td>
           <td>${m.cantidad}</td>
           <td>${m.descripcion || '—'}</td>
         `;
         tbody.appendChild(tr);
       });
+    }
 
-      new bootstrap.Modal(document.getElementById('modalDetalleMermas')).show();
-    })
-    .catch(err => {
-      console.error("❌ Error al cargar mermas:", err);
-      document.getElementById("tablaMermasBody").innerHTML =
-        "<tr><td colspan='4'>Error al cargar los datos.</td></tr>";
-    });
+    new bootstrap.Modal(document.getElementById('modalDetalleMermas')).show();
+  } catch (err) {
+    console.error("❌ Error al cargar mermas:", err);
+    document.getElementById("tablaMermasBody").innerHTML =
+      "<tr><td colspan='4'>Error al cargar los datos.</td></tr>";
+  }
 }
 
-function abrirModalSobrantes(fecha) {
-  document.getElementById("modalFechaSobrante").textContent = fecha;
+async function abrirModalSobrantes(fecha) {
+  try {
+    document.getElementById("modalFechaSobrante").textContent = fecha;
 
-  fetch(`/movimientos/drill/sobrantes/${fecha}`)
-    .then(res => res.json())
-    .then(data => {
-      const tbody = document.getElementById("tablaSobrantesBody");
-      tbody.innerHTML = "";
+    const res = await fetch(`/movimientos/drill/sobrantes/${fecha}`);
+    const data = await res.json();
 
-      if (!Array.isArray(data) || data.length === 0) {
-        tbody.innerHTML = "<tr><td colspan='4'>No se encontraron sobrantes.</td></tr>";
-        return;
-      }
+    const tbody = document.getElementById("tablaSobrantesBody");
+    tbody.innerHTML = "";
 
+    if (!Array.isArray(data) || data.length === 0) {
+      tbody.innerHTML = "<tr><td colspan='4'>No se encontraron sobrantes.</td></tr>";
+    } else {
       data.forEach(s => {
         const tr = document.createElement("tr");
         tr.innerHTML = `
-          <td>${s.id_movimiento}</td>
+          <td>
+            ${s.id_movimiento
+              ? `<a href="/movimientos/detalle/${s.id_movimiento}" class="text-primary text-decoration-underline">${s.id_movimiento}</a>`
+              : '—'}
+          </td> 
           <td>${s.nombre_producto}</td>
           <td>${s.cantidad}</td>
           <td>${s.descripcion || '—'}</td>
         `;
         tbody.appendChild(tr);
       });
+    }
 
-      new bootstrap.Modal(document.getElementById('modalDetalleSobrantes')).show();
-    })
-    .catch(err => {
-      console.error("❌ Error al cargar sobrantes:", err);
-      document.getElementById("tablaSobrantesBody").innerHTML =
-        "<tr><td colspan='4'>Error al cargar los datos.</td></tr>";
-    });
+    new bootstrap.Modal(document.getElementById('modalDetalleSobrantes')).show();
+  } catch (err) {
+    console.error("❌ Error al cargar sobrantes:", err);
+    document.getElementById("tablaSobrantesBody").innerHTML =
+      "<tr><td colspan='4'>Error al cargar los datos.</td></tr>";
+  }
 }
 </script>
 

@@ -73,7 +73,7 @@ async function editarUsuarioGet(req, res) {
 
     if (!usuario) return res.status(404).send("Usuario no encontrado");
 
-    res.render("editarUsuario", { usuario, usuarios });
+    res.render("editarUsuario", { usuario, usuarios, usuarioActual: req.user, });
   } catch (error) {
     console.error("Error al cargar edición de usuario:", error);
     res.status(500).send("Error interno");

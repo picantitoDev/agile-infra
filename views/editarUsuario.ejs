@@ -329,22 +329,23 @@
           </div>
         </div>
 
-        <div class="form-group">
-          <label for="estado" class="form-label">Estado de la Cuenta</label>
-          <select id="estado" name="estado" class="form-select">
-            <option value="Activado" <%= usuario.estado === 'Activado' ? 'selected' : '' %>>
-              Activado
-            </option>
-            <option value="Desactivado" <%= usuario.estado === 'Desactivado' ? 'selected' : '' %>>
-              Desactivado
-            </option>
-          </select>
-          <div class="status-info <%= usuario.estado === 'Activado' ? 'status-activado' : 'status-desactivado' %>">
-            <i class="fas fa-circle"></i>
-            Estado actual: <%= usuario.estado %>
-          </div>
+      <div class="form-group">
+        <label for="estado" class="form-label">Estado de la Cuenta</label>
+        <select id="estado" name="estado" class="form-select">
+          <option value="Activado" <%= usuario.estado === 'Activado' ? 'selected' : '' %>>
+            Activado
+          </option>
+          <option value="Desactivado"
+            <%= usuario.estado === 'Desactivado' ? 'selected' : '' %>
+            <%= usuarioActual.id === usuario.id && usuarioActual.nivel_acceso === 'superadmin' ? 'disabled' : '' %>>
+            Desactivado
+          </option>
+        </select>
+        <div class="status-info <%= usuario.estado === 'Activado' ? 'status-activado' : 'status-desactivado' %>">
+          <i class="fas fa-circle"></i>
+          Estado actual: <%= usuario.estado %>
         </div>
-
+      </div>
         <div class="button-group">
           <a href="/usuarios" class="btn btn-secondary">
             <i class="fas fa-times"></i>

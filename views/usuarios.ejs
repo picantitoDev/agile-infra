@@ -124,8 +124,18 @@
                   <td><%= new Date(a.fecha).toLocaleString() %></td>
                 </tr>
               <% }) %>
+            <% if (auditorias.length === 0) { %>
+              <tr>
+                <td colspan="7" style="text-align: center; padding: 1rem; color: gray;">
+                  No se han encontrado registros de auditoría.
+                </td>
+              </tr>
+            <% } %>
             </tbody>
   </table>
+  <p id="sin-coincidencias" style="display: none; color: gray; text-align: center;  padding: 1rem;  margin-top: 1rem;">
+  No se encontraron auditorías para ese producto.
+</p>
 </div>
     </div>
   
@@ -133,14 +143,20 @@
   const inputBusqueda = document.getElementById("busquedaProducto");
   const tabla = document.getElementById("tablaAuditoria");
   const filas = tabla.querySelectorAll("tbody tr");
+  const mensajeNoCoincidencias = document.getElementById("sin-coincidencias");
 
   inputBusqueda.addEventListener("input", function () {
     const filtro = this.value.toLowerCase();
+    let coincidencias = 0;
 
     filas.forEach(fila => {
       const nombreProducto = fila.children[3].textContent.toLowerCase();
-      fila.style.display = nombreProducto.includes(filtro) ? "" : "none";
+      const coincide = nombreProducto.includes(filtro);
+      fila.style.display = coincide ? "" : "none";
+      if (coincide) coincidencias++;
     });
+
+    mensajeNoCoincidencias.style.display = coincidencias === 0 ? "block" : "none";
   });
 </script>
     </body>

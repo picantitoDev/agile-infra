@@ -3,8 +3,8 @@
 <head>
   <meta charset="UTF-8" />
   <title>Editar Usuario</title>
-  <link rel="stylesheet" href="/formularioUsuario.css" />
-</head>
+    <link rel="stylesheet" href="/crearUsuario.css" />
+  </head>
 <body>
   <div class="form-container">
     <h1>Editar Usuario</h1>
@@ -31,5 +31,107 @@
     </form>
     <a href="/usuarios">← Volver</a>
   </div>
+
+  <script id="usuarios-data" type="application/json">
+  <%- JSON.stringify(usuarios) %>
+</script>
+<script id="usuario-actual" type="application/json">
+  <%- JSON.stringify(usuario) %>
+</script>
+
+<script>
+  const usuariosRegistrados = JSON.parse(document.getElementById("usuarios-data").textContent);
+  const usuarioActual = JSON.parse(document.getElementById("usuario-actual").textContent);
+
+  const form = document.querySelector("form");
+  const nombre = form.querySelector("input[name='username']");
+  const email = form.querySelector("input[name='email']");
+  const btnSubmit = form.querySelector("button[type='submit']");
+
+  function mostrarError(input, mensaje) {
+    eliminarError(input);
+    const error = document.createElement("small");
+    error.className = "error-texto";
+    error.style.color = "red";
+    error.textContent = mensaje;
+    input.parentElement.appendChild(error);
+  }
+
+  function eliminarError(input) {
+    const error = input.parentElement.querySelector(".error-texto");
+    if (error) error.remove();
+  }
+
+  function validarNombre() {
+    const valor = nombre.value.trim();
+    const regex = /^[a-zA-ZÀ-ÿ\s]+$/;
+
+    if (valor === "") {
+      mostrarError(nombre, "Complete los campos");
+      return false;
+    }
+
+    if (!regex.test(valor)) {
+      mostrarError(nombre, "El nombre contiene caracteres inválidos");
+      return false;
+    }
+
+    const duplicado = usuariosRegistrados.some(u =>
+      u.username.toLowerCase() === valor.toLowerCase() && u.id !== usuarioActual.id
+    );
+    if (duplicado) {
+      mostrarError(nombre, "El nombre de usuario ya existe");
+      return false;
+    }
+
+    eliminarError(nombre);
+    return true;
+  }
+
+  function validarEmail() {
+    const valor = email.value.trim();
+
+    if (valor === "") {
+      mostrarError(email, "Complete los campos");
+      return false;
+    }
+
+    if (!valor.includes("@")) {
+      mostrarError(email, `Incluye un signo "@" en la dirección de correo electrónico. La dirección "${valor}" no incluye el signo "@".`);
+      return false;
+    }
+
+    const duplicado = usuariosRegistrados.some(u =>
+      u.email.toLowerCase() === valor.toLowerCase() && u.id !== usuarioActual.id
+    );
+    if (duplicado) {
+      mostrarError(email, "El correo electrónico ya está en uso");
+      return false;
+    }
+
+    eliminarError(email);
+    return true;
+  }
+
+  // Validación en tiempo real
+  nombre.addEventListener("input", validarNombre);
+  email.addEventListener("input", validarEmail);
+
+  form.addEventListener("submit", function (e) {
+    const esNombreValido = validarNombre();
+    const esEmailValido = validarEmail();
+
+    if (!esNombreValido || !esEmailValido) {
+      e.preventDefault();
+      return;
+    }
+
+    // Desactivar botón para evitar múltiples envíos
+    btnSubmit.disabled = true;
+    btnSubmit.style.opacity = "0.6";
+    btnSubmit.style.cursor = "not-allowed";
+    btnSubmit.innerHTML = `<i class="fas fa-spinner fa-spin"></i> Guardando...`;
+  });
+</script>
 </body>
 </html>

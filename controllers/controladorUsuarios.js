@@ -4,7 +4,8 @@ const dbAuditoria = require("../model/queriesAuditoria")
 
 async function crearUsuarioGet(req, res) {
   try {
-    res.render("crearUsuario")
+    const usuarios = await dbUsuarios.obtenerUsuarios()
+    res.render("crearUsuario", { usuarios })
   } catch (error) {
     console.error("Error al cargar formulario:", error)
     res.status(500).send("Error al cargar formulario")
@@ -67,11 +68,12 @@ const obtenerUsuarios = async (req, res) => {
 async function editarUsuarioGet(req, res) {
   try {
     const id = req.params.id;
+    const usuarios = await dbUsuarios.obtenerUsuarios()
     const usuario = await dbUsuarios.buscarUsuarioPorId(id);
 
     if (!usuario) return res.status(404).send("Usuario no encontrado");
 
-    res.render("editarUsuario", { usuario });
+    res.render("editarUsuario", { usuario, usuarios });
   } catch (error) {
     console.error("Error al cargar edición de usuario:", error);
     res.status(500).send("Error interno");

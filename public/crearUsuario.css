@@ -32,7 +32,8 @@
   background-color: white;
   border-radius: var(--border-radius);
   box-shadow: var(--shadow);
-  max-width: 100%;
+  max-width: 80%;
+  margin: 0 auto;
   padding: 35px;
   position: relative;
   overflow: hidden;

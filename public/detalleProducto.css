@@ -10,15 +10,12 @@
 body {
   background: #f5f7fa;
   color: #333;
-  padding: 2rem;
-  display: flex;
-  justify-content: center;
+  min-height: 100vh;
+  padding: 0;
 }
-
 /* Main container */
 .container {
   background: white;
-  max-width: 600px;
   width: 100%;
   border-radius: 16px;
   padding: 2rem;

@@ -28,15 +28,18 @@ async function obtenerProductoPorId(req, res) {
       return res.status(400).send("El ID del producto no es válido")
     }
 
+    const productos = await dbProductos.obtenerProductos()
     const producto = await dbProductos.obtenerProductoPorId(id)
     const categorias = await dbCategorias.obtenerCategorias()
     const proveedores = await dbProveedores.obtenerProveedores()
+    const productosSinActual = productos.filter(p => p.id_producto !== producto.id_producto);
 
     if (!producto) {
       return res.status(404).send("Producto no encontrado")
     }
 
     res.render("detalleProducto", {
+      productos:productosSinActual,
       producto,
       categorias,
       proveedores,
@@ -126,7 +129,7 @@ async function actualizarProducto(req, res) {
 
 async function crearProductoGet(req, res) {
   try {
-    const categorias = await dbCategorias.obtenerCategorias()
+    const categorias = await dbCategorias.obtenerCategoriasActivas()
     const productos = await dbProductos.obtenerProductos()
     const proveedores = await dbProveedores.obtenerProveedores()
     res.render("nuevoProducto", { categorias, proveedores, productos })

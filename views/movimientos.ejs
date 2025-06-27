@@ -194,7 +194,7 @@
         <input type="date" id="hasta" name="hasta">
       </div>
 
-      <button type="submit" class="btn-confirmar">Exportar Excel</button>
+      <button type="submit" id="btnSubmitExportar" class="btn-confirmar">Exportar Excel</button>
     </form>
   </div>
 </div>
@@ -202,7 +202,7 @@
   const btnExportar = document.getElementById("btn-exportar");
   const modalExportar = document.getElementById("modal-exportar");
   const cerrarModal = document.getElementById("cerrar-modal");
-
+  const btnSubmit = document.getElementById("btnSubmitExportar");
   btnExportar.addEventListener("click", () => {
     modalExportar.style.display = "block";
   });
@@ -241,12 +241,17 @@ formExportar.addEventListener("submit", function (e) {
   if (fechaDesde > fechaHasta) {
     e.preventDefault();
     alert("La fecha 'desde' no puede ser mayor que la fecha 'hasta'.");
+    return;
   }
 
-      setTimeout(() => {
-      formExportar.reset(); // Limpia todos los inputs del formulario
-      modalExportar.style.display = "none"; // Cierra el modal
-    }, 500); // Tiempo suficiente para iniciar la descarga
+    btnSubmit.disabled = true;
+  btnSubmit.textContent = "Generando...";
+  setTimeout(() => {
+    formExportar.reset(); // Limpia todos los inputs del formulario
+    modalExportar.style.display = "none"; // Cierra el modal
+    btnSubmit.disabled = false;
+    btnSubmit.textContent = "Exportar Excel";
+  }, 1500); // Tiempo suficiente para iniciar la descarga
 });
 </script>
 
@@ -275,6 +280,7 @@ function filtrar() {
   
   if (desde && hasta && desde > hasta) {
     alert("La fecha 'Desde' no puede ser posterior a la fecha 'Hasta'.");
+    filtroHasta.value = "";
     return;
   }
   const hoy = new Date();

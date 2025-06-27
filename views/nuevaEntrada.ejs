@@ -23,6 +23,16 @@
     <link rel="shortcut icon" href="/favicon/favicon.ico" />
     <title>Registrar Nueva Entrada</title>
     <link rel="stylesheet" href="/registrarEntrada.css" />
+
+    <style>
+      .select-sin-flecha {
+        -webkit-appearance: none;
+        -moz-appearance: none;
+        appearance: none;
+        pointer-events: none; /* impide interacción */
+        background-image: none; /* quita la flechita */
+      }
+    </style>
   </head>
   <body>
     <div class="venta-container">
@@ -79,7 +89,7 @@
             </svg>
             Proveedor
           </h3>
-          <select id="proveedor" name="proveedor-select">
+          <select id="proveedor" name="proveedor-select" disabled class="select-sin-flecha">
             <option value="">Seleccione un proveedor</option>
             <% proveedores.forEach(proveedor => { %>
             <option value="<%= proveedor.id_proveedor %>">
@@ -133,7 +143,9 @@
               </tr>
             </thead>
             <tbody id="tablaProductos">
-              <!-- Productos se cargarán dinámicamente -->
+                  <td colspan="3" style="text-align: center; color: #6b7280; font-style: italic;">
+                  Cargue una orden para mostrar productos disponibles.
+                </td>
             </tbody>
           </table>
         </div>
@@ -168,7 +180,9 @@
               </tr>
             </thead>
             <tbody id="resumenEntrada">
-              <!-- Productos agregados se mostrarán aquí -->
+              <td colspan="4" style="text-align: center; color: #6b7280; font-style: italic;">
+                No se han agregado productos al resumen aún.
+              </td>
             </tbody>
           </table>
           <div class="total-container" style="display: none;">
@@ -490,6 +504,19 @@
       // Función para renderizar los productos en el resumen
       function renderResumenEntrada() {
       resumenEntrada.innerHTML = "";
+        if (carrito.length === 0) {
+    resumenEntrada.innerHTML = `
+      <tr>
+        <td colspan="4" style="text-align: center; color: #6b7280; font-style: italic;">
+          No se han agregado productos al resumen aún.
+        </td>
+      </tr>
+    `;
+    totalVenta.textContent = "0.00";
+    productosInput.value = "[]";
+    hiddenTotal.value = "0.00";
+    return;
+  }
       let total = 0;
 
       carrito.forEach((item, index) => {
@@ -498,6 +525,10 @@
         
         const productoOrden = ordenActual?.products.find(p => p.nombre === item.producto.nombre);
         const cantidadMaxima = productoOrden ? productoOrden.cantidad - productoOrden.ingresado : 100;
+
+        const cantidadActual = item.cantidad;
+        const requiereIncidencia = cantidadActual < cantidadMaxima;
+        const incidenciaDisabled = !requiereIncidencia ? 'disabled style="background-color:#f3f4f6; cursor: not-allowed;"' : '';
 
         const row = document.createElement("tr");
         console.log("Cantidad Maxima:", cantidadMaxima)
@@ -511,7 +542,7 @@
           <td>
             <input type="text" class="incidencia-input" 
                   placeholder="Incidencia..." data-index="${index}" 
-                  value="${item.incidencia || ""}" />
+                  value="${item.incidencia || ""}" ${incidenciaDisabled} />
           </td>
           <td>
             <button type="button" onclick="quitarProducto(${index})">Quitar</button>
@@ -574,6 +605,37 @@
 
         if (carrito.length === 0) {
           alert("Debe agregar al menos un producto al resumen de entrada.");
+          e.preventDefault();
+          return;
+        }
+
+         // Validar incidencias obligatorias
+        const productosConIncidenciaFaltante = [];
+
+        carrito.forEach((item) => {
+          const productoOrden = ordenActual?.products.find(
+            (p) => p.id_producto === item.producto.id_producto
+          );
+
+          if (!productoOrden) return;
+
+          const cantidadEsperada = productoOrden.cantidad - productoOrden.ingresado;
+          const cantidadIngresada = item.cantidad;
+
+          const requiereIncidencia = cantidadIngresada < cantidadEsperada;
+          const incidenciaVacia = !item.incidencia || item.incidencia.trim() === "";
+
+          if (requiereIncidencia && incidenciaVacia) {
+            productosConIncidenciaFaltante.push(item.producto.nombre);
+          }
+        });
+
+        if (productosConIncidenciaFaltante.length > 0) {
+          alert(
+            `Los siguientes productos requieren una incidencia porque se ingresó menos cantidad de la esperada:\n- ${productosConIncidenciaFaltante.join(
+              "\n- "
+            )}`
+          );
           e.preventDefault();
           return;
         }

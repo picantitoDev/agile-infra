@@ -142,9 +142,19 @@ async function registrarVentaPost(req, res) {
     }
 
     if (clienteExistente) {
-      // Cliente ya existe
-      id_cliente = clienteExistente.id_cliente
-    } else {
+      id_cliente = clienteExistente.id_cliente;
+
+      // Verificar si hay cambios en correo o dirección
+      if (
+        correo_cliente && correo_cliente !== clienteExistente.correo_cliente ||
+        direccion_cliente && direccion_cliente !== clienteExistente.direccion_cliente
+      ) {
+        await dbClientes.actualizarDatosContacto(id_cliente, {
+          correo_cliente,
+          direccion_cliente
+        });
+      }
+} else {
       // Cliente no existe, lo registramos
       id_cliente = await dbClientes.registrarCliente({
         nombre_cliente: cliente_nombre,

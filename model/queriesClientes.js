@@ -42,8 +42,22 @@ async function buscarPorRUC(ruc) {
   return result.rows[0] // o undefined si no hay
 }
 
+async function actualizarDatosContacto(id_cliente, { correo_cliente, direccion_cliente }) {
+  const query = `
+    UPDATE cliente
+    SET 
+      correo_cliente = $1,
+      direccion_cliente = $2
+    WHERE id_cliente = $3
+  `;
+
+  const values = [correo_cliente, direccion_cliente, id_cliente];
+  await pool.query(query, values);
+}
+
 module.exports = {
   registrarCliente,
   buscarPorDNI,
   buscarPorRUC,
+  actualizarDatosContacto
 }

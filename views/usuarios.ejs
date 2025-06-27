@@ -28,8 +28,8 @@
   <body>
     <div class="container">
       <div class="header">
-              <h1 class="title">Lista de Usuarios</h1>
         <div class="top-bar">
+                <h1 class="title">Lista de Usuarios</h1>
           <a href="/usuarios/nuevo" class="btn-crear"> + Crear Usuario </a>
         </div>
       </div>
@@ -67,11 +67,21 @@
             (esAdmin && !objetivoEsAdmin && !objetivoEsSuperadmin)
           );
         %>
-        <% if (puedeEditar) { %>
-          <a href="/usuarios/editar/<%= usuario.id %>">Editar</a>
-        <% } else { %>
-          <span class="text-muted" style="color: gray;">—</span>
-        <% } %>
+<% if (puedeEditar) { %>
+  <a href="/usuarios/editar/<%= usuario.id %>" title="Editar usuario">
+    <svg class="edit-icon" viewBox="0 0 24 24">
+      <path d="m18 2 4 4-12 12H6v-4L18 2z"/>
+      <path d="m21.378 5.378-3.756-3.756"/>
+    </svg>
+  </a>
+<% } else { %>
+  <span title="Sin permisos para editar">
+    <svg class="edit-icon-disabled" viewBox="0 0 24 24">
+      <path d="m18 2 4 4-12 12H6v-4L18 2z"/>
+      <path d="m21.378 5.378-3.756-3.756"/>
+    </svg>
+  </span>
+<% } %>
       </td>
     </tr>
   <% }) %>

@@ -20,7 +20,7 @@ async function generarComprobantePDF(data) {
   const blackColor = rgb(0, 0, 0)
 
   // Logo (Blue Square Placeholder)
-  const pngImageBytes = fs.readFileSync("public/stockLogo.png")
+  const pngImageBytes = fs.readFileSync("public/bravo-logo.png")
   const pngImage = await pdfDoc.embedPng(pngImageBytes)
   const pngDims = pngImage.scale(0.5) // Scale to 50% of original size, adjust as needed
 
@@ -33,7 +33,7 @@ async function generarComprobantePDF(data) {
   })
 
   // Stock Cloud Title
-  page.drawText("STOCK CLOUD", {
+  page.drawText("BRAVO S.A.C", {
     x: 135,
     y: height - 60,
     size: 18,
@@ -42,14 +42,14 @@ async function generarComprobantePDF(data) {
   })
 
   // Subtitle
-  page.drawText("Teléfono 976167251 Trujillo-Perú", {
+  page.drawText("Teléfono 993767893 Chimbote-Perú", {
     x: 135,
     y: height - 80,
     size: 10,
     font,
   })
 
-  page.drawText("Av. América Sur 1910, Trujillo 13006", {
+  page.drawText("Urb. Nicolas Garatea Mz. 75, Chimbote 02710", {
     x: 135,
     y: height - 95,
     size: 10,
@@ -90,7 +90,7 @@ async function generarComprobantePDF(data) {
   const numeroComprobante = `${data[0].serie}-${correlativoFormateado}`
 
   const texts = [
-    "R.U.C. No. 132345423345",
+    "R.U.C. No. 20610557113",
     `${tipoComprobante} DE VENTA ELECTRONICA`,
     numeroComprobante,
   ]

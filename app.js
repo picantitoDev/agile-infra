@@ -6,6 +6,8 @@ const methodOverride = require("method-override")
 const passport = require("passport")
 const flash = require("connect-flash")
 const expressLayouts = require('express-ejs-layouts');
+const { PrismaSessionStore, prisma } = require('./utils/prismaSessionStore');
+const cron = require('node-cron');
 
 // Configurar passport
 require("./auth/passportConfig")
@@ -24,22 +26,30 @@ const rutaRecovery = require("./routes/rutaRecovery")
 const rutaVentas = require("./routes/rutaVentas")
 
 // Middleware
-app.use(express.json())
 app.use(express.static(path.join(__dirname, "public")))
-app.set("view engine", "ejs")
+app.use(express.json())
 app.use(express.urlencoded({ extended: true }))
 app.use(methodOverride("_method"))
 app.use(expressLayouts);
+
+app.set("view engine", "ejs")
 app.set('layout', 'layouts/main');
 
 // Configurar sesión
 app.use(
   session({
-    secret: "clave_super_secreta",
+    store: new PrismaSessionStore(),
+    secret: process.env.SESSION_SECRET,
     resave: false,
     saveUninitialized: false,
+    cookie: {
+      secure: process.env.NODE_ENV === 'production',
+      httpOnly: true,
+      sameSite: 'lax',
+      maxAge: 1000 * 60 * 60 * 24,
+    },
   })
-)
+);
 
 app.use(flash())
 
@@ -58,6 +68,13 @@ app.use((req, res, next) => {
   res.locals.user = req.user || null
   next()
 })
+
+const csurf = require('csurf');
+app.use(csurf());
+app.use((req, res, next) => {
+  res.locals.csrfToken = req.csrfToken();
+  next();
+});
 
 // Rutas principales
 const { obtenerResumenVentas30Dias } = require('./model/queriesMovimientos');
@@ -114,8 +131,6 @@ app.get("/", async (req, res) => {
   });
 });
 
-
-
 app.use('/ventas', rutaVentas);
 app.use("/productos", validarSesion, verificarAdmin, rutaProductos);
 app.use("/categorias", validarSesion, verificarAdmin, rutaCategorias);
@@ -137,19 +152,37 @@ app.post(
 )
 
 // Logout
-app.get("/log-out", (req, res, next) => {
+app.get('/log-out', (req, res, next) => {
   req.logout((err) => {
     if (err) {
-      return next(err)
+      req.flash('error_msg', 'Error al cerrar sesión');
+      return res.redirect('/');
     }
-    res.redirect("/")
-  })
-})
+    req.flash('success_msg', 'Sesión cerrada correctamente');
+    res.redirect('/');
+  });
+});
 
 // Middleware para manejar errores 404
 app.use((req, res, next) => {
   res.status(404).render("404", { url: req.originalUrl })
 })
+
+cron.schedule('0 * * * *', async () => {
+  try {
+    const now = new Date();
+    const deleted = await prisma.session.deleteMany({
+      where: {
+        expires: {
+          lt: now,  // Less than current time
+        },
+      },
+    });
+    console.log(`Cleanup: Deleted ${deleted.count} expired sessions at ${now}`);
+  } catch (err) {
+    console.error('Error during session cleanup:', err);
+  }
+});
 
 // Servidor
 const PORT =  3000

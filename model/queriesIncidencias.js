@@ -1,132 +1,283 @@
-// queriesIncidencias.js
-const pool = require("./pool")
-const { DateTime } = require('luxon');
+const { PrismaClient } = require('@prisma/client')
+const { DateTime } = require('luxon')
+const prisma = new PrismaClient()
+
 /**
  * Registra una incidencia asociada a un movimiento.
- * 
- * @param {Object} incidencia
- * @param {number} incidencia.id_movimiento - ID del movimiento relacionado
- * @param {string|null} incidencia.descripcion_general - Descripción general de la incidencia (opcional)
- * @param {Array} incidencia.detalle_productos - Lista de productos con incidencia (JSON serializable)
  */
-async function registrarIncidencia({ id_movimiento, descripcion_general, detalle_productos, id_orden = null, fecha = new Date() }) {
-  const query = `
-    INSERT INTO incidencia (id_movimiento, descripcion_general, detalle_productos, id_orden, fecha)
-    VALUES ($1, $2, $3, $4, $5)
-  `;
-  const values = [
-    id_movimiento,
-    descripcion_general || null,
-    JSON.stringify(detalle_productos),
-    id_orden,
-    fecha
-  ];
-
+async function registrarIncidencia({
+  id_movimiento,
+  descripcion_general,
+  detalle_productos,
+  id_orden = null,
+  fecha = new Date(),
+}) {
   try {
-    await pool.query(query, values);
+    // Validar que id_movimiento sea un número válido
+    const movimientoId = parseInt(id_movimiento)
+    if (isNaN(movimientoId)) {
+      throw new Error('ID de movimiento debe ser un número válido')
+    }
+
+    // Validar id_orden si se proporciona
+    let ordenId = null
+    if (id_orden !== null && id_orden !== undefined) {
+      ordenId = parseInt(id_orden)
+      if (isNaN(ordenId)) {
+        throw new Error('ID de orden debe ser un número válido')
+      }
+    }
+
+    // Validar fecha
+    const fechaDate = fecha instanceof Date ? fecha : new Date(fecha)
+    if (isNaN(fechaDate.getTime())) {
+      throw new Error('Fecha inválida')
+    }
+
+    const dataToInsert = {
+      id_movimiento: movimientoId,
+      descripcion_general: descripcion_general || null,
+      detalle_productos: detalle_productos || null, // JSON field
+      id_orden: ordenId,
+      fecha: fechaDate,
+    }
+
+    return await prisma.incidencia.create({
+      data: dataToInsert,
+      include: {
+        movimiento: {
+          select: {
+            id_movimiento: true,
+            fecha: true,
+            descripcion: true,
+            usuarios: { // Corregido: usuarios en lugar de usuario
+              select: { id: true, username: true }
+            }
+          }
+        },
+        orden_reabastecimiento: { // Relación con orden si existe
+          select: {
+            id_order: true,
+            estado: true
+          }
+        }
+      }
+    })
   } catch (error) {
-    console.error("Error al registrar incidencia:", error);
-    throw error;
+    console.error('Error al registrar incidencia:', error)
+    throw error
   }
 }
 
-
 async function obtenerIncidencias() {
-  const query = `
-    SELECT 
-      i.id_incidencia,
-      i.id_movimiento,
-      i.id_orden,
-      i.descripcion_general,
-      i.detalle_productos,
-      i.fecha_registro,
-      m.fecha,
-      m.descripcion,
-      u.username AS usuario
-    FROM incidencia i
-    JOIN movimiento m ON i.id_movimiento = m.id_movimiento
-    JOIN usuarios u ON m.id_usuario = u.id
-    ORDER BY i.fecha_registro DESC
-  `
-
   try {
-    const result = await pool.query(query)
-    return result.rows
+    return await prisma.incidencia.findMany({
+      orderBy: { fecha_registro: 'desc' },
+      include: {
+        movimiento: {
+          select: {
+            id_movimiento: true,
+            fecha: true,
+            descripcion: true,
+            usuarios: { // Corregido: usuarios en lugar de usuario
+              select: { id: true, username: true }
+            }
+          }
+        },
+        orden_reabastecimiento: { // Agregado para completar la info
+          select: {
+            id_order: true,
+            estado: true,
+            proveedor: {
+              select: { id_proveedor: true, razon_social: true }
+            }
+          }
+        }
+      }
+    })
   } catch (error) {
-    console.error("Error al obtener incidencias:", error)
+    console.error('Error al obtener incidencias:', error)
     throw error
   }
 }
 
 async function obtenerIncidenciasPorOrden(id_orden) {
-  const query = `
-    SELECT id_incidencia, id_movimiento, id_orden, detalle_productos, fecha
-    FROM incidencia
-    WHERE id_orden = $1
-    ORDER BY id_incidencia ASC
-  `;
-  const { rows } = await pool.query(query, [id_orden]);
+  try {
+    const ordenId = parseInt(id_orden)
+    if (isNaN(ordenId)) {
+      throw new Error('ID de orden debe ser un número válido')
+    }
 
-  return rows.map(row => ({
-    id_incidencia: row.id_incidencia,
-    id_movimiento: row.id_movimiento,
-    detalle_productos: row.detalle_productos, // esto ya es JSON si la columna es tipo JSONB o text convertido
-    fecha: row.fecha
-  }));
+    const incidencias = await prisma.incidencia.findMany({
+      where: { id_orden: ordenId },
+      orderBy: { id_incidencia: 'asc' },
+      select: {
+        id_incidencia: true,
+        id_movimiento: true,
+        descripcion_general: true,
+        detalle_productos: true,
+        fecha: true,
+        fecha_registro: true
+      }
+    })
+
+    return incidencias.map(row => ({
+      id_incidencia: row.id_incidencia,
+      id_movimiento: row.id_movimiento,
+      descripcion_general: row.descripcion_general,
+      detalle_productos: row.detalle_productos ?? [], // seguridad para JSON
+      fecha: row.fecha,
+      fecha_registro: row.fecha_registro
+    }))
+  } catch (error) {
+    console.error('Error al obtener incidencias por orden:', error)
+    throw error
+  }
 }
 
-async function obtenerIncidenciaPorId(id_incidencia){
-  const query = `
-    SELECT 
-      id_incidencia, 
-      id_movimiento, 
-      descripcion_general, 
-      detalle_productos, 
-      fecha_registro, 
-      id_orden,
-      fecha
-    FROM incidencia
-    WHERE id_incidencia = $1
-  `;
+async function obtenerIncidenciaPorId(id_incidencia) {
+  try {
+    const incidenciaId = parseInt(id_incidencia)
+    if (isNaN(incidenciaId)) {
+      throw new Error('ID de incidencia debe ser un número válido')
+    }
 
-  const result = await pool.query(query, [id_incidencia]);
-  if (result.rows.length === 0) return null;
+    const incidencia = await prisma.incidencia.findUnique({
+      where: { id_incidencia: incidenciaId },
+      include: {
+        movimiento: {
+          select: {
+            id_movimiento: true,
+            fecha: true,
+            descripcion: true,
+            tipo: true,
+            usuarios: {
+              select: { id: true, username: true }
+            }
+          }
+        },
+        orden_reabastecimiento: {
+          select: {
+            id_order: true,
+            estado: true,
+            fecha: true,
+            proveedor: {
+              select: { id_proveedor: true, razon_social: true }
+            }
+          }
+        }
+      }
+    })
 
-  const row = result.rows[0];
-  // Asegurarse que detalle_productos sea un array (si no lo es)
-  row.detalle_productos = Array.isArray(row.detalle_productos) ? row.detalle_productos : [];
-  return row;
+    if (!incidencia) return null
+
+    // Asegurar que detalle_productos sea un array
+    return {
+      ...incidencia,
+      detalle_productos: Array.isArray(incidencia.detalle_productos)
+        ? incidencia.detalle_productos
+        : []
+    }
+  } catch (error) {
+    console.error('Error al obtener incidencia por ID:', error)
+    throw error
+  }
 }
 
 async function obtenerIncidenciasUltimos30Dias() {
-  const result = await pool.query(`
-    SELECT fecha
-    FROM incidencia
-    WHERE fecha >= NOW() - INTERVAL '30 days'
-  `);
-  return result.rows;
+  try {
+    const limite = new Date()
+    limite.setDate(limite.getDate() - 30)
+
+    return await prisma.incidencia.findMany({
+      where: {
+        fecha: { gte: limite }
+      },
+      select: {
+        id_incidencia: true,
+        fecha: true,
+        fecha_registro: true,
+        descripcion_general: true
+      },
+      orderBy: { fecha: 'desc' }
+    })
+  } catch (error) {
+    console.error('Error al obtener incidencias últimos 30 días:', error)
+    throw error
+  }
 }
 
 async function obtenerIncidenciasPorFecha(fechaLima) {
-  const inicioUTC = DateTime
-    .fromISO(fechaLima, { zone: 'America/Lima' })
-    .startOf('day')
-    .toUTC()
-    .toISO();
+  try {
+    if (!fechaLima) {
+      throw new Error('Fecha es requerida')
+    }
 
-  const finUTC = DateTime
-    .fromISO(fechaLima, { zone: 'America/Lima' })
-    .endOf('day')
-    .toUTC()
-    .toISO();
+    const inicioUTC = DateTime.fromISO(fechaLima, { zone: 'America/Lima' })
+      .startOf('day')
+      .toUTC()
+      .toJSDate()
 
-  const { rows } = await pool.query(`
-    SELECT * FROM incidencia
-    WHERE fecha BETWEEN $1 AND $2
-    ORDER BY fecha ASC
-  `, [inicioUTC, finUTC]);
+    const finUTC = DateTime.fromISO(fechaLima, { zone: 'America/Lima' })
+      .endOf('day')
+      .toUTC()
+      .toJSDate()
 
-  return rows;
+    return await prisma.incidencia.findMany({
+      where: {
+        fecha: {
+          gte: inicioUTC,
+          lte: finUTC
+        }
+      },
+      include: {
+        movimiento: {
+          select: {
+            id_movimiento: true,
+            tipo: true,
+            fecha: true,
+            usuarios: {
+              select: { id: true, username: true }
+            }
+          }
+        }
+      },
+      orderBy: { fecha: 'asc' }
+    })
+  } catch (error) {
+    console.error('Error al obtener incidencias por fecha:', error)
+    throw error
+  }
+}
+
+// Función adicional útil: obtener incidencias por movimiento
+async function obtenerIncidenciasPorMovimiento(id_movimiento) {
+  try {
+    const movimientoId = parseInt(id_movimiento)
+    if (isNaN(movimientoId)) {
+      throw new Error('ID de movimiento debe ser un número válido')
+    }
+
+    return await prisma.incidencia.findMany({
+      where: { id_movimiento: movimientoId },
+      orderBy: { fecha_registro: 'desc' },
+      include: {
+        movimiento: {
+          select: {
+            id_movimiento: true,
+            tipo: true,
+            fecha: true,
+            usuarios: {
+              select: { id: true, username: true }
+            }
+          }
+        }
+      }
+    })
+  } catch (error) {
+    console.error('Error al obtener incidencias por movimiento:', error)
+    throw error
+  }
 }
 
 module.exports = {
@@ -135,5 +286,6 @@ module.exports = {
   obtenerIncidenciasPorOrden,
   obtenerIncidenciaPorId,
   obtenerIncidenciasUltimos30Dias,
-  obtenerIncidenciasPorFecha
+  obtenerIncidenciasPorFecha,
+  obtenerIncidenciasPorMovimiento
 }

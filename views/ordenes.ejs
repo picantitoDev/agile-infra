@@ -610,7 +610,7 @@
     <% ordenes.forEach((orden, index) => { %>
       <tr class="fila-orden" data-index="<%= index %>">
         <td data-label="ID Orden"><%= orden.id_order %></td>
-        <td data-label="Proveedor"><%= orden.proveedor %></td>
+        <td data-label="Proveedor"><%= orden.proveedor.razon_social %></td>
         <% const fechaObjeto = new Date(orden.fecha); %>
 
         <td data-label="Fecha" data-fecha="<%= fechaObjeto.toISOString() %>">

@@ -1,92 +1,40 @@
-const pool = require("./pool")
-const { DateTime } = require('luxon');
+const { PrismaClient } = require('@prisma/client')
+const { DateTime } = require('luxon')
+const prisma = new PrismaClient()
 
+// === OBTENER MOVIMIENTOS ===
 async function obtenerMovimientos() {
-  const { rows } = await pool.query(`
-      SELECT * FROM movimiento ORDER BY id_movimiento DESC`)
-  return rows
+  return prisma.movimiento.findMany({
+    orderBy: { id_movimiento: 'desc' }
+  })
 }
 
 async function obtenerDetalleMovimiento(idMov) {
-  const { rows } = await pool.query(
-    `
-      SELECT 
-        m.id_movimiento,
-        m.fecha,
-        m.tipo,
-        m.descripcion,
-        u.username AS usuario,
-        -- Datos de cliente (obtenidos a través de movimiento_venta)
-        mv.id_cliente,
-        c.nombre_cliente,
-        c.razon_social,
-        c.dni_cliente,
-        c.ruc_cliente,
-        c.correo_cliente,
-        c.direccion_cliente,
-        mv.tipo_comprobante,
-        mv.serie,
-        mv.correlativo,
-        mv.total AS total_venta,
-        -- Datos de movimiento compra
-        me.id_proveedor,
-        me.total AS total_compra,
-        -- Datos de movimiento ajuste
-        ma.tipo_ajuste,
-        ma.motivo,
-        -- Productos involucrados
-        p.id_producto,
-        p.nombre AS producto,
-        pm.cantidad,
-        pm.precio_unitario,
-        pm.subtotal
-      FROM 
-        movimiento m
-      JOIN 
-        usuarios u ON m.id_usuario = u.id
-      LEFT JOIN 
-        movimiento_venta mv ON m.id_movimiento = mv.id_movimiento
-      LEFT JOIN 
-        cliente c ON mv.id_cliente = c.id_cliente
-      LEFT JOIN 
-        movimiento_entrada me ON m.id_movimiento = me.id_movimiento
-      LEFT JOIN 
-        movimiento_ajuste ma ON m.id_movimiento = ma.id_movimiento
-      LEFT JOIN 
-        producto_movimiento pm ON m.id_movimiento = pm.id_movimiento
-      LEFT JOIN 
-        producto p ON pm.id_producto = p.id_producto
-      WHERE 
-        m.id_movimiento = $1
-    `,
-    [idMov]
-  )
-
-  return rows
+  return prisma.movimiento.findUnique({
+    where: { id_movimiento: idMov },
+    include: {
+      usuarios: { select: { username: true } },
+      movimiento_venta: {
+        include: { cliente: true }
+      },
+      movimiento_entrada: {
+        include: { proveedor: true }
+      },
+      movimiento_ajuste: true,
+      producto_movimiento: {
+        include: { producto: true }
+      }
+    }
+  })
 }
 
+// === REPORTES ===
 async function obtenerMovimientosVentas(fechaInicio, fechaFin) {
-  const query = `
-    SELECT
-      m.id_movimiento,
-      m.fecha,
-      m.descripcion,
-      u.username AS usuario,
-      mv.tipo_comprobante,
-      mv.serie,
-      mv.correlativo,
-      mv.total AS total_venta,
-      c.nombre_cliente,
-      c.razon_social,
-      c.ruc_cliente,
-      c.dni_cliente,
-      c.direccion_cliente,
-      c.correo_cliente,
-      p.id_producto,
-      p.nombre AS producto,
-      pm.cantidad,
-      pm.precio_unitario,
-      pm.subtotal
+  return prisma.$queryRaw`
+    SELECT m.id_movimiento, m.fecha, m.descripcion, u.username AS usuario,
+           mv.tipo_comprobante, mv.serie, mv.correlativo, mv.total AS total_venta,
+           c.nombre_cliente, c.razon_social, c.ruc_cliente, c.dni_cliente, c.direccion_cliente, c.correo_cliente,
+           p.id_producto, p.nombre AS producto, pm.cantidad, pm.precio_unitario, pm.subtotal
     FROM movimiento m
     JOIN movimiento_venta mv ON m.id_movimiento = mv.id_movimiento
     JOIN usuarios u ON m.id_usuario = u.id
@@ -94,28 +42,16 @@ async function obtenerMovimientosVentas(fechaInicio, fechaFin) {
     JOIN producto_movimiento pm ON m.id_movimiento = pm.id_movimiento
     JOIN producto p ON pm.id_producto = p.id_producto
     WHERE m.tipo = 'Venta'
-     AND m.fecha::date BETWEEN $1 AND $2
+      AND m.fecha::date BETWEEN ${fechaInicio} AND ${fechaFin}
     ORDER BY m.fecha DESC, m.id_movimiento
-  `;
-
-  const { rows } = await pool.query(query, [fechaInicio, fechaFin]);
-  return rows;
+  `
 }
 
-
 async function obtenerMovimientosMermas(fechaInicio, fechaFin) {
-  const query = `
-    SELECT
-      m.id_movimiento,
-      m.fecha,
-      m.descripcion,
-      u.username AS usuario,
-      ma.motivo,
-      p.id_producto,
-      p.nombre AS producto,
-      pm.cantidad,
-      pm.precio_unitario,
-      pm.subtotal
+  return prisma.$queryRaw`
+    SELECT m.id_movimiento, m.fecha, m.descripcion, u.username AS usuario,
+           ma.motivo, p.id_producto, p.nombre AS producto,
+           pm.cantidad, pm.precio_unitario, pm.subtotal
     FROM movimiento m
     JOIN movimiento_ajuste ma ON m.id_movimiento = ma.id_movimiento
     JOIN usuarios u ON m.id_usuario = u.id
@@ -123,33 +59,18 @@ async function obtenerMovimientosMermas(fechaInicio, fechaFin) {
     JOIN producto p ON pm.id_producto = p.id_producto
     WHERE m.tipo = 'Merma'
       AND ma.tipo_ajuste = 'Merma'
-      AND m.fecha::date BETWEEN $1 AND $2
+      AND m.fecha::date BETWEEN ${fechaInicio} AND ${fechaFin}
     ORDER BY m.fecha DESC, m.id_movimiento
-  `;
-
-  const { rows } = await pool.query(query, [fechaInicio, fechaFin]);
-  return rows;
+  `
 }
 
-
 async function obtenerMovimientosEntradas(fechaInicio, fechaFin) {
-  const query = `
-    SELECT
-      m.id_movimiento,
-      m.fecha,
-      m.descripcion,
-      u.username AS usuario,
-      me.total AS total_entrada,
-      me.id_orden,
-      pr.razon_social,
-      pr.ruc,
-      pr.direccion,
-      pr.correo,
-      p.id_producto,
-      p.nombre AS producto,
-      pm.cantidad,
-      pm.precio_unitario,
-      pm.subtotal
+  return prisma.$queryRaw`
+    SELECT m.id_movimiento, m.fecha, m.descripcion, u.username AS usuario,
+           me.total AS total_entrada, me.id_orden,
+           pr.razon_social, pr.ruc, pr.direccion, pr.correo,
+           p.id_producto, p.nombre AS producto,
+           pm.cantidad, pm.precio_unitario, pm.subtotal
     FROM movimiento m
     JOIN movimiento_entrada me ON m.id_movimiento = me.id_movimiento
     JOIN usuarios u ON m.id_usuario = u.id
@@ -157,26 +78,16 @@ async function obtenerMovimientosEntradas(fechaInicio, fechaFin) {
     JOIN producto_movimiento pm ON m.id_movimiento = pm.id_movimiento
     JOIN producto p ON pm.id_producto = p.id_producto
     WHERE m.tipo = 'Compra'
-      AND m.fecha::date BETWEEN $1 AND $2
+      AND m.fecha::date BETWEEN ${fechaInicio} AND ${fechaFin}
     ORDER BY m.fecha DESC, m.id_movimiento
-  `;
-  const { rows } = await pool.query(query, [fechaInicio, fechaFin]);
-  return rows;
+  `
 }
 
 async function obtenerMovimientosSobrantes(fechaInicio, fechaFin) {
-  const query = `
-    SELECT
-      m.id_movimiento,
-      m.fecha,
-      m.descripcion,
-      u.username AS usuario,
-      ma.motivo,
-      p.id_producto,
-      p.nombre AS producto,
-      pm.cantidad,
-      pm.precio_unitario,
-      pm.subtotal
+  return prisma.$queryRaw`
+    SELECT m.id_movimiento, m.fecha, m.descripcion, u.username AS usuario,
+           ma.motivo, p.id_producto, p.nombre AS producto,
+           pm.cantidad, pm.precio_unitario, pm.subtotal
     FROM movimiento m
     JOIN movimiento_ajuste ma ON m.id_movimiento = ma.id_movimiento
     JOIN usuarios u ON m.id_usuario = u.id
@@ -184,231 +95,152 @@ async function obtenerMovimientosSobrantes(fechaInicio, fechaFin) {
     JOIN producto p ON pm.id_producto = p.id_producto
     WHERE m.tipo = 'Sobrante'
       AND ma.tipo_ajuste = 'Sobrante'
-      AND m.fecha::date BETWEEN $1 AND $2
+      AND m.fecha::date BETWEEN ${fechaInicio} AND ${fechaFin}
     ORDER BY m.fecha DESC, m.id_movimiento
-  `;
-
-  const { rows } = await pool.query(query, [fechaInicio, fechaFin]);
-  return rows;
+  `
 }
 
-
-
+// === REGISTRO DE MOVIMIENTOS ===
 async function registrarMovimiento({ id_usuario, tipo, fecha, descripcion }) {
-  const query = `
-      INSERT INTO movimiento (id_usuario, tipo, fecha, descripcion) 
-      VALUES ($1, $2, $3, $4) 
-      RETURNING id_movimiento
-    `
-  const values = [id_usuario, tipo, fecha, descripcion]
-
   try {
-    const result = await pool.query(query, values)
-    return result.rows[0].id_movimiento // Regresa el id_movimiento generado
+    const movimiento = await prisma.movimiento.create({
+      data: { id_usuario, tipo, fecha, descripcion }
+    })
+    return movimiento.id_movimiento
   } catch (error) {
     console.error("Error al insertar movimiento:", error)
     throw error
   }
 }
 
-async function registrarMovimientoVenta({
-  id_movimiento,
-  id_cliente,
-  tipo_comprobante,
-  total,
-}) {
+async function registrarMovimientoVenta({ id_movimiento, id_cliente, tipo_comprobante, total }) {
   try {
-    // Definir la serie según el tipo de comprobante
     const serie = tipo_comprobante === "boleta" ? "B001" : "F001"
 
-    // Obtener el correlativo actual
-    const correlativoQuery = `
-    SELECT COALESCE(MAX(correlativo), 0) + 1 AS nuevo_correlativo
-    FROM movimiento_venta
-    WHERE tipo_comprobante = $1
-  `
-    const correlativoResult = await pool.query(correlativoQuery, [
-      tipo_comprobante,
-    ])
-    const correlativo = correlativoResult.rows[0].nuevo_correlativo
+    // Calcular correlativo actual
+    const { _max } = await prisma.movimiento_venta.aggregate({
+      where: { tipo_comprobante },
+      _max: { correlativo: true }
+    })
+    const correlativo = (_max.correlativo ?? 0) + 1
 
-    // Insertar el movimiento de venta con serie y correlativo
-    const insertQuery = `
-      INSERT INTO movimiento_venta (
-        id_movimiento, id_cliente, tipo_comprobante, serie, correlativo, total
-      )
-      VALUES ($1, $2, $3, $4, $5, $6)
-    `
-    const values = [
-      id_movimiento,
-      id_cliente,
-      tipo_comprobante,
-      serie,
-      correlativo,
-      total,
-    ]
-
-    await pool.query(insertQuery, values)
+    await prisma.movimiento_venta.create({
+      data: {
+        id_movimiento,
+        id_cliente,
+        tipo_comprobante,
+        serie,
+        correlativo,
+        total
+      }
+    })
   } catch (error) {
     console.error("Error al insertar movimiento venta:", error)
     throw error
   }
 }
 
-async function registrarMovimientoCompra({
-  id_movimiento,
-  id_proveedor,
-  total,
-  id_orden,
-}) {
-  const query = `
-    INSERT INTO movimiento_entrada (id_movimiento, id_proveedor, total, id_orden)
-    VALUES ($1, $2, $3, $4)
-  `;
-
-  const values = [id_movimiento, id_proveedor, total, id_orden];
-
+async function registrarMovimientoCompra({ id_movimiento, id_proveedor, total, id_orden }) {
   try {
-    await pool.query(query, values);
-  } catch (error) {
-    console.error("Error al insertar movimiento compra:", error);
-    throw error;
-  }
-}
-
-async function registrarMovimientoAjuste({
-  id_movimiento,
-  tipo_ajuste,
-  motivo,
-}) {
-  const query = `
-      INSERT INTO movimiento_ajuste (id_movimiento, tipo_ajuste, motivo)
-      VALUES ($1, $2, $3)
-    `
-
-  const values = [id_movimiento, tipo_ajuste, motivo]
-
-  try {
-    await pool.query(query, values)
+    await prisma.movimiento_entrada.create({
+      data: { id_movimiento, id_proveedor, total, id_orden }
+    })
   } catch (error) {
     console.error("Error al insertar movimiento compra:", error)
     throw error
   }
 }
 
-async function registrarProductoMovimiento({
-  id_producto,
-  id_movimiento,
-  cantidad,
-  precio_unitario,
-  subtotal,
-}) {
-  const query = `
-      INSERT INTO producto_movimiento (id_producto, id_movimiento, cantidad, precio_unitario, subtotal) 
-      VALUES ($1, $2, $3, $4, $5)
-    `
-
-  const values = [
-    id_producto,
-    id_movimiento,
-    cantidad,
-    precio_unitario,
-    subtotal,
-  ]
-
+async function registrarMovimientoAjuste({ id_movimiento, tipo_ajuste, motivo }) {
   try {
-    await pool.query(query, values)
+    await prisma.movimiento_ajuste.create({
+      data: { id_movimiento, tipo_ajuste, motivo }
+    })
+  } catch (error) {
+    console.error("Error al insertar movimiento ajuste:", error)
+    throw error
+  }
+}
+
+async function registrarProductoMovimiento({ id_producto, id_movimiento, cantidad, precio_unitario, subtotal }) {
+  try {
+    await prisma.producto_movimiento.create({
+      data: { id_producto, id_movimiento, cantidad, precio_unitario, subtotal }
+    })
   } catch (error) {
     console.error("Error al insertar producto movimiento:", error)
     throw error
   }
 }
 
+// === DASHBOARD ===
 async function obtenerResumenVentas30Dias() {
-  const result = await pool.query(`
-    SELECT 
-      m.fecha::DATE AS fecha,
-      SUM(v.total) AS total
+  return prisma.$queryRaw`
+    SELECT m.fecha::DATE AS fecha, SUM(v.total) AS total
     FROM movimiento m
     JOIN movimiento_venta v ON m.id_movimiento = v.id_movimiento
     WHERE m.tipo = 'Venta'
       AND m.fecha >= NOW() - INTERVAL '30 days'
     GROUP BY 1
-    ORDER BY 1;
-  `);
-  console.log('FECHAS DE VENTAS:', result.rows);
-  return result.rows;
+    ORDER BY 1
+  `
 }
 
 async function obtenerDetalleVentaPorFecha(fecha) {
-  const fechaInicio = `${fecha}T00:00:00.000Z`;
-  const fechaFin = `${fecha}T23:59:59.999Z`;
+  const fechaInicio = `${fecha}T00:00:00.000Z`
+  const fechaFin = `${fecha}T23:59:59.999Z`
 
-  const { rows } = await pool.query(`
-    SELECT 
-      m.id_movimiento,            -- Incluido aquí
-      p.nombre,
-      pm.cantidad,
-      pm.subtotal
+  return prisma.$queryRaw`
+    SELECT m.id_movimiento, p.nombre, pm.cantidad, pm.subtotal
     FROM producto_movimiento pm
     JOIN producto p ON p.id_producto = pm.id_producto
     JOIN movimiento m ON m.id_movimiento = pm.id_movimiento
     WHERE m.tipo = 'Venta'
-      AND m.fecha BETWEEN $1 AND $2
-  `, [fechaInicio, fechaFin]);
-
-  return rows;
+      AND m.fecha BETWEEN ${fechaInicio} AND ${fechaFin}
+  `
 }
 
 async function obtenerMermasUltimos30Dias() {
-  const { rows } = await pool.query(`
-    SELECT fecha
-    FROM movimiento
-    WHERE tipo = 'Merma' AND fecha >= NOW() - INTERVAL '30 days'
-  `);
-  return rows;
+  return prisma.movimiento.findMany({
+    where: {
+      tipo: 'Merma',
+      fecha: { gte: new Date(Date.now() - 30 * 24 * 60 * 60 * 1000) }
+    },
+    select: { fecha: true }
+  })
 }
 
 async function obtenerSobrantesUltimos30Dias() {
-  const { rows } = await pool.query(`
-    SELECT fecha
-    FROM movimiento
-    WHERE tipo = 'Sobrante' AND fecha >= NOW() - INTERVAL '30 days'
-  `);
-  return rows;
+  return prisma.movimiento.findMany({
+    where: {
+      tipo: 'Sobrante',
+      fecha: { gte: new Date(Date.now() - 30 * 24 * 60 * 60 * 1000) }
+    },
+    select: { fecha: true }
+  })
 }
 
 async function obtenerMovimientosAjustePorFecha(tipoAjuste, fechaLima) {
-  const inicioUTC = DateTime
-    .fromISO(fechaLima, { zone: "America/Lima" })
+  const inicioUTC = DateTime.fromISO(fechaLima, { zone: "America/Lima" })
     .startOf("day")
     .toUTC()
-    .toISO();
-
-  const finUTC = DateTime
-    .fromISO(fechaLima, { zone: "America/Lima" })
+    .toISO()
+  const finUTC = DateTime.fromISO(fechaLima, { zone: "America/Lima" })
     .endOf("day")
     .toUTC()
-    .toISO();
+    .toISO()
 
-  const { rows } = await pool.query(`
-    SELECT 
-      m.id_movimiento,
-      m.descripcion,
-      pm.id_producto,
-      p.nombre AS nombre_producto,
-      pm.cantidad
+  return prisma.$queryRaw`
+    SELECT m.id_movimiento, m.descripcion, pm.id_producto,
+           p.nombre AS nombre_producto, pm.cantidad
     FROM movimiento m
     JOIN producto_movimiento pm ON pm.id_movimiento = m.id_movimiento
     JOIN producto p ON p.id_producto = pm.id_producto
-    WHERE m.tipo = $1
-      AND m.fecha BETWEEN $2 AND $3
+    WHERE m.tipo = ${tipoAjuste}
+      AND m.fecha BETWEEN ${inicioUTC} AND ${finUTC}
     ORDER BY m.fecha ASC
-  `, [tipoAjuste, inicioUTC, finUTC]);
-
-  return rows;
+  `
 }
-
 
 module.exports = {
   obtenerMovimientos,

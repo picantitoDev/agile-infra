@@ -1,212 +1,198 @@
-const pool = require("./pool")
+const { PrismaClient } = require('@prisma/client')
+const prisma = new PrismaClient()
 
+// Obtener todos los productos con categoría y proveedor
 async function obtenerProductos() {
-  const { rows } = await pool.query(`
-    SELECT 
-      p.id_producto,
-      p.nombre,
-      p.stock,
-      p.precio_unitario,
-      p.cantidad_minima,
-      p.estado,
-      c.nombre AS categoria,
-      pr.razon_social AS proveedor
-    FROM producto p
-    JOIN categoria c ON p.id_categoria = c.id_categoria
-    JOIN proveedor pr ON p.id_proveedor = pr.id_proveedor
-    ORDER BY p.nombre ASC
-  `)
-  return rows
+  return await prisma.producto.findMany({
+    select: {
+      id_producto: true,
+      nombre: true,
+      stock: true,
+      precio_unitario: true,
+      cantidad_minima: true,
+      estado: true,
+      categoria: { select: { nombre: true } },
+      proveedor: { select: { razon_social: true } }
+    },
+    orderBy: { nombre: 'asc' }
+  })
 }
 
+// Similar a obtenerProductos pero con id_proveedor
 async function obtenerProductosParaOrden() {
-  const { rows } = await pool.query(`
-    SELECT 
-      p.id_producto,
-      p.nombre,
-      p.stock,
-      p.precio_unitario,
-      p.cantidad_minima,
-      p.estado,
-      c.nombre AS categoria,
-      pr.razon_social AS proveedor,
-      p.id_proveedor
-    FROM producto p
-    JOIN categoria c ON p.id_categoria = c.id_categoria
-    JOIN proveedor pr ON p.id_proveedor = pr.id_proveedor
-    ORDER BY p.nombre ASC
-  `)
-  return rows
+  return await prisma.producto.findMany({
+    select: {
+      id_producto: true,
+      nombre: true,
+      stock: true,
+      precio_unitario: true,
+      cantidad_minima: true,
+      estado: true,
+      id_proveedor: true,
+      categoria: { select: { nombre: true } },
+      proveedor: { select: { razon_social: true } }
+    },
+    orderBy: { nombre: 'asc' }
+  })
 }
 
+// Productos críticos: stock < cantidad_minima y sin orden en curso
 async function obtenerProductosCriticos() {
-  const query = `
-    SELECT COUNT(*) AS total
-    FROM producto pr
-    WHERE pr.stock < pr.cantidad_minima
-      AND pr.estado = 'Activado'
-      AND NOT EXISTS (
-        SELECT 1
-        FROM orden_reabastecimiento o
-        WHERE o.estado = 'en_curso'
-          AND (
-            o.products::jsonb @> to_jsonb(json_build_array(json_build_object('id_producto', pr.id_producto)))
-          )
-      )
-  `;
-  const result = await pool.query(query);
-  return parseInt(result.rows[0].total, 10);
-}
+  const productos = await prisma.producto.findMany({
+    where: {
+      stock: { lt: prisma.producto.fields.cantidad_minima },
+      estado: 'Activado',
+    },
+    select: { id_producto: true }
+  })
 
-async function obtenerProductoPorId(id) {
-  const { rows } = await pool.query(
-    `SELECT 
-       p.id_producto,
-       p.nombre,
-       p.stock,
-       p.precio_unitario,
-       p.cantidad_minima,
-       p.estado,
-       p.id_categoria,
-       c.nombre AS categoria_nombre,
-       p.id_proveedor,
-       pr.razon_social AS proveedor_nombre
-     FROM producto p
-     JOIN categoria c ON p.id_categoria = c.id_categoria
-     JOIN proveedor pr ON p.id_proveedor = pr.id_proveedor
-     WHERE p.id_producto = $1`,
-    [id]
+  // Filtrar los que están en orden_reabastecimiento con estado en_curso
+  const productosEnCurso = await prisma.orden_reabastecimiento.findMany({
+    where: { estado: 'en_curso' },
+    select: { products: true }
+  })
+
+  const idsEnCurso = new Set(
+    productosEnCurso.flatMap(o => (o.products || []).map(p => p.id_producto))
   )
-  return rows[0]
+
+  const criticos = productos.filter(p => !idsEnCurso.has(p.id_producto))
+  return criticos.length
 }
 
-async function crearProducto(
-  nombre,
-  stock,
-  precio_unitario,
-  id_categoria,
-  id_proveedor,
-  cantidad_minima
-) {
-  await pool.query(
-    `INSERT INTO producto 
-     (nombre, id_proveedor, id_categoria, cantidad_minima, stock, estado, precio_unitario) 
-     VALUES ($1, $2, $3, $4, $5, 'Activado', $6)`,
-    [
+// Obtener un producto por ID
+async function obtenerProductoPorId(id) {
+  return await prisma.producto.findUnique({
+    where: { id_producto: id },
+    select: {
+      id_producto: true,
+      nombre: true,
+      stock: true,
+      precio_unitario: true,
+      cantidad_minima: true,
+      estado: true,
+      id_categoria: true,
+      id_proveedor: true,
+      categoria: { select: { nombre: true } },
+      proveedor: { select: { razon_social: true } }
+    }
+  })
+}
+
+// Crear producto
+async function crearProducto(nombre, stock, precio_unitario, id_categoria, id_proveedor, cantidad_minima) {
+  await prisma.producto.create({
+    data: {
       nombre,
-      id_proveedor,
-      id_categoria,
-      cantidad_minima,
       stock,
       precio_unitario,
-    ]
-  )
+      id_categoria,
+      id_proveedor,
+      cantidad_minima,
+      estado: 'Activado'
+    }
+  })
 }
 
+// Obtener ID por nombre
 async function obtenerIdProductoPorNombre(nombre) {
-  const resultado = await pool.query(
-    `SELECT id_producto FROM producto WHERE nombre = $1 LIMIT 1`,
-    [nombre]
-  )
-  return resultado.rows[0] ? resultado.rows[0].id_producto : null
+  const producto = await prisma.producto.findFirst({
+    where: { nombre },
+    select: { id_producto: true }
+  })
+  return producto ? producto.id_producto : null
 }
 
+// Actualizar producto
 async function actualizarProducto(id, producto) {
-  const query = `
-    UPDATE producto
-    SET nombre = $1,
-        stock = $2,
-        precio_unitario = $3,
-        id_categoria = $4,
-        id_proveedor = $5,
-        cantidad_minima = $6,
-        estado = $7
-    WHERE id_producto = $8
-  `
-
-  const valores = [
-    producto.nombre,
-    producto.stock,
-    producto.precio_unitario,
-    producto.id_categoria,
-    producto.id_proveedor,
-    producto.cantidad_minima,
-    producto.estado,
-    id,
-  ]
-
-  await pool.query(query, valores)
+  await prisma.producto.update({
+    where: { id_producto: id },
+    data: {
+      nombre: producto.nombre,
+      stock: producto.stock,
+      precio_unitario: producto.precio_unitario,
+      id_categoria: producto.id_categoria,
+      id_proveedor: producto.id_proveedor,
+      cantidad_minima: producto.cantidad_minima,
+      estado: producto.estado
+    }
+  })
 }
 
-// SUMAR al stock de un producto
+// Aumentar stock
 async function aumentarStock(id_producto, cantidad) {
-  const query = `
-    UPDATE producto
-    SET stock = stock + $1
-    WHERE id_producto = $2
-  `
-  await pool.query(query, [cantidad, id_producto])
+  await prisma.producto.update({
+    where: { id_producto },
+    data: { stock: { increment: cantidad } }
+  })
 }
 
-// RESTAR al stock de un producto
+// Disminuir stock
 async function disminuirStock(id_producto, cantidad) {
-  const query = `
-    UPDATE producto
-    SET stock = stock - $1
-    WHERE id_producto = $2
-  `
-  await pool.query(query, [cantidad, id_producto])
+  await prisma.producto.update({
+    where: { id_producto },
+    data: { stock: { decrement: cantidad } }
+  })
 }
 
+// Productos en órdenes en curso
 async function obtenerProductosEnOrdenesEnCurso() {
-  const query = `
-    SELECT DISTINCT (prod->>'id_producto')::int AS id_producto
-    FROM orden_reabastecimiento,
-         jsonb_array_elements(products::jsonb) AS prod
-    WHERE estado = 'en_curso';
-  `;
+  const ordenes = await prisma.orden_reabastecimiento.findMany({
+    where: { estado: 'en_curso' },
+    select: { products: true }
+  })
 
-  const { rows } = await pool.query(query);
-  return rows.map(row => row.id_producto);
+  return [
+    ...new Set(
+      ordenes.flatMap(o => (o.products || []).map(p => p.id_producto))
+    )
+  ]
 }
 
-const obtenerRankingPorCantidad = async () => {
-  const result = await pool.query(`
-    SELECT p.id_producto, p.nombre, SUM(pm.cantidad) AS total_vendido
-    FROM producto_movimiento pm
-    JOIN movimiento m ON m.id_movimiento = pm.id_movimiento
-    JOIN producto p ON p.id_producto = pm.id_producto
-    WHERE m.tipo = 'Venta'
-    GROUP BY p.id_producto
-    ORDER BY total_vendido DESC
-  `);
-  return result.rows;
-};
+// Ranking por cantidad vendida
+async function obtenerRankingPorCantidad() {
+  const result = await prisma.producto_movimiento.groupBy({
+    by: ['id_producto'],
+    _sum: { cantidad: true },
+    orderBy: { _sum: { cantidad: 'desc' } }
+  })
 
-const obtenerRankingPorIngresos = async () => {
-  const result = await pool.query(`
-    SELECT p.id_producto, p.nombre, SUM(pm.subtotal) AS total_ingresos
-    FROM producto_movimiento pm
-    JOIN movimiento m ON m.id_movimiento = pm.id_movimiento
-    JOIN producto p ON p.id_producto = pm.id_producto
-    WHERE m.tipo = 'Venta'
-    GROUP BY p.id_producto
-    ORDER BY total_ingresos DESC
-  `);
-  return result.rows;
-};
+  return await Promise.all(result.map(async r => {
+    const prod = await prisma.producto.findUnique({
+      where: { id_producto: r.id_producto },
+      select: { nombre: true }
+    })
+    return { id_producto: r.id_producto, nombre: prod.nombre, total_vendido: r._sum.cantidad }
+  }))
+}
 
+// Ranking por ingresos
+async function obtenerRankingPorIngresos() {
+  const result = await prisma.producto_movimiento.groupBy({
+    by: ['id_producto'],
+    _sum: { subtotal: true },
+    orderBy: { _sum: { subtotal: 'desc' } }
+  })
+
+  return await Promise.all(result.map(async r => {
+    const prod = await prisma.producto.findUnique({
+      where: { id_producto: r.id_producto },
+      select: { nombre: true }
+    })
+    return { id_producto: r.id_producto, nombre: prod.nombre, total_ingresos: r._sum.subtotal }
+  }))
+}
 
 module.exports = {
   obtenerProductos,
-  crearProducto,
+  obtenerProductosParaOrden,
+  obtenerProductosCriticos,
   obtenerProductoPorId,
-  actualizarProducto,
+  crearProducto,
   obtenerIdProductoPorNombre,
+  actualizarProducto,
   aumentarStock,
   disminuirStock,
-  obtenerProductosCriticos,
-  obtenerProductosParaOrden,
   obtenerProductosEnOrdenesEnCurso,
   obtenerRankingPorCantidad,
   obtenerRankingPorIngresos

@@ -1,178 +1,386 @@
-const pool = require("./pool")
-const { DateTime } = require('luxon');
+const { PrismaClient } = require('@prisma/client')
+const { DateTime } = require('luxon')
+const prisma = new PrismaClient()
 
 async function obtenerOrdenes() {
-  const query = `
-    SELECT 
-      o.id_order, 
-      p.razon_social AS proveedor, 
-      o.products, 
-      o.fecha,
-      o.estado,
-      u.username AS usuario
-    FROM orden_reabastecimiento o
-    JOIN proveedor p ON o.id_proveedor = p.id_proveedor
-    JOIN usuarios u ON o.id_usuario = u.id
-    ORDER BY o.id_order DESC
-  `;
-  const result = await pool.query(query);
-  return result.rows;
-};
-
+  try {
+    return await prisma.orden_reabastecimiento.findMany({
+      orderBy: { id_order: 'desc' },
+      include: {
+        proveedor: { 
+          select: { 
+            id_proveedor: true,
+            razon_social: true,
+            ruc: true 
+          } 
+        },
+        usuarios: { // Corregido: usuarios en lugar de usuario
+          select: { 
+            id: true,
+            username: true 
+          } 
+        }
+      }
+    })
+  } catch (error) {
+    console.error('Error al obtener órdenes:', error)
+    throw error
+  }
+}
 
 async function crearOrden(id_proveedor, productos, fecha, estado = 'en_curso', id_usuario) {
-  const client = await pool.connect();
   try {
-    const productosJson = JSON.stringify(productos);
+    // Validar parámetros requeridos
+    const proveedorId = parseInt(id_proveedor)
+    if (isNaN(proveedorId)) {
+      throw new Error('ID de proveedor debe ser un número válido')
+    }
 
-    const query = `
-      INSERT INTO orden_reabastecimiento (id_proveedor, products, fecha, estado, id_usuario)
-      VALUES ($1, $2::json, $3, $4, $5)
-      RETURNING id_order
-    `;
+    let usuarioId = null
+    if (id_usuario !== null && id_usuario !== undefined) {
+      usuarioId = parseInt(id_usuario)
+      if (isNaN(usuarioId)) {
+        throw new Error('ID de usuario debe ser un número válido')
+      }
+    }
 
-    const result = await client.query(query, [id_proveedor, productosJson, fecha, estado, id_usuario]);
-    return result.rows[0].id_order;
+    // Validar que productos sea un array válido
+    if (!Array.isArray(productos)) {
+      throw new Error('Los productos deben ser un array')
+    }
 
-  } finally {
-    client.release();
+    // Validar fecha
+    const fechaDate = fecha instanceof Date ? fecha : new Date(fecha)
+    if (isNaN(fechaDate.getTime())) {
+      throw new Error('Fecha inválida')
+    }
+
+    // Validar estado
+    const estadosValidos = ['en_curso', 'completada', 'cancelada']
+    if (!estadosValidos.includes(estado)) {
+      throw new Error(`Estado debe ser uno de: ${estadosValidos.join(', ')}`)
+    }
+
+    const orden = await prisma.orden_reabastecimiento.create({
+      data: {
+        id_proveedor: proveedorId,
+        products: productos, // JSON field
+        fecha: fechaDate,
+        estado,
+        id_usuario: usuarioId
+      },
+      include: {
+        proveedor: {
+          select: { 
+            id_proveedor: true,
+            razon_social: true 
+          }
+        },
+        usuarios: {
+          select: { 
+            id: true,
+            username: true 
+          }
+        }
+      }
+    })
+    
+    return orden.id_order
+  } catch (error) {
+    console.error('Error al crear orden:', error)
+    throw error
   }
 }
 
 async function actualizarEstadoOrden(id_orden, nuevoEstado) {
-  const query = `
-    UPDATE orden_reabastecimiento
-    SET estado = $1
-    WHERE id_order = $2
-  `;
-  await pool.query(query, [nuevoEstado, id_orden]);
+  try {
+    const ordenId = parseInt(id_orden)
+    if (isNaN(ordenId)) {
+      throw new Error('ID de orden debe ser un número válido')
+    }
+
+    // Validar estado
+    const estadosValidos = ['en_curso', 'completada', 'cancelada']
+    if (!estadosValidos.includes(nuevoEstado)) {
+      throw new Error(`Estado debe ser uno de: ${estadosValidos.join(', ')}`)
+    }
+
+    return await prisma.orden_reabastecimiento.update({
+      where: { id_order: ordenId },
+      data: { estado: nuevoEstado },
+      include: {
+        proveedor: {
+          select: { razon_social: true }
+        }
+      }
+    })
+  } catch (error) {
+    console.error('Error al actualizar estado de orden:', error)
+    throw error
+  }
 }
 
-
 async function obtenerOrdenPorId(id_order) {
-  const query = `
-    SELECT 
-      o.id_order,
-      o.id_proveedor,
-      p.razon_social AS proveedor,
-      o.products,
-      o.fecha,
-      o.estado,
-      u.username AS usuario
-    FROM orden_reabastecimiento o
-    JOIN proveedor p ON o.id_proveedor = p.id_proveedor
-    JOIN usuarios u ON o.id_usuario = u.id
-    WHERE o.id_order = $1
-  `;
+  try {
+    const ordenId = parseInt(id_order)
+    if (isNaN(ordenId)) {
+      throw new Error('ID de orden debe ser un número válido')
+    }
 
-  const result = await pool.query(query, [id_order]);
-  return result.rows[0]; // solo una orden por id
+    const orden = await prisma.orden_reabastecimiento.findUnique({
+      where: { id_order: ordenId },
+      include: {
+        proveedor: { 
+          select: { 
+            id_proveedor: true,
+            razon_social: true,
+            ruc: true,
+            numero_telefono: true,
+            correo: true,
+            direccion: true
+          } 
+        },
+        usuarios: { // Corregido: usuarios en lugar de usuario
+          select: { 
+            id: true,
+            username: true,
+            email: true
+          } 
+        },
+        // Incluir incidencias relacionadas
+        incidencia: {
+          select: {
+            id_incidencia: true,
+            descripcion_general: true,
+            fecha: true
+          }
+        },
+        // Incluir movimientos de entrada relacionados
+        movimiento_entrada: {
+          select: {
+            id_movimiento: true,
+            total: true,
+            movimiento: {
+              select: {
+                fecha: true,
+                descripcion: true
+              }
+            }
+          }
+        }
+      }
+    })
+
+    if (!orden) return null
+
+    // Asegurar que products sea un array
+    return {
+      ...orden,
+      products: Array.isArray(orden.products) ? orden.products : []
+    }
+  } catch (error) {
+    console.error('Error al obtener orden por ID:', error)
+    throw error
+  }
 }
 
 async function actualizarProductosOrden(id_order, nuevosProductos) {
-  const query = `
-    UPDATE orden_reabastecimiento
-    SET products = $1
-    WHERE id_order = $2
-  `;
+  try {
+    const ordenId = parseInt(id_order)
+    if (isNaN(ordenId)) {
+      throw new Error('ID de orden debe ser un número válido')
+    }
 
-  // Asegúrate de convertir el array de productos a JSON string si `products` es de tipo JSON o JSONB
-  await pool.query(query, [JSON.stringify(nuevosProductos), id_order]);
+    // Validar que nuevosProductos sea un array
+    if (!Array.isArray(nuevosProductos)) {
+      throw new Error('Los productos deben ser un array')
+    }
+
+    return await prisma.orden_reabastecimiento.update({
+      where: { id_order: ordenId },
+      data: { products: nuevosProductos },
+      include: {
+        proveedor: {
+          select: { razon_social: true }
+        }
+      }
+    })
+  } catch (error) {
+    console.error('Error al actualizar productos de orden:', error)
+    throw error
+  }
 }
 
 async function buscarOrdenPorProductoEnCurso(idProducto) {
-  const query = `
-    SELECT
-      o.id_order,
-      o.fecha,
-      o.estado,
-      o.id_proveedor,
-      p.razon_social AS proveedor,
-      o.products
-    FROM orden_reabastecimiento o
-    JOIN proveedor p ON p.id_proveedor = o.id_proveedor
-    WHERE o.estado = 'en_curso'
-  `;
-
   try {
-    const { rows } = await pool.query(query);
+    const productoId = parseInt(idProducto)
+    if (isNaN(productoId)) {
+      throw new Error('ID de producto debe ser un número válido')
+    }
 
-    for (const orden of rows) {
-      const productos = orden.products;
-      const contiene = productos.find(p => Number(p.id_producto) === idProducto);
+    const ordenes = await prisma.orden_reabastecimiento.findMany({
+      where: { estado: 'en_curso' },
+      include: { 
+        proveedor: { 
+          select: { 
+            id_proveedor: true,
+            razon_social: true 
+          } 
+        } 
+      }
+    })
+
+    for (const orden of ordenes) {
+      const productos = Array.isArray(orden.products) ? orden.products : []
+      const contiene = productos.find(p => Number(p.id_producto) === productoId)
       if (contiene) {
         return {
           id_orden: orden.id_order,
           fecha: orden.fecha,
-          total: orden.total,
-          proveedor: orden.proveedor,
-          productos: productos
-        };
+          proveedor: orden.proveedor.razon_social,
+          productos,
+          estado: orden.estado
+        }
       }
     }
-
-    return null; // No encontrada
+    return null
   } catch (error) {
-    throw error;
+    console.error('Error al buscar orden por producto en curso:', error)
+    throw error
   }
 }
 
 async function obtenerOrdenesUltimos30Dias() {
-  const result = await pool.query(`
-    SELECT id_order, fecha
-    FROM orden_reabastecimiento
-    WHERE fecha >= NOW() - INTERVAL '30 days'
-  `);
-  return result.rows;
-}
+  try {
+    const limite = new Date()
+    limite.setDate(limite.getDate() - 30)
 
+    return await prisma.orden_reabastecimiento.findMany({
+      where: { fecha: { gte: limite } },
+      select: { 
+        id_order: true, 
+        fecha: true,
+        estado: true,
+        proveedor: {
+          select: { razon_social: true }
+        }
+      },
+      orderBy: { fecha: 'desc' }
+    })
+  } catch (error) {
+    console.error('Error al obtener órdenes últimos 30 días:', error)
+    throw error
+  }
+}
 
 async function obtenerDetalleOrdenesPorFecha(fechaLimaString) {
-  // fecha = "2025-06-24"
-  const inicioUTC = DateTime
-    .fromISO(fechaLimaString, { zone: 'America/Lima' })
-    .startOf('day')
-    .toUTC()
-    .toISO();
+  try {
+    if (!fechaLimaString) {
+      throw new Error('Fecha es requerida')
+    }
 
-  const finUTC = DateTime
-    .fromISO(fechaLimaString, { zone: 'America/Lima' })
-    .endOf('day')
-    .toUTC()
-    .toISO();
+    const inicioUTC = DateTime.fromISO(fechaLimaString, { zone: 'America/Lima' })
+      .startOf('day')
+      .toUTC()
+      .toJSDate()
 
-  const { rows } = await pool.query(`
-    SELECT 
-      o.id_order,
-      o.fecha,
-      o.estado,
-      o.products,
-      pr.razon_social AS proveedor
-    FROM orden_reabastecimiento o
-    JOIN proveedor pr ON pr.id_proveedor = o.id_proveedor
-    WHERE o.fecha BETWEEN $1 AND $2
-  `, [inicioUTC, finUTC]);
+    const finUTC = DateTime.fromISO(fechaLimaString, { zone: 'America/Lima' })
+      .endOf('day')
+      .toUTC()
+      .toJSDate()
 
-  return rows;
+    return await prisma.orden_reabastecimiento.findMany({
+      where: {
+        fecha: {
+          gte: inicioUTC,
+          lte: finUTC
+        }
+      },
+      include: {
+        proveedor: { 
+          select: { 
+            id_proveedor: true,
+            razon_social: true,
+            ruc: true
+          } 
+        },
+        usuarios: {
+          select: {
+            id: true,
+            username: true
+          }
+        }
+      },
+      orderBy: { fecha: 'asc' }
+    })
+  } catch (error) {
+    console.error('Error al obtener detalle órdenes por fecha:', error)
+    throw error
+  }
 }
 
-async function cancelarOrden(idOrden){
-  const query = `
-    UPDATE orden_reabastecimiento
-    SET estado = 'cancelada'
-    WHERE id_order = $1
-  `;
-  await pool.query(query, [idOrden]);
-};
+async function cancelarOrden(idOrden) {
+  try {
+    const ordenId = parseInt(idOrden)
+    if (isNaN(ordenId)) {
+      throw new Error('ID de orden debe ser un número válido')
+    }
+
+    return await prisma.orden_reabastecimiento.update({
+      where: { id_order: ordenId },
+      data: { estado: 'cancelada' },
+      include: {
+        proveedor: {
+          select: { razon_social: true }
+        }
+      }
+    })
+  } catch (error) {
+    console.error('Error al cancelar orden:', error)
+    throw error
+  }
+}
+
+// Función adicional útil: obtener órdenes por proveedor
+async function obtenerOrdenesPorProveedor(id_proveedor, estado = null) {
+  try {
+    const proveedorId = parseInt(id_proveedor)
+    if (isNaN(proveedorId)) {
+      throw new Error('ID de proveedor debe ser un número válido')
+    }
+
+    const whereClause = { id_proveedor: proveedorId }
+    if (estado) {
+      whereClause.estado = estado
+    }
+
+    return await prisma.orden_reabastecimiento.findMany({
+      where: whereClause,
+      include: {
+        proveedor: {
+          select: { razon_social: true }
+        },
+        usuarios: {
+          select: { username: true }
+        }
+      },
+      orderBy: { fecha: 'desc' }
+    })
+  } catch (error) {
+    console.error('Error al obtener órdenes por proveedor:', error)
+    throw error
+  }
+}
 
 module.exports = {
-    obtenerOrdenes,
-    crearOrden,
-    obtenerOrdenPorId,
-    actualizarEstadoOrden,
-    actualizarProductosOrden,
-    buscarOrdenPorProductoEnCurso,
-    obtenerOrdenesUltimos30Dias,
-    obtenerDetalleOrdenesPorFecha,
-    cancelarOrden
+  obtenerOrdenes,
+  crearOrden,
+  obtenerOrdenPorId,
+  actualizarEstadoOrden,
+  actualizarProductosOrden,
+  buscarOrdenPorProductoEnCurso,
+  obtenerOrdenesUltimos30Dias,
+  obtenerDetalleOrdenesPorFecha,
+  cancelarOrden,
+  obtenerOrdenesPorProveedor
 }

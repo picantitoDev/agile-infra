@@ -1,4 +1,5 @@
-const pool = require("./pool")
+const { PrismaClient } = require('@prisma/client')
+const prisma = new PrismaClient()
 
 async function registrarCliente({
   nombre_cliente,
@@ -8,56 +9,48 @@ async function registrarCliente({
   direccion_cliente,
   correo_cliente,
 }) {
-  const result = await pool.query(
-    `INSERT INTO cliente 
-       (nombre_cliente, razon_social, dni_cliente, ruc_cliente, direccion_cliente, correo_cliente)
-       VALUES ($1, $2, $3, $4, $5, $6)
-       RETURNING id_cliente`,
-    [
+  const cliente = await prisma.cliente.create({
+    data: {
       nombre_cliente,
       razon_social,
       dni_cliente,
       ruc_cliente,
       direccion_cliente,
       correo_cliente,
-    ]
-  )
+    },
+    select: {
+      id_cliente: true, // para devolver solo el id
+    },
+  })
 
-  return result.rows[0].id_cliente
+  return cliente.id_cliente
 }
 
 async function buscarPorDNI(dni) {
-  const result = await pool.query(
-    "SELECT * FROM cliente WHERE dni_cliente = $1",
-    [dni]
-  )
-  return result.rows[0] // o undefined si no hay
+  return await prisma.cliente.findUnique({
+    where: { dni_cliente: dni },
+  })
 }
 
 async function buscarPorRUC(ruc) {
-  const result = await pool.query(
-    "SELECT * FROM cliente WHERE ruc_cliente = $1",
-    [ruc]
-  )
-  return result.rows[0] // o undefined si no hay
+  return await prisma.cliente.findUnique({
+    where: { ruc_cliente: ruc },
+  })
 }
 
 async function actualizarDatosContacto(id_cliente, { correo_cliente, direccion_cliente }) {
-  const query = `
-    UPDATE cliente
-    SET 
-      correo_cliente = $1,
-      direccion_cliente = $2
-    WHERE id_cliente = $3
-  `;
-
-  const values = [correo_cliente, direccion_cliente, id_cliente];
-  await pool.query(query, values);
+  await prisma.cliente.update({
+    where: { id_cliente },
+    data: {
+      correo_cliente,
+      direccion_cliente,
+    },
+  })
 }
 
 module.exports = {
   registrarCliente,
   buscarPorDNI,
   buscarPorRUC,
-  actualizarDatosContacto
+  actualizarDatosContacto,
 }

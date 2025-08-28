@@ -152,7 +152,7 @@ app.use((req, res, next) => {
 })
 
 // Servidor
-const PORT = 8080
+const PORT =  3000
 app.listen(PORT, () => {
   console.log("Running on localhost...")
 })

@@ -3,6 +3,17 @@ const express = require('express');
 const controladorCategorias = require('../../controllers/controladorCategorias');
 const dbCategorias = require('../../model/queriesCategorias');
 
+beforeAll(() => {
+  jest.spyOn(console, "error").mockImplementation(() => {});
+  jest.spyOn(console, "log").mockImplementation(() => {});
+});
+
+afterAll(() => {
+  console.error.mockRestore();
+  console.log.mockRestore();
+});
+
+
 // Mock the database module
 jest.mock('../../model/queriesCategorias');
 

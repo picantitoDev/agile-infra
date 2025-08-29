@@ -20,8 +20,13 @@ const crearUsuarioPost = async (req, res, next) => {
     console.log(email)
     console.log(rol)
     // Validación simple
-    if (!username || !password || !email || !rol) {
-      return res.status(400).send("Faltan campos obligatorios.")
+    if (
+      !username?.trim() ||
+      !password?.trim() ||
+      !email?.trim() ||
+      !rol?.trim()
+    ) {
+      return res.status(400).send("Faltan campos obligatorios");
     }
 
     // Verifica si el usuario ya existe
@@ -57,7 +62,7 @@ const obtenerUsuarios = async (req, res) => {
     const usuarios = await dbUsuarios.obtenerUsuarios()
     const auditorias = await dbAuditoria.obtenerAuditoriasConUsuarios() // nueva función
 
-    res.render("usuarios", { usuarios, auditorias })
+    res.render("usuarios", { usuarios, auditorias, user: req.user })
   } catch (error) {
     console.error("Error al obtener usuarios o auditorías:", error)
     res.status(500).send("Error al obtener los datos de usuarios")

@@ -10,6 +10,17 @@ const excelUtils = require("../utils/excelGenerator")
 
 const { DateTime } = require("luxon")
 
+function ensureBuffer(x) {
+  if (!x) return Buffer.alloc(0);
+  if (Buffer.isBuffer(x)) return x;
+  if (x instanceof Uint8Array) return Buffer.from(x);
+  if (x && typeof x === "object" && x.type === "Buffer" && Array.isArray(x.data)) {
+    return Buffer.from(x.data);
+  }
+  // último intento: si es array-like (e.g., [1,2,3]) o ArrayBuffer
+  try { return Buffer.from(x); } catch { return Buffer.from(String(x)); }
+}
+
 async function obtenerMovimientos(req, res) {
   try {
     const movimientos = await dbMovimientos.obtenerMovimientos()
@@ -67,7 +78,8 @@ async function exportarReporteExcel(req, res) {
     res.setHeader('Content-Disposition', `attachment; filename=${nombreArchivo}`);
 
     // Enviar buffer
-    res.send(buffer);
+    const out = ensureBuffer(buffer);
+    res.send(out);
 
   } catch (error) {
     console.error("Error exportando Excel:", error);

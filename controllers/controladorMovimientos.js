@@ -453,7 +453,6 @@ async function registrarMermaPost(req, res) {
 async function generarComprobantePDF(req, res) {
   const idVenta = req.params.id
   const dataVenta = await dbMovimientos.obtenerDetalleMovimiento(idVenta)
-  console.log(dataVenta)
   const pdfBytes = await pdfUtils.generarComprobantePDF(dataVenta)
 
   // FACTURA_JuanPerez_20250430.pdf
@@ -470,7 +469,6 @@ async function generarComprobantePDF(req, res) {
     .slice(0, 10)
     .split("-")
     .join("")
-  console.log(fecha)
   const fileName = `${tipoComprobante}_${nombre}_${fecha}.pdf`
   res.setHeader("Content-Type", "application/pdf")
   res.setHeader("Content-Disposition", `attachment; filename="${fileName}"`)

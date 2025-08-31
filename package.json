@@ -10,13 +10,18 @@
     "test:coverage": "jest --coverage"
   },
   "jest": {
-  "testEnvironment": "node",
-  "collectCoverageFrom": [
-    "controllers/**/*.js",
-    "!controllers/index.js"
-  ]},
+    "testEnvironment": "node",
+    "collectCoverageFrom": [
+      "controllers/**/*.js",
+      "!controllers/index.js"
+    ]
+  },
   "coverageDirectory": "coverage",
-  "coverageReporters": ["text", "lcov", "html"],
+  "coverageReporters": [
+    "text",
+    "lcov",
+    "html"
+  ],
   "keywords": [],
   "author": "",
   "license": "ISC",
@@ -25,7 +30,6 @@
     "bcryptjs": "^3.0.2",
     "connect-flash": "^0.1.1",
     "connect-pg-simple": "^10.0.0",
-    "csurf": "^1.11.0",
     "dotenv": "^16.5.0",
     "ejs": "^3.1.10",
     "exceljs": "^4.4.0",

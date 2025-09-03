@@ -391,7 +391,6 @@
             </div>
             <form action="/log-in" method="POST" class="login-form">
                 <!-- Add CSRF token -->
-                <input type="hidden" name="_csrf" value="<%= csrfToken %>">
                 <div class="input-group">
                     <label for="username">Usuario</label>
                     <input id="username" name="username" placeholder="Ingresa tu usuario o email" type="text" required />

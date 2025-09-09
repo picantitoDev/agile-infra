@@ -94,8 +94,8 @@
                 <% } %>
               </td>
               <td>S/. <%= producto.precio_unitario %></td>
-              <td class="product-category"><%= producto.categoria %></td>
-              <td class="product-supplier"><%= producto.proveedor %></td>
+              <td class="product-category"><%= producto.categoria.nombre %></td>
+              <td class="product-supplier"><%= producto.proveedor.razon_social %></td>
               <td>
                 <a
                   class="view-btn"

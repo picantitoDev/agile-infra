@@ -1,8 +1,12 @@
 const dbProveedores = require("../model/queriesProveedores")
+const { getOrSetCache, redisClient } = require("../utils/redis")
 
+// ✅ Obtener proveedores con cache
 async function obtenerProveedores(req, res) {
   try {
-    const proveedores = await dbProveedores.obtenerProveedores()
+    const proveedores = await getOrSetCache("proveedores:all", () =>
+      dbProveedores.obtenerProveedores()
+    )
     res.render("proveedores", { proveedores })
   } catch (error) {
     console.error("Error al obtener proveedores:", error)
@@ -10,9 +14,12 @@ async function obtenerProveedores(req, res) {
   }
 }
 
+// ✅ Nuevo proveedor (form) con cache
 async function nuevoProveedorGet(req, res) {
   try {
-    const proveedores = await dbProveedores.obtenerProveedores()
+    const proveedores = await getOrSetCache("proveedores:all", () =>
+      dbProveedores.obtenerProveedores()
+    )
     res.render("nuevoProveedor", { proveedores })
   } catch (error) {
     console.error("Error al cargar registro de proveedores:", error)
@@ -20,6 +27,7 @@ async function nuevoProveedorGet(req, res) {
   }
 }
 
+// ✅ Crear proveedor → invalidar cache
 async function nuevoProveedorPost(req, res) {
   const { razon_social, ruc, numero_telefono, correo, direccion } = req.body
 
@@ -31,6 +39,10 @@ async function nuevoProveedorPost(req, res) {
       correo,
       direccion,
     })
+
+    // 🔄 invalidar cache
+    await redisClient.del("proveedores:all")
+
     res.redirect("/proveedores")
   } catch (error) {
     console.error("Error al cargar registro de proveedores:", error)
@@ -38,24 +50,43 @@ async function nuevoProveedorPost(req, res) {
   }
 }
 
-async function editarProveedorGet(req, res){
-  const id = req.params.id;
-  const proveedor = await dbProveedores.obtenerProveedorPorId(id); // función en queries
-  const proveedores = await dbProveedores.obtenerProveedores()
-  res.render('detalleProveedor', { proveedor, proveedores });
-};
+// ✅ Editar proveedor (form) con cache
+async function editarProveedorGet(req, res) {
+  const id = req.params.id
+  try {
+    const proveedor = await dbProveedores.obtenerProveedorPorId(id)
+    const proveedores = await getOrSetCache("proveedores:all", () =>
+      dbProveedores.obtenerProveedores()
+    )
+    res.render("detalleProveedor", { proveedor, proveedores })
+  } catch (error) {
+    console.error("Error al cargar detalle de proveedor:", error)
+    res.status(500).send("Error al cargar detalle del proveedor")
+  }
+}
 
-async function editarProveedorPut(req, res){
-  const id = req.params.id;
-  const datos = req.body;
-  await dbProveedores.actualizarProveedor(id, datos);
-  res.redirect('/proveedores');
-};
+// ✅ Editar proveedor (update) → invalidar cache
+async function editarProveedorPut(req, res) {
+  const id = req.params.id
+  const datos = req.body
+
+  try {
+    await dbProveedores.actualizarProveedor(id, datos)
+
+    // 🔄 invalidar cache
+    await redisClient.del("proveedores:all")
+
+    res.redirect("/proveedores")
+  } catch (error) {
+    console.error("Error al actualizar proveedor:", error)
+    res.status(500).send("Error al actualizar proveedor")
+  }
+}
 
 module.exports = {
   obtenerProveedores,
   nuevoProveedorGet,
   nuevoProveedorPost,
   editarProveedorGet,
-  editarProveedorPut
+  editarProveedorPut,
 }

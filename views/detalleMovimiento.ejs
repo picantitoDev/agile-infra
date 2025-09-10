@@ -3,23 +3,9 @@
   <head>
     <meta charset="UTF-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-    <link
-      rel="apple-touch-icon"
-      sizes="180x180"
-      href="/favicon/apple-touch-icon.png"
-    />
-    <link
-      rel="icon"
-      type="image/png"
-      sizes="32x32"
-      href="/favicon/favicon-32x32.png"
-    />
-    <link
-      rel="icon"
-      type="image/png"
-      sizes="16x16"
-      href="/favicon/favicon-16x16.png"
-    />
+    <link rel="apple-touch-icon" sizes="180x180" href="/favicon/apple-touch-icon.png" />
+    <link rel="icon" type="image/png" sizes="32x32" href="/favicon/favicon-32x32.png" />
+    <link rel="icon" type="image/png" sizes="16x16" href="/favicon/favicon-16x16.png" />
     <link rel="manifest" href="/favicon/site.webmanifest" />
     <link rel="shortcut icon" href="/favicon/favicon.ico" />
     <title>Detalle de Movimiento</title>
@@ -33,106 +19,84 @@
       <section class="section">
         <h2 class="section-title">Información General</h2>
         <div class="info-container">
-          <% const fecha = new Date(movimientoDetalle[0].fecha); const
-          fechaFormateada = fecha.toLocaleDateString("es-PE", { year: "numeric",
-          month: "long", day: "numeric", });
+          <% const fecha = new Date(movimientoDetalle.fecha); 
+             const fechaFormateada = fecha.toLocaleDateString("es-PE", { 
+               year: "numeric", month: "long", day: "numeric" 
+             }); 
           %>
           <p><strong>Fecha:</strong> <%= fechaFormateada %></p>
-          <p>
-            <strong>Tipo:</strong> <%= movimientoDetalle[0].tipo === 'Compra' ?
-            'Entrada' : movimientoDetalle[0].tipo %>
-          </p>
+          <p><strong>Tipo:</strong> <%= movimientoDetalle.tipo === 'Compra' ? 'Entrada' : movimientoDetalle.tipo %></p>
           <p>
             <strong>Descripción:</strong>
-            <%= (movimientoDetalle[0].tipo === 'Venta' &&
-            !movimientoDetalle[0].descripcion) ? 'Venta realizada con éxito' :
-            movimientoDetalle[0].descripcion %>
+            <%= (movimientoDetalle.tipo === 'Venta' && !movimientoDetalle.descripcion) 
+                  ? 'Venta realizada con éxito' 
+                  : movimientoDetalle.descripcion %>
           </p>
-          <p><strong>Usuario:</strong> <%= movimientoDetalle[0].usuario %></p>
+          <p><strong>Usuario:</strong> <%= movimientoDetalle.usuarios.username %></p>
         </div>
       </section>
 
-      <% if (movimientoDetalle[0].tipo === 'Venta') { %>
-<!-- Datos de Venta Section -->
-<section class="section" data-type="Venta">
-  <h2 class="section-title">Datos de Venta</h2>
-  <div class="info-container">
-    <% if (movimientoDetalle[0].tipo_comprobante === "factura") { %>
-    <p>
-      <strong>Razón Social:</strong> <%= movimientoDetalle[0].razon_social %>
-    </p>
-    <p><strong>RUC:</strong> <%= movimientoDetalle[0].ruc_cliente %></p>
-    <% } else if (movimientoDetalle[0].tipo_comprobante === "boleta") { %>
-    <p>
-      <strong>Nombre Cliente:</strong> <%= movimientoDetalle[0].nombre_cliente %>
-    </p>
-    <p><strong>DNI:</strong> <%= movimientoDetalle[0].dni_cliente %></p>
-    <% } %>
+      <% if (movimientoDetalle.tipo === 'Venta') { %>
+      <!-- Datos de Venta -->
+      <section class="section" data-type="Venta">
+        <h2 class="section-title">Datos de Venta</h2>
+        <div class="info-container">
+          <% if (movimientoDetalle.movimiento_venta.tipo_comprobante === "factura") { %>
+            <p><strong>Razón Social:</strong> <%= movimientoDetalle.movimiento_venta.cliente.razon_social %></p>
+            <p><strong>RUC:</strong> <%= movimientoDetalle.movimiento_venta.cliente.ruc_cliente %></p>
+          <% } else if (movimientoDetalle.movimiento_venta.tipo_comprobante === "boleta") { %>
+            <p><strong>Nombre Cliente:</strong> <%= movimientoDetalle.movimiento_venta.cliente.nombre_cliente %></p>
+            <p><strong>DNI:</strong> <%= movimientoDetalle.movimiento_venta.cliente.dni_cliente %></p>
+          <% } %>
 
-    <p>
-      <strong>Correo:</strong> <%= movimientoDetalle[0].correo_cliente %>
-    </p>
-    <p>
-      <strong>Dirección:</strong> <%= movimientoDetalle[0].direccion_cliente %>
-    </p>
-    <p>
-      <strong>Comprobante:</strong> <%= movimientoDetalle[0].tipo_comprobante %>
-    </p>
-    <p>
-      <strong>Total Venta:</strong> <%= movimientoDetalle[0].total_venta %>
-    </p>
-  </div>
-</section>
+          <p><strong>Correo:</strong> <%= movimientoDetalle.movimiento_venta.cliente.correo_cliente %></p>
+          <p><strong>Dirección:</strong> <%= movimientoDetalle.movimiento_venta.cliente.direccion_cliente %></p>
+          <p><strong>Comprobante:</strong> <%= movimientoDetalle.movimiento_venta.tipo_comprobante %></p>
+          <p><strong>Total Venta:</strong> S/ <%= movimientoDetalle.movimiento_venta.total %></p>
+        </div>
+      </section>
 
-<!-- Productos Afectados Section (now separate) -->
-<section class="section">
-  <h2 class="section-title">Productos Afectados</h2>
-  <table class="table">
-    <thead>
-      <tr>
-        <th>Producto</th>
-        <th>Cantidad</th>
-        <th>Precio Unitario</th>
-        <th>Subtotal</th>
-      </tr>
-    </thead>
-    <tbody>
-      <% movimientoDetalle.forEach((item) => { %>
-      <tr>
-        <td><%= item.producto %></td>
-        <td><%= item.cantidad %></td>
-        <td><%= item.precio_unitario %></td>
-        <td><%= item.subtotal %></td>
-      </tr>
-      <% }) %>
-    </tbody>
-  </table>
-</section>
+      <!-- Productos de la Venta -->
+      <section class="section">
+        <h2 class="section-title">Productos Afectados</h2>
+        <table class="table">
+          <thead>
+            <tr>
+              <th>Producto</th>
+              <th>Cantidad</th>
+              <th>Precio Unitario</th>
+              <th>Subtotal</th>
+            </tr>
+          </thead>
+          <tbody>
+            <% movimientoDetalle.producto_movimiento.forEach((item) => { %>
+              <tr>
+                <td><%= item.producto.nombre %></td>
+                <td><%= item.cantidad %></td>
+                <td><%= item.precio_unitario %></td>
+                <td><%= item.subtotal %></td>
+              </tr>
+            <% }) %>
+          </tbody>
+        </table>
+      </section>
 
-<!-- Download Button (now at bottom) -->
-<div class="button-container">
-  <a
-    href="/movimientos/detalle/<%= movimientoDetalle[0].id_movimiento %>/comprobante"
-    class="btn"
-  >
-    Descargar Comprobante
-  </a>
-</div>
-      <% } else if (movimientoDetalle[0].tipo === 'Compra') { %>
+      <div class="button-container">
+        <a href="/movimientos/detalle/<%= movimientoDetalle.id_movimiento %>/comprobante" class="btn">
+          Descargar Comprobante
+        </a>
+      </div>
+
+      <% } else if (movimientoDetalle.tipo === 'Compra') { %>
+      <!-- Datos de Entrada -->
       <section class="section">
         <h2 class="section-title">Datos de Entrada</h2>
         <div class="info-container">
-          <p>
-            <strong>Proveedor:</strong>
-            <%= proveedores.find(p => p.id_proveedor ===
-            movimientoDetalle[0].id_proveedor)?.razon_social || 'Desconocido' %>
-          </p>
-          <p>
-            <strong>Total Compra:</strong> <%= movimientoDetalle[0].total_compra
-            %>
-          </p>
+          <p><strong>Proveedor:</strong> <%= movimientoDetalle.movimiento_entrada?.proveedor?.razon_social || "Desconocido" %></p>
+          <p><strong>Total Compra:</strong> <%= movimientoDetalle.movimiento_entrada?.total %></p>
         </div>
       </section>
+
       <section class="section">
         <h2 class="section-title">Productos Afectados</h2>
         <table class="table">
@@ -145,30 +109,28 @@
             </tr>
           </thead>
           <tbody>
-            <% movimientoDetalle.forEach((item) => { %>
-            <tr>
-              <td><%= item.producto %></td>
-              <td><%= item.cantidad %></td>
-              <td><%= item.precio_unitario %></td>
-              <td><%= item.subtotal %></td>
-            </tr>
+            <% movimientoDetalle.producto_movimiento.forEach((item) => { %>
+              <tr>
+                <td><%= item.producto.nombre %></td>
+                <td><%= item.cantidad %></td>
+                <td><%= item.precio_unitario %></td>
+                <td><%= item.subtotal %></td>
+              </tr>
             <% }) %>
           </tbody>
         </table>
       </section>
-      <% } else if (movimientoDetalle[0].tipo === 'Merma') { %>
+
+      <% } else if (movimientoDetalle.tipo === 'Merma') { %>
+      <!-- Datos de Merma -->
       <section class="section">
         <h2 class="section-title">Datos de Merma</h2>
         <div class="info-container">
-          <p>
-            <strong>Motivo de Merma:</strong> <%= movimientoDetalle[0].motivo %>
-          </p>
-          <p>
-            <strong>Cantidad Merma:</strong> <%= movimientoDetalle[0].cantidad
-            %>
-          </p>
+          <p><strong>Motivo de Merma:</strong> <%= movimientoDetalle.movimiento_ajuste?.motivo %></p>
+          <p><strong>Cantidad Merma:</strong> <%= movimientoDetalle.movimiento_ajuste?.cantidad %></p>
         </div>
       </section>
+
       <section class="section">
         <h2 class="section-title">Productos Afectados</h2>
         <table class="table">
@@ -181,31 +143,28 @@
             </tr>
           </thead>
           <tbody>
-            <% movimientoDetalle.forEach((item) => { %>
-            <tr>
-              <td><%= item.producto %></td>
-              <td><%= item.cantidad %></td>
-              <td><%= item.precio_unitario %></td>
-              <td><%= item.subtotal %></td>
-            </tr>
+            <% movimientoDetalle.producto_movimiento.forEach((item) => { %>
+              <tr>
+                <td><%= item.producto.nombre %></td>
+                <td><%= item.cantidad %></td>
+                <td><%= item.precio_unitario %></td>
+                <td><%= item.subtotal %></td>
+              </tr>
             <% }) %>
           </tbody>
         </table>
       </section>
-      <% } else if (movimientoDetalle[0].tipo === 'Sobrante') { %>
+
+      <% } else if (movimientoDetalle.tipo === 'Sobrante') { %>
+      <!-- Datos de Sobrante -->
       <section class="section">
         <h2 class="section-title">Datos de Sobrante</h2>
         <div class="info-container">
-          <p>
-            <strong>Motivo de Sobrante:</strong> <%= movimientoDetalle[0].motivo
-            %>
-          </p>
-          <p>
-            <strong>Cantidad Sobrante:</strong> <%=
-            movimientoDetalle[0].cantidad %>
-          </p>
+          <p><strong>Motivo de Sobrante:</strong> <%= movimientoDetalle.movimiento_ajuste?.motivo %></p>
+          <p><strong>Cantidad Sobrante:</strong> <%= movimientoDetalle.movimiento_ajuste?.cantidad %></p>
         </div>
       </section>
+
       <section class="section">
         <h2 class="section-title">Productos Afectados</h2>
         <table class="table">
@@ -218,13 +177,13 @@
             </tr>
           </thead>
           <tbody>
-            <% movimientoDetalle.forEach((item) => { %>
-            <tr>
-              <td><%= item.producto %></td>
-              <td><%= item.cantidad %></td>
-              <td><%= item.precio_unitario %></td>
-              <td><%= item.subtotal %></td>
-            </tr>
+            <% movimientoDetalle.producto_movimiento.forEach((item) => { %>
+              <tr>
+                <td><%= item.producto.nombre %></td>
+                <td><%= item.cantidad %></td>
+                <td><%= item.precio_unitario %></td>
+                <td><%= item.subtotal %></td>
+              </tr>
             <% }) %>
           </tbody>
         </table>

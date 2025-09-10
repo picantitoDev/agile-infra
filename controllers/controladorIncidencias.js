@@ -1,10 +1,13 @@
 const dbIncidencias = require("../model/queriesIncidencias");
 const { generarPDFIncidencia } = require("../utils/pdfGenerator");
 const { DateTime } = require("luxon");
+const { getOrSetCache, redisClient } = require("../utils/redis");
 
 async function obtenerIncidencias(req, res) {
   try {
-    const incidencias = await dbIncidencias.obtenerIncidencias();
+    const incidencias = await getOrSetCache("incidencias:all", () =>
+      dbIncidencias.obtenerIncidencias()
+    );
 
     const procesadas = incidencias.map((inc) => ({
       ...inc,
@@ -13,12 +16,10 @@ async function obtenerIncidencias(req, res) {
         : JSON.parse(inc.detalle_productos),
     }));
 
-    console.log(procesadas);
-
     res.render("incidencias", { incidencias: procesadas, title: "Incidencias" });
   } catch (error) {
-    console.error("Error al obtener categorias:", error);
-    res.status(500).send("Error al obtener las categorias");
+    console.error("Error al obtener incidencias:", error);
+    res.status(500).send("Error al obtener las incidencias");
   }
 }
 
@@ -46,47 +47,45 @@ async function descargarPDFIncidencia(req, res) {
 }
 
 async function obtenerResumenIncidencias() {
-  const incidencias = await dbIncidencias.obtenerIncidenciasUltimos30Dias();
+  return await getOrSetCache("incidencias:ultimos30dias", () =>
+    dbIncidencias.obtenerIncidenciasUltimos30Dias().then((incidencias) => {
+      const resumen = {};
+      incidencias.forEach((inc) => {
+        const dt =
+          inc.fecha instanceof Date
+            ? DateTime.fromJSDate(inc.fecha, { zone: "America/Lima" })
+            : DateTime.fromISO(String(inc.fecha), { zone: "America/Lima" });
+        const fechaLima = dt.toFormat("yyyy-MM-dd");
+        resumen[fechaLima] = (resumen[fechaLima] || 0) + 1;
+      });
 
-  const resumen = {};
-
-  incidencias.forEach((inc) => {
-    // Aseguramos zona 'America/Lima' y evitamos toISOString() (que pasa a UTC)
-    const dt = inc.fecha instanceof Date
-      ? DateTime.fromJSDate(inc.fecha, { zone: "America/Lima" })
-      : DateTime.fromISO(String(inc.fecha), { zone: "America/Lima" });
-
-    const fechaLima = dt.toFormat("yyyy-MM-dd");
-    resumen[fechaLima] = (resumen[fechaLima] || 0) + 1;
-  });
-
-  const resultado = Object.entries(resumen).map(([fecha, incidencias]) => ({
-    fecha,
-    incidencias,
-  }));
-
-  resultado.sort((a, b) => a.fecha.localeCompare(b.fecha));
-
-  return resultado;
+      return Object.entries(resumen)
+        .map(([fecha, incidencias]) => ({ fecha, incidencias }))
+        .sort((a, b) => a.fecha.localeCompare(b.fecha));
+    })
+  );
 }
 
 async function detallePorFecha(req, res) {
   try {
     const { fecha } = req.params;
 
-    // Validación de fecha REAL con Luxon (no solo regex)
     const dt = DateTime.fromFormat(fecha, "yyyy-MM-dd", { zone: "America/Lima" });
     if (!dt.isValid) {
       return res.status(400).json({ error: "Formato de fecha inválido" });
     }
 
-    const datos = await dbIncidencias.obtenerIncidenciasPorFecha(fecha);
+    const datos = await getOrSetCache(`incidencias:fecha:${fecha}`, () =>
+      dbIncidencias.obtenerIncidenciasPorFecha(fecha)
+    );
+
     res.json(datos);
   } catch (error) {
     console.error("❌ Error al obtener incidencias por fecha:", error);
     res.status(500).json({ error: "Error interno al obtener incidencias" });
   }
 }
+
 
 module.exports = {
   obtenerIncidencias,

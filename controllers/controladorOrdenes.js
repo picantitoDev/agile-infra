@@ -5,12 +5,18 @@ const dbIncidencias = require('../model/queriesIncidencias');
 const pdfUtil = require("../utils/pdfGenerator")
 const nodemailer = require("nodemailer");
 const { DateTime } = require('luxon');
+const { getOrSetCache, redisClient } = require("../utils/redis")
 
 async function listarOrdenes(req, res) {
   try {
-    const ordenes = await dbOrdenes.obtenerOrdenes();
+    const ordenes = await getOrSetCache("ordenes:all", () =>
+      dbOrdenes.obtenerOrdenes()
+    )
 
-    const productosBajoStock = await dbProductos.obtenerProductosCriticos();
+    const productosBajoStock = await getOrSetCache("productos:criticos", () =>
+      dbProductos.obtenerProductosCriticos()
+    )
+
     res.render('ordenes', { ordenes, productosBajoStock, user: req.user });
   } catch (error) {
     console.error('Error al obtener órdenes:', error);
@@ -20,39 +26,36 @@ async function listarOrdenes(req, res) {
 
 async function crearOrdenGet(req, res) {
   try {
-    const productosTotales = await dbProductos.obtenerProductosParaOrden();
-    console.log("Ejemplo producto:", productosTotales[0]);
-    const proveedores     = await dbProveedores.obtenerProveedores();
+    const productosTotales = await getOrSetCache("productos:paraOrden", () =>
+      dbProductos.obtenerProductosParaOrden()
+    )
+    const proveedores = await getOrSetCache("proveedores:all", () =>
+      dbProveedores.obtenerProveedores()
+    )
 
-    // Solo productos activados (ignoramos mayúsculas/minúsculas)
     const productos = productosTotales.filter(
       p => (p.estado || '').toLowerCase() === 'activado'
-    );
+    )
 
-    // IDs de proveedores con productos críticos (forzamos a Number)
     const proveedoresConStockBajo = new Set(
       productos
         .filter(p => Number(p.stock) < Number(p.cantidad_minima))
         .map(p => Number(p.id_proveedor))
-    );
+    )
 
-    // Marcamos cada proveedor
     const proveedoresMarcados = proveedores.map(p => ({
       ...p,
       tieneStockBajo: proveedoresConStockBajo.has(Number(p.id_proveedor))
-    }));
+    }))
 
-  const productosEnCurso = await dbProductos.obtenerProductosEnOrdenesEnCurso();
-
-  // console.log("Productos en curso: ")
-  //   console.log(productosEnCurso)
+    const productosEnCurso = await dbProductos.obtenerProductosEnOrdenesEnCurso()
 
     res.render('crearOrden', {
       proveedores: proveedoresMarcados,
       productos,
-      productosEnCurso // <-- aquí pasamos la lista para el frontend
+      productosEnCurso
     });
-    } catch (error) {
+  } catch (error) {
     console.error('Error al crear orden:', error);
     res.status(500).send('Error al crear orden');
   }
@@ -115,6 +118,8 @@ const fechaLimaUTC = DateTime.now().setZone('America/Lima').toUTC().toJSDate();
       ],
     });
 
+    await redisClient.del("ordenes:all")
+    await redisClient.del("ordenes:ultimos30dias")
     res.redirect("/ordenes");
   } catch (error) {
     console.error('Error al crear orden y enviar PDF:', error);
@@ -216,57 +221,46 @@ async function obtenerOrdenPorProducto(req, res) {
 async function detalleOrdenPorFecha(req, res){
   try {
     const { fecha } = req.params;
-    const detalle = await dbOrdenes.obtenerDetalleOrdenesPorFecha(fecha);
+    const detalle = await getOrSetCache(`ordenes:fecha:${fecha}`, () =>
+      dbOrdenes.obtenerDetalleOrdenesPorFecha(fecha)
+    )
     res.json(detalle);
   } catch (error) {
     console.error('Error al obtener detalle de órdenes por fecha:', error);
     res.status(500).json({ error: 'Error interno al obtener detalle de órdenes' });
   }
-};
+}
 
 async function obtenerResumenOrdenes() {
-  const ordenes = await dbOrdenes.obtenerOrdenesUltimos30Dias();
-
-  const resumenAgrupado = {};
-
-  ordenes.forEach(orden => {
-    const fechaOriginalUTC = orden.fecha.toISOString();
-
-    // Convertimos a zona horaria Lima y agrupamos por día
-    const fechaLimaAgrupada = DateTime
-      .fromISO(fechaOriginalUTC, { zone: 'utc' })
-      .setZone('America/Lima')
-      .toFormat('yyyy-MM-dd');
-
-    if (!resumenAgrupado[fechaLimaAgrupada]) resumenAgrupado[fechaLimaAgrupada] = [];
-    resumenAgrupado[fechaLimaAgrupada].push({
-      id: orden.id_orden,
-      fechaUTC: orden.fecha,
-    });
-  });
-
-  const resumen = Object.entries(resumenAgrupado).map(([fecha, ordenes]) => ({
-    fecha,
-    total: ordenes.length,
-    ordenes,
-  }));
-
-resumen.sort((a, b) => a.fecha.localeCompare(b.fecha));
-
-// 🔍 Nuevo log general del resumen final
-console.log("📊 Resumen de órdenes por fecha (hora Lima):");
-resumen.forEach(r => {
-  console.log(`   📅 ${r.fecha} — ${r.total} orden(es)`);
-});
-
-  return resumen;
+  return await getOrSetCache("ordenes:ultimos30dias", () =>
+    dbOrdenes.obtenerOrdenesUltimos30Dias().then(ordenes => {
+      const resumenAgrupado = {}
+      ordenes.forEach(orden => {
+        const fechaOriginalUTC = orden.fecha.toISOString();
+        const fechaLima = DateTime.fromISO(fechaOriginalUTC, { zone: 'utc' })
+                                .setZone('America/Lima')
+                                .toFormat('yyyy-MM-dd');
+        if (!resumenAgrupado[fechaLima]) resumenAgrupado[fechaLima] = [];
+        resumenAgrupado[fechaLima].push({ id: orden.id_orden, fechaUTC: orden.fecha });
+      });
+      return Object.entries(resumenAgrupado).map(([fecha, ordenes]) => ({
+        fecha,
+        total: ordenes.length,
+        ordenes,
+      })).sort((a, b) => a.fecha.localeCompare(b.fecha));
+    })
+  )
 }
 
 async function cancelarOrden(req, res){
   const idOrden = req.params.id;
-
   try {
     await dbOrdenes.cancelarOrden(idOrden);
+
+    // 🔄 invalidar caches
+    await redisClient.del("ordenes:all")
+    await redisClient.del("ordenes:ultimos30dias")
+
     res.redirect(`/ordenes`);
   } catch (error) {
     console.error("Error al cancelar la orden:", error);

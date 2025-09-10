@@ -9,6 +9,7 @@ const pdfUtils = require("../utils/pdfGenerator")
 const excelUtils = require("../utils/excelGenerator")
 
 const { DateTime } = require("luxon")
+const { getOrSetCache, redisClient } = require("../utils/redis")
 
 function ensureBuffer(x) {
   if (!x) return Buffer.alloc(0);
@@ -23,8 +24,12 @@ function ensureBuffer(x) {
 
 async function obtenerMovimientos(req, res) {
   try {
-    const movimientos = await dbMovimientos.obtenerMovimientos()
-    const usuarios = await dbUsuarios.obtenerUsuarios()
+    const movimientos = await getOrSetCache("movimientos:all", () =>
+      dbMovimientos.obtenerMovimientos()
+    )
+    const usuarios = await getOrSetCache("usuarios:all", () =>
+      dbUsuarios.obtenerUsuarios()
+    )
     res.render("movimientos", { movimientos, usuarios })
   } catch (error) {
     console.error("Error al obtener movimientos:", error)
@@ -89,19 +94,17 @@ async function exportarReporteExcel(req, res) {
 
 async function verDetalleMovimiento(req, res) {
   try {
-    const idMov = req.params.id
-    const movimientoDetalle = await dbMovimientos.obtenerDetalleMovimiento(
-      idMov
+    const idMov = parseInt(req.params.id)
+    const movimientoDetalle = await getOrSetCache(`movimientos:detalle:${idMov}`, () =>
+      dbMovimientos.obtenerDetalleMovimiento(idMov)
     )
-
-    console.log(movimientoDetalle)
     if (movimientoDetalle.length === 0) {
       return res.status(404).send("Movimiento no encontrado")
     }
-
-    const proveedores = await dbProveedores.obtenerProveedores()
-    console.log(proveedores)
-
+    const proveedores = await getOrSetCache("proveedores:all", () =>
+      dbProveedores.obtenerProveedores()
+    )
+    console.log("Detalle enviado a la vista:", movimientoDetalle);
     res.render("detalleMovimiento", { movimientoDetalle, proveedores })
   } catch (error) {
     console.error("Error al obtener detalle de movimiento:", error)
@@ -214,6 +217,7 @@ async function registrarVentaPost(req, res) {
     )
 
     // 5. Redireccionar al listado de movimientos
+    await redisClient.del("movimientos:all")
     res.redirect("/movimientos")
   } catch (error) {
     console.error("Error al obtener detalle de movimiento:", error)
@@ -328,7 +332,7 @@ async function registrarEntradaPost(req, res) {
       }
     }
 
-
+    await redisClient.del("movimientos:all")
     res.redirect("/movimientos") // Redirige después de registrar la entrada
   } catch (error) {
     console.error("Error al registrar entrada:", error)
@@ -384,7 +388,8 @@ async function registrarSobrantePost(req, res) {
     })
 
     await dbProductos.aumentarStock(idProducto, cantidadNumerica)
-
+    await redisClient.del("movimientos:all")
+    await redisClient.del("movimientos:sobrantes30d")
     res.redirect("/movimientos")
   } catch (error) {
     console.error("Error al obtener detalle de movimiento:", error)
@@ -442,7 +447,8 @@ async function registrarMermaPost(req, res) {
     })
 
     await dbProductos.disminuirStock(idProducto, cantidadNumerica)
-
+    await redisClient.del("movimientos:all")
+    await redisClient.del("movimientos:mermas30d")
     res.redirect("/movimientos")
   } catch (error) {
     console.error("Error al obtener detalle de movimiento:", error)
@@ -478,75 +484,60 @@ async function generarComprobantePDF(req, res) {
 }
 
 async function obtenerResumenMermas() {
-  const mermas = await dbMovimientos.obtenerMermasUltimos30Dias();
-
-  const resumen = {};
-
-  mermas.forEach(m => {
-    const fechaLima = DateTime
-      .fromISO(m.fecha.toISOString())
-      .toFormat('yyyy-MM-dd');
-
-    resumen[fechaLima] = (resumen[fechaLima] || 0) + 1;
-  });
-
-  const resultado = Object.entries(resumen).map(([fecha, mermas]) => ({
-    fecha,
-    mermas
-  }));
-
-  resultado.sort((a, b) => a.fecha.localeCompare(b.fecha));
-
-  return resultado;
+  return await getOrSetCache("movimientos:mermas30d", () =>
+    dbMovimientos.obtenerMermasUltimos30Dias().then(mermas => {
+      const resumen = {}
+      mermas.forEach(m => {
+        const fechaLima = DateTime.fromISO(m.fecha.toISOString()).toFormat("yyyy-MM-dd")
+        resumen[fechaLima] = (resumen[fechaLima] || 0) + 1
+      })
+      return Object.entries(resumen).map(([fecha, mermas]) => ({ fecha, mermas }))
+        .sort((a, b) => a.fecha.localeCompare(b.fecha))
+    })
+  )
 }
 
-
 async function obtenerResumenSobrantes() {
-  const sobrantes = await dbMovimientos.obtenerSobrantesUltimos30Dias();
-
-  const resumen = {};
-
-  sobrantes.forEach(s => {
-    const fechaLima = DateTime
-      .fromISO(s.fecha.toISOString())
-      .toFormat('yyyy-MM-dd');
-
-    resumen[fechaLima] = (resumen[fechaLima] || 0) + 1;
-  });
-
-  const resultado = Object.entries(resumen).map(([fecha, sobrantes]) => ({
-    fecha,
-    sobrantes
-  }));
-
-  resultado.sort((a, b) => a.fecha.localeCompare(b.fecha));
-
-  return resultado;
+  return await getOrSetCache("movimientos:sobrantes30d", () =>
+    dbMovimientos.obtenerSobrantesUltimos30Dias().then(sobrantes => {
+      const resumen = {}
+      sobrantes.forEach(s => {
+        const fechaLima = DateTime.fromISO(s.fecha.toISOString()).toFormat("yyyy-MM-dd")
+        resumen[fechaLima] = (resumen[fechaLima] || 0) + 1
+      })
+      return Object.entries(resumen).map(([fecha, sobrantes]) => ({ fecha, sobrantes }))
+        .sort((a, b) => a.fecha.localeCompare(b.fecha))
+    })
+  )
 }
 
 // Para obtener mermas de una fecha específica
-async function obtenerMermasPorFecha(req, res){
+async function obtenerMermasPorFecha(req, res) {
   try {
-    const fecha = req.params.fecha;
-    const mermas = await dbMovimientos.obtenerMovimientosAjustePorFecha("Merma", fecha);
-    res.json(mermas);
+    const fecha = req.params.fecha
+    const mermas = await getOrSetCache(`movimientos:mermas:${fecha}`, () =>
+      dbMovimientos.obtenerMovimientosAjustePorFecha("Merma", fecha)
+    )
+    res.json(mermas)
   } catch (error) {
-    console.error("Error al obtener mermas:", error);
-    res.status(500).json({ error: "Error interno del servidor" });
+    console.error("Error al obtener mermas:", error)
+    res.status(500).json({ error: "Error interno del servidor" })
   }
-};
+}
 
 // Para obtener sobrantes de una fecha específica
-async function obtenerSobrantesPorFecha(req, res){
+async function obtenerSobrantesPorFecha(req, res) {
   try {
-    const fecha = req.params.fecha;
-    const sobrantes = await dbMovimientos.obtenerMovimientosAjustePorFecha("Sobrante", fecha);
-    res.json(sobrantes);
+    const fecha = req.params.fecha
+    const sobrantes = await getOrSetCache(`movimientos:sobrantes:${fecha}`, () =>
+      dbMovimientos.obtenerMovimientosAjustePorFecha("Sobrante", fecha)
+    )
+    res.json(sobrantes)
   } catch (error) {
-    console.error("Error al obtener sobrantes:", error);
-    res.status(500).json({ error: "Error interno del servidor" });
+    console.error("Error al obtener sobrantes:", error)
+    res.status(500).json({ error: "Error interno del servidor" })
   }
-};
+}
 
 module.exports = {
   obtenerMovimientos,

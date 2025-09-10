@@ -6,16 +6,18 @@ const dbAuditoria = require("../model/queriesAuditoria")
 const dbOrdenes = require("../model/queriesOrdenes")
 const pdfUtils = require("../utils/pdfGenerator")
 const { DateTime } = require("luxon")
+const { getOrSetCache, redisClient } = require("../utils/redis")
 
 async function obtenerProductos(req, res) {
   try {
-    const productos = await dbProductos.obtenerProductos()
-    const categorias = await dbCategorias.obtenerCategoriasActivas()
-    
-    res.render("productos", {
-      productos,
-      categorias,
-    })
+    const productos = await getOrSetCache("productos:all", () =>
+      dbProductos.obtenerProductos()
+    )
+    const categorias = await getOrSetCache("categorias:activas", () =>
+      dbCategorias.obtenerCategoriasActivas()
+    )
+
+    res.render("productos", { productos, categorias })
   } catch (error) {
     console.error("Error al obtener productos:", error)
     res.status(500).send("Error al obtener los productos")
@@ -25,35 +27,40 @@ async function obtenerProductoPorId(req, res) {
   try {
     const id = parseInt(req.params.id, 10)
     if (isNaN(id)) {
-      console.log(req.params)
       return res.status(400).send("El ID del producto no es válido")
     }
 
-    const productos = await dbProductos.obtenerProductos()
-    const producto = await dbProductos.obtenerProductoPorId(id)
-    const categorias = await dbCategorias.obtenerCategorias()
-    const proveedores = await dbProveedores.obtenerProveedores()
-    const productosSinActual = productos.filter(p => p.id_producto !== producto.id_producto);
-    const ordenAsociada = await dbOrdenes.buscarOrdenPorProductoEnCurso(id);
+    const productos = await getOrSetCache("productos:all", () =>
+      dbProductos.obtenerProductos()
+    )
+    const producto = await dbProductos.obtenerProductoPorId(id) // si quieres, también se puede cachear individual
+    const categorias = await getOrSetCache("categorias:all", () =>
+      dbCategorias.obtenerCategorias()
+    )
+    const proveedores = await getOrSetCache("proveedores:all", () =>
+      dbProveedores.obtenerProveedores()
+    )
+    const productosSinActual = productos.filter(p => p.id_producto !== producto.id_producto)
+    const ordenAsociada = await dbOrdenes.buscarOrdenPorProductoEnCurso(id)
 
     if (!producto) {
       return res.status(404).send("Producto no encontrado")
     }
 
-  res.render("detalleProducto", {
-    productos: productosSinActual,
-    producto,
-    categorias,
-    proveedores,
-    ordenAsociada, // <-- nueva variable
-    usuario: req.user
-  });
-  
+    res.render("detalleProducto", {
+      productos: productosSinActual,
+      producto,
+      categorias,
+      proveedores,
+      ordenAsociada,
+      usuario: req.user,
+    })
   } catch (error) {
     console.error("Error al obtener producto por ID:", error)
     res.status(500).send("Error al obtener el producto")
   }
 }
+
 
 async function actualizarProducto(req, res) {
   try {
@@ -123,6 +130,7 @@ async function actualizarProducto(req, res) {
       });
     }
 
+    await redisClient.del("productos:all")
     res.redirect("/productos");
   } catch (error) {
     console.error("Error al actualizar el producto:", error);
@@ -133,26 +141,26 @@ async function actualizarProducto(req, res) {
 
 async function crearProductoGet(req, res) {
   try {
-    const categorias = await dbCategorias.obtenerCategoriasActivas()
-    const productos = await dbProductos.obtenerProductos()
-    const proveedores = await dbProveedores.obtenerProveedores()
+    const categorias = await getOrSetCache("categorias:activas", () =>
+      dbCategorias.obtenerCategoriasActivas()
+    )
+    const productos = await getOrSetCache("productos:all", () =>
+      dbProductos.obtenerProductos()
+    )
+    const proveedores = await getOrSetCache("proveedores:all", () =>
+      dbProveedores.obtenerProveedores()
+    )
+
     res.render("nuevoProducto", { categorias, proveedores, productos })
   } catch (error) {
     console.error("Error al cargar formulario:", error)
     res.status(500).send("Error al cargar formulario")
   }
-}
+} 
 
 async function crearProductoPost(req, res) {
   try {
-    const {
-      nombre,
-      stock,
-      precio_unitario,
-      id_categoria,
-      id_proveedor,
-      cantidad_minima,
-    } = req.body
+    const { nombre, stock, precio_unitario, id_categoria, id_proveedor, cantidad_minima } = req.body
 
     await dbProductos.crearProducto(
       nombre,
@@ -163,12 +171,16 @@ async function crearProductoPost(req, res) {
       parseInt(cantidad_minima)
     )
 
+    // 🔄 invalidar cache
+    await redisClient.del("productos:all")
+
     res.redirect("/productos")
   } catch (error) {
     console.error("Error al crear producto:", error)
     res.status(500).send("Error al crear el producto")
   }
 }
+
 
 async function generarOrdenReposicion(req, res) {
   const idProducto = req.params.id

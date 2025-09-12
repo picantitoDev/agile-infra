@@ -163,9 +163,3 @@ model usuarios {
   movimiento             movimiento[]
   orden_reabastecimiento orden_reabastecimiento[]
 }
-
-model Session {
-  id      String   @id // Session ID (sid)
-  data    Json     // Session data as JSON
-  expires DateTime // Expiration timestamp
-}

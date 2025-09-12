@@ -6,8 +6,8 @@ const methodOverride = require("method-override")
 const passport = require("passport")
 const flash = require("connect-flash")
 const expressLayouts = require('express-ejs-layouts');
-const { PrismaSessionStore, prisma } = require('./utils/prismaSessionStore');
-const cron = require('node-cron');
+const RedisStore = require("connect-redis").default; 
+const { createClient } = require("redis");
 
 // Configurar passport
 require("./auth/passportConfig")
@@ -37,10 +37,13 @@ app.set("views", path.join(__dirname, "views"))
 app.set('layout', 'layouts/main')
 
 // Configurar sesión
+const redisClient = createClient({ url: process.env.REDIS_URL || "redis://localhost:6379" });
+redisClient.connect().catch(console.error);
 const SESSION_SECRET = process.env.SESSION_SECRET || 'dev_only_change_me'
+
 app.use(
   session({
-    store: new PrismaSessionStore(),
+    store: new RedisStore({ client: redisClient }),
     secret: SESSION_SECRET,
     resave: false,
     saveUninitialized: false,
@@ -160,19 +163,6 @@ app.get('/log-out', (req, res) => {
 // 404
 app.use((req, res) => {
   res.status(404).render("404", { url: req.originalUrl })
-})
-
-// Limpieza de sesiones expiradas cada hora
-cron.schedule('0 * * * *', async () => {
-  try {
-    const now = new Date()
-    const deleted = await prisma.session.deleteMany({
-      where: { expires: { lt: now } },
-    })
-    console.log(`Cleanup: Deleted ${deleted.count} expired sessions at ${now}`)
-  } catch (err) {
-    console.error('Error during session cleanup:', err)
-  }
 })
 
 // Servidor

@@ -8,6 +8,7 @@ const flash = require("connect-flash")
 const expressLayouts = require('express-ejs-layouts');
 const RedisStore = require("connect-redis").default; 
 const { createClient } = require("redis");
+require("dotenv").config();
 
 // Configurar passport
 require("./auth/passportConfig")

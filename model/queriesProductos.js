@@ -35,13 +35,22 @@ async function obtenerProductosParaOrden() {
     orderBy: { nombre: 'asc' }
   })
 
-  // Aplanar para que el frontend no tenga que cambiar
-  return productos.map(p => ({
-    ...p,
+  const productosAplanados =  productos.map(p => ({
+    id_producto: p.id_producto,
+    nombre: p.nombre,
+    stock: p.stock,
+    precio_unitario: p.precio_unitario,
+    cantidad_minima: p.cantidad_minima,
+    estado: p.estado,
+    id_proveedor: p.id_proveedor,
     categoria: p.categoria?.nombre || null,
     proveedor: p.proveedor?.razon_social || null
   }))
+
+  return productosAplanados
 }
+
+
 // Productos críticos: stock < cantidad_minima y sin orden en curso
 async function obtenerProductosCriticos() {
   const productos = await prisma.producto.findMany({

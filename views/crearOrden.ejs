@@ -198,9 +198,9 @@
         document.getElementById("productos-curso").textContent
       )
 
-      console.log("Productos:", productos)
-      console.log("Proveedores:", proveedores)
-      console.log("Productos en Curso:", productosEnCurso)
+    console.log("Productos:", productos)
+    console.log("Proveedores:", proveedores)
+    console.log("Productos en Curso:", productosEnCurso)
 
       const proveedorSelect = document.getElementById("proveedor")
       const proveedorInfo = document.getElementById("proveedor-info")
@@ -242,7 +242,7 @@
 
             // Filtrar productos por nombre del proveedor (razón social)
             const productosFiltrados = productos.filter((p) => {
-              return p.proveedor === proveedor.razon_social
+              return p.id_proveedor === proveedor.id_proveedor
             })
 
             renderTablaBusqueda(productosFiltrados, productosEnCurso)
@@ -407,7 +407,7 @@ function renderResumenEntrada() {
         const productosFiltrados = productos.filter((p) => {
           return (
             p.nombre.toLowerCase().includes(query) &&
-            p.proveedor === proveedor.razon_social
+            p.proveedor === proveedor.id_proveedor
           )
         })
 

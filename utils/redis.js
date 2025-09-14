@@ -21,8 +21,18 @@ async function getOrSetCache(key, cb) {
   }
 
   const freshData = await cb();
+
+  // 🚨 No cachear si es vacío
+  if (
+    freshData == null ||
+    (Array.isArray(freshData) && freshData.length === 0)
+  ) {
+    return freshData;
+  }
+
   await redisClient.setEx(key, DEFAULT_EXPIRATION, JSON.stringify(freshData));
   return freshData;
 }
+
 
 module.exports = { redisClient, getOrSetCache };

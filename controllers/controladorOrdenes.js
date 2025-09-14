@@ -36,6 +36,7 @@ async function crearOrdenGet(req, res) {
     const productos = productosTotales.filter(
       p => (p.estado || '').toLowerCase() === 'activado'
     )
+    console.log("ProductosTotales:", productosTotales)
 
     const proveedoresConStockBajo = new Set(
       productos

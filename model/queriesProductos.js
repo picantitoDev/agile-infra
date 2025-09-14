@@ -20,7 +20,7 @@ async function obtenerProductos() {
 
 // Similar a obtenerProductos pero con id_proveedor
 async function obtenerProductosParaOrden() {
-  return await prisma.producto.findMany({
+  const productos = await prisma.producto.findMany({
     select: {
       id_producto: true,
       nombre: true,
@@ -34,8 +34,14 @@ async function obtenerProductosParaOrden() {
     },
     orderBy: { nombre: 'asc' }
   })
-}
 
+  // Aplanar para que el frontend no tenga que cambiar
+  return productos.map(p => ({
+    ...p,
+    categoria: p.categoria?.nombre || null,
+    proveedor: p.proveedor?.razon_social || null
+  }))
+}
 // Productos críticos: stock < cantidad_minima y sin orden en curso
 async function obtenerProductosCriticos() {
   const productos = await prisma.producto.findMany({

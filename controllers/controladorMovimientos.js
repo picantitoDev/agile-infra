@@ -382,7 +382,7 @@ async function registrarSobrantePost(req, res) {
     await dbMovimientos.registrarProductoMovimiento({
       id_producto: idProducto,
       id_movimiento,
-      cantidad,
+      cantidad: cantidadNumerica, 
       precio_unitario: objProducto.precio_unitario,
       subtotal: parseFloat(objProducto.precio_unitario * cantidad),
     })
@@ -441,7 +441,7 @@ async function registrarMermaPost(req, res) {
     await dbMovimientos.registrarProductoMovimiento({
       id_producto: idProducto,
       id_movimiento,
-      cantidad,
+      cantidad: cantidadNumerica, 
       precio_unitario: objProducto.precio_unitario,
       subtotal: parseFloat(objProducto.precio_unitario * parseInt(cantidad)),
     })
@@ -449,6 +449,8 @@ async function registrarMermaPost(req, res) {
     await dbProductos.disminuirStock(idProducto, cantidadNumerica)
     await redisClient.del("movimientos:all")
     await redisClient.del("movimientos:mermas30d")
+    await redisClient.del("productos:all")
+
     res.redirect("/movimientos")
   } catch (error) {
     console.error("Error al obtener detalle de movimiento:", error)

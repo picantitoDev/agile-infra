@@ -17,6 +17,7 @@ async function obtenerProductos(req, res) {
       dbCategorias.obtenerCategoriasActivas()
     )
 
+    console.log(productos)
     res.render("productos", { productos, categorias })
   } catch (error) {
     console.error("Error al obtener productos:", error)

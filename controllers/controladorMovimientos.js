@@ -218,6 +218,8 @@ async function registrarVentaPost(req, res) {
 
     // 5. Redireccionar al listado de movimientos
     await redisClient.del("movimientos:all")
+    await redisClient.del("productos:all")
+
     res.redirect("/movimientos")
   } catch (error) {
     console.error("Error al obtener detalle de movimiento:", error)
@@ -333,6 +335,8 @@ async function registrarEntradaPost(req, res) {
     }
 
     await redisClient.del("movimientos:all")
+   await redisClient.del("productos:all")
+
     res.redirect("/movimientos") // Redirige después de registrar la entrada
   } catch (error) {
     console.error("Error al registrar entrada:", error)
@@ -390,6 +394,8 @@ async function registrarSobrantePost(req, res) {
     await dbProductos.aumentarStock(idProducto, cantidadNumerica)
     await redisClient.del("movimientos:all")
     await redisClient.del("movimientos:sobrantes30d")
+    await redisClient.del("productos:all")
+
     res.redirect("/movimientos")
   } catch (error) {
     console.error("Error al obtener detalle de movimiento:", error)

@@ -667,6 +667,25 @@
 </script>
 
 <script>
+
+const noDataPlugin = {
+  id: 'noDataPlugin',
+  afterDraw: (chart) => {
+    if (chart.data.datasets.every(ds => !ds.data || ds.data.length === 0 || ds.data.every(v => v === 0))) {
+      const {ctx, width, height} = chart;
+      ctx.save();
+      ctx.textAlign = 'center';
+      ctx.textBaseline = 'middle';
+      ctx.font = '16px Inter, sans-serif';
+      ctx.fillStyle = '#9ca3af'; // gris 400
+      ctx.fillText('No hay datos disponibles', width / 2, height / 2);
+      ctx.restore();
+    }
+  }
+};
+
+Chart.register(noDataPlugin);
+
 // Ventas Chart
 const fechasCrudas = JSON.parse(document.getElementById("fechas-data").textContent);
 const montos = JSON.parse(document.getElementById("montos-data").textContent);

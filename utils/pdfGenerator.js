@@ -20,7 +20,7 @@ async function generarComprobantePDF(data) {
   const blackColor = rgb(0, 0, 0)
 
   // Logo (Blue Square Placeholder)
-  const pngImageBytes = fs.readFileSync("public/bravo-logo.png")
+  const pngImageBytes = fs.readFileSync("public/stockLogo.png")
   const pngImage = await pdfDoc.embedPng(pngImageBytes)
   const pngDims = pngImage.scale(0.5) // Scale to 50% of original size, adjust as needed
 

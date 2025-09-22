@@ -67,14 +67,6 @@ document.addEventListener('DOMContentLoaded', function() {
     </div>
   `;
   
-  // Uncomment the line below if you want to add the profile section
-  // sidebar.insertAdjacentHTML('beforeend', profileSection);
-  
-  // Add mobile toggle button and overlay
-  // const mobileToggle = document.createElement('div');
-  // mobileToggle.className = 'mobile-toggle';
-  // mobileToggle.innerHTML = '<i class="fas fa-bars"></i>';
-  // document.body.appendChild(mobileToggle);
   
   const overlay = document.createElement('div');
   overlay.className = 'overlay';
@@ -84,11 +76,6 @@ document.addEventListener('DOMContentLoaded', function() {
   toggleBtn.addEventListener('click', () => {
     sidebar.classList.toggle('active');
   });
-  
-  // Add click event to mobile toggle
-  // mobileToggle.addEventListener('click', () => {
-  //   sidebar.classList.toggle('active');
-  // });
   
   // Close sidebar when clicking on overlay
   overlay.addEventListener('click', () => {

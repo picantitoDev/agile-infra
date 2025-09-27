@@ -7,6 +7,7 @@ const dbClientes = require("../model/queriesClientes")
 const dbOrdenes = require("../model/queriesOrdenes")
 const pdfUtils = require("../utils/pdfGenerator")
 const excelUtils = require("../utils/excelGenerator")
+const cacheInvalidator = require("../utils/cacheInvalidator")
 
 const { DateTime } = require("luxon")
 const { getOrSetCache, redisClient } = require("../utils/redis")
@@ -268,9 +269,9 @@ async function registrarEntradaPost(req, res) {
     // 2. Registrar el movimiento de compra con el proveedor y el total
     await dbMovimientos.registrarMovimientoCompra({
       id_movimiento,
-      id_proveedor: proveedor,
+      id_proveedor: parseInt(proveedor),
       total,
-      id_orden, // la id orden se pasa al query tambien
+      id_orden: parseInt(id_orden), // la id orden se pasa al query tambien
     });
 
     // 3. Registrar los productos en `producto_movimiento` y actualizar el stock
@@ -330,12 +331,14 @@ async function registrarEntradaPost(req, res) {
       const orden = await dbOrdenes.obtenerOrdenPorId(id_orden);
       const completada = orden.products.every(p => p.ingresado >= p.cantidad);
       if (completada) {
-        await dbOrdenes.actualizarEstadoOrden(id_orden, 'finalizada');
+        await dbOrdenes.actualizarEstadoOrden(id_orden, 'completada');
       }
     }
 
     await redisClient.del("movimientos:all")
-   await redisClient.del("productos:all")
+    await redisClient.del("ordenes:all")
+    await redisClient.del("productos:all")
+    await redisClient.del("incidencias:all")
 
     res.redirect("/movimientos") // Redirige después de registrar la entrada
   } catch (error) {

@@ -29,8 +29,8 @@ model cliente {
   id_cliente        Int                @id @default(autoincrement())
   nombre_cliente    String?            @db.VarChar(100)
   razon_social      String?            @db.VarChar(100)
-  dni_cliente       String?            @db.VarChar(15)
-  ruc_cliente       String?            @db.VarChar(20)
+  dni_cliente       String?            @unique @db.VarChar(15)
+  ruc_cliente       String?            @unique @db.VarChar(20)
   direccion_cliente String?            @db.VarChar(150)
   correo_cliente    String?            @db.VarChar(100)
   movimiento_venta  movimiento_venta[]

@@ -142,8 +142,6 @@ async function registrarVentaPost(req, res) {
 
   const usuarioId = req.user.id
   const fecha = DateTime.now().minus({ hours: 5 }).toISO()
-  console.log(fecha)
-  // Parseamos el JSON de productos
   const productosArray = JSON.parse(productos)
 
   try {
@@ -216,10 +214,7 @@ async function registrarVentaPost(req, res) {
         await dbProductos.disminuirStock(id_producto, cantidad)
       })
     )
-
-    // 5. Redireccionar al listado de movimientos
-    await redisClient.del("movimientos:all")
-    await redisClient.del("productos:all")
+    await cacheInvalidator.afterVenta()
 
     res.redirect("/movimientos")
   } catch (error) {
@@ -335,11 +330,7 @@ async function registrarEntradaPost(req, res) {
       }
     }
 
-    await redisClient.del("movimientos:all")
-    await redisClient.del("ordenes:all")
-    await redisClient.del("productos:all")
-    await redisClient.del("incidencias:all")
-
+    await cacheInvalidator.afterEntrada(id_orden)
     res.redirect("/movimientos") // Redirige después de registrar la entrada
   } catch (error) {
     console.error("Error al registrar entrada:", error)
@@ -395,9 +386,7 @@ async function registrarSobrantePost(req, res) {
     })
 
     await dbProductos.aumentarStock(idProducto, cantidadNumerica)
-    await redisClient.del("movimientos:all")
-    await redisClient.del("movimientos:sobrantes30d")
-    await redisClient.del("productos:all")
+    await cacheInvalidator.afterSobrante()
 
     res.redirect("/movimientos")
   } catch (error) {
@@ -456,9 +445,7 @@ async function registrarMermaPost(req, res) {
     })
 
     await dbProductos.disminuirStock(idProducto, cantidadNumerica)
-    await redisClient.del("movimientos:all")
-    await redisClient.del("movimientos:mermas30d")
-    await redisClient.del("productos:all")
+    await cacheInvalidator.afterMerma()
 
     res.redirect("/movimientos")
   } catch (error) {
@@ -468,30 +455,54 @@ async function registrarMermaPost(req, res) {
 }
 
 async function generarComprobantePDF(req, res) {
-  const idVenta = req.params.id
-  const dataVenta = await dbMovimientos.obtenerDetalleMovimiento(idVenta)
-  const pdfBytes = await pdfUtils.generarComprobantePDF(dataVenta)
+  try {
+    const idVenta = parseInt(req.params.id, 10)
+    const venta = await dbMovimientos.obtenerDetalleMovimiento(idVenta)
 
-  // FACTURA_JuanPerez_20250430.pdf
-  const tipoComprobante =
-    dataVenta[0].tipo_comprobante === "boleta" ? "BOLETA" : "FACTURA"
+    if (!venta) {
+      return res.status(404).send("Venta no encontrada")
+    }
 
-  const nombre =
-    dataVenta[0].tipo_comprobante === "boleta"
-      ? dataVenta[0].nombre_cliente
-      : dataVenta[0].razon_social
+    // Flatten structure for pdfGenerator
+    const dataForPdf = venta.producto_movimiento.map((pm) => ({
+      tipo_comprobante: venta.movimiento_venta.tipo_comprobante,
+      serie: venta.movimiento_venta.serie,
+      correlativo: venta.movimiento_venta.correlativo,
+      nombre_cliente: venta.movimiento_venta.cliente.nombre_cliente,
+      razon_social: venta.movimiento_venta.cliente.razon_social,
+      dni_cliente: venta.movimiento_venta.cliente.dni_cliente,
+      ruc_cliente: venta.movimiento_venta.cliente.ruc_cliente,
+      direccion_cliente: venta.movimiento_venta.cliente.direccion_cliente,
+      fecha: venta.fecha,
+      id_producto: pm.id_producto,
+      producto: pm.producto.nombre,
+      cantidad: pm.cantidad,
+      precio_unitario: pm.precio_unitario,
+      subtotal: pm.subtotal,
+    }))
 
-  const fecha = dataVenta[0].fecha
-    .toISOString()
-    .slice(0, 10)
-    .split("-")
-    .join("")
-  const fileName = `${tipoComprobante}_${nombre}_${fecha}.pdf`
-  res.setHeader("Content-Type", "application/pdf")
-  res.setHeader("Content-Disposition", `attachment; filename="${fileName}"`)
+    console.log("🧾 Data passed to PDF generator:", JSON.stringify(dataForPdf, null, 2))
 
-  // Send PDF
-  res.send(Buffer.from(pdfBytes))
+    const pdfBytes = await pdfUtils.generarComprobantePDF(dataForPdf)
+
+    const tipoComprobante =
+      venta.movimiento_venta.tipo_comprobante === "boleta" ? "BOLETA" : "FACTURA"
+
+    const nombre =
+      venta.movimiento_venta.tipo_comprobante === "boleta"
+        ? venta.movimiento_venta.cliente.nombre_cliente
+        : venta.movimiento_venta.cliente.razon_social
+
+    const fecha = venta.fecha.toISOString().slice(0, 10).replace(/-/g, "")
+    const fileName = `${tipoComprobante}_${nombre}_${fecha}.pdf`
+
+    res.setHeader("Content-Type", "application/pdf")
+    res.setHeader("Content-Disposition", `attachment; filename="${fileName}"`)
+    res.send(Buffer.from(pdfBytes))
+  } catch (error) {
+    console.error("❌ Error en generarComprobantePDF:", error)
+    res.status(500).send("Error generando comprobante PDF")
+  }
 }
 
 async function obtenerResumenMermas() {

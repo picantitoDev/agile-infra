@@ -80,6 +80,7 @@ async function generarComprobantePDF(data) {
     borderWidth: 1,
   })
 
+  console.log("Data: " + data[0])
   const tipoComprobante =
     data[0].tipo_comprobante === "boleta" ? "BOLETA" : "FACTURA"
 

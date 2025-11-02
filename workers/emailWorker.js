@@ -4,7 +4,7 @@ const nodemailer = require("nodemailer");
 
 (async () => {
   try {
-    const conn = await amqplib.connect("amqp://localhost");
+    const conn = await amqplib.connect(process.env.RABBITMQ_URL);
     const channel = await conn.createChannel();
     const queue = "email_notifications";
 
